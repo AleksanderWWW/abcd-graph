@@ -174,13 +174,15 @@ def face_edit_simpliciality(V,E):
 def simplicial_pairs(V,E):
     #Convert to set and list of sets
     V = set(V)
+    #Sometimes the max-size edges in a Chung-Lu graph are shrunk after changing edges to sets
+    #So we get max_size first
+    max_size = max({len(e) for e in E})
     E = [set(e) for e in E]
     
     #Getting relevant data
     edge_sets = hf.edge_sets(V,E)
     degrees = {v : len(edge_sets[v]) for v in V}
-    max_size = max({len(e) for e in E})
-
+    
     #M is the matrix of pairs
     M = np.zeros((max_size,max_size))
 
@@ -217,7 +219,7 @@ def simplicial_pairs(V,E):
 
 def simplicial_matrix(V,E,samples = 1,model = 'CL'):
     #We first get the matrix of simplicial pairs
-    M_top = simplicial_pairs(V,E) + 1/samples
+    M_top = simplicial_pairs(V,E)
 
     #Next, we get the same matrix for the re-sample, depending on the model specified
     if model == 'ER':
@@ -237,7 +239,8 @@ def simplicial_matrix(V,E,samples = 1,model = 'CL'):
         M_bottom = simplicial_pairs(V,E_resampled)
         for i in range(samples-1):
             E_resampled = hm.chung_lu(V,E)
-            M_bottom = np.add(M_bottom, simplicial_pairs(V,E_resampled))
+            temp = simplicial_pairs(V,E_resampled)
+            M_bottom = np.add(M_bottom, temp)
     M_bottom = (M_bottom + 1)/samples
     
     return M_top/M_bottom
