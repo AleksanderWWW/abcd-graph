@@ -23,4 +23,5 @@ __all__ = [
     "ABCDParams",
 ]
 
-from abcd_graph.abcd import generate_abcd, ABCDParams
+from abcd_graph.abcd import generate_abcd
+from abcd_graph.abcd_params import ABCDParams

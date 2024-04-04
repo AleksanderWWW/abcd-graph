@@ -20,40 +20,18 @@
 
 __all__ = [
     "generate_abcd",
-    "ABCDParams",
 ]
 
-from dataclasses import dataclass
-from typing import Any
+from typing import Any, TYPE_CHECKING
 
 from abcd_graph.core import build_degrees, build_community_sizes, build_communities, assign_degrees, split_degrees, \
     build_community_edges, build_background_edges
 
-
-#n: number of vertices
-#gamma: power-law parameter for degrees, between 2 and 3
-#delta: min degree
-#zeta: parameter for max degree, between 0 and 1
-#beta: power-law parameter for community sizes, between 1 and 2
-#s: min community size
-#tau: parameter for max community size, between zeta and 1
-#xi: noise parameter, between 0 and 1
-@dataclass
-class ABCDParams:
-    # TODO: add docstrings and validation of parameters
-    """"""
-    gamma: float
-    delta: int
-    zeta: float
-    beta: float
-    tau: float
-    xi: float
-    s: int
+if TYPE_CHECKING:
+    from abcd_graph.abcd_params import ABCDParams
 
 
-# pydantic -> data validation
-# defensive programming
-def generate_abcd(*, n: int, params: ABCDParams) -> tuple[list[list[Any]], list[list[Any]]]:
+def generate_abcd(*, n: int, params: "ABCDParams") -> tuple[list[list[Any]], list[list[Any]]]:
     """
     < short description >
     :param n: number of vertices (int)
