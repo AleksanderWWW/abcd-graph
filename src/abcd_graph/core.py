@@ -1,4 +1,15 @@
-from typing import TypeAlias
+__all__ = [
+    'configuration_model',
+    'build_degrees',
+    'build_community_sizes',
+    'build_communities',
+    'assign_degrees',
+    'split_degrees',
+    'build_community_edges',
+    'build_background_edges',
+]
+
+from typing_extensions import TypeAlias
 
 import numpy as np
 import random
@@ -6,6 +17,8 @@ import random
 from abcd_graph.utils import rand_round, powerlaw_distribution
 
 COMMUNITIES: TypeAlias = dict[int, list[int]]
+DEGREE_LIST: TypeAlias = list[int]
+DEGREE_SEQUENCE: TypeAlias = dict[int, int]
 
 
 def configuration_model(degree_sequence: dict) -> list[list[int]]:
@@ -17,7 +30,7 @@ def configuration_model(degree_sequence: dict) -> list[list[int]]:
     return E
 
 
-def build_degrees(n: int, gamma: float, delta: int, zeta: float) -> list[int]:
+def build_degrees(n: int, gamma: float, delta: int, zeta: float) -> DEGREE_LIST:
     max_degree = int(np.floor(n**zeta))
     avail = list(range(delta, max_degree+1))
 
@@ -66,7 +79,7 @@ def build_communities(community_sizes: list[int]) -> COMMUNITIES:
 
 def assign_degrees(
         degrees: list[int], communities: COMMUNITIES, community_sizes: list[int], xi: float,
-) -> dict[int, int]:
+) -> DEGREE_SEQUENCE:
     phi = 1-sum(c**2 for c in community_sizes)/(len(degrees)**2)
     deg = {}
     avail = []

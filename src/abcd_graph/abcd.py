@@ -1,5 +1,5 @@
 __all__ = [
-    "ABCD",
+    "generate_abcd",
     "ABCDParams",
 ]
 
@@ -33,7 +33,7 @@ class ABCDParams:
 
 # pydantic -> data validation
 # defensive programming
-def ABCD(*, n: int, params: ABCDParams) -> tuple[list[list[Any]], list[list[Any]]]:
+def generate_abcd(*, n: int, params: ABCDParams) -> tuple[list[list[Any]], list[list[Any]]]:
     """
     < short description >
     :param n: number of vertices (int)
