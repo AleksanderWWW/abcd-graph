@@ -20,16 +20,13 @@
 
 __all__ = ["rand_round", "powerlaw_distribution"]
 
+import math
 import random
-import numpy as np
 
 
-def rand_round(x):
-    p = x - np.floor(x)
-    if random.uniform(0, 1) <= p:
-        return int(np.floor(x) + 1)
-    else:
-        return int(np.floor(x))
+def rand_round(x: float) -> int:
+    p = x - math.floor(x)
+    return int(math.floor(x) + 1) if random.uniform(0, 1) <= p else int(math.floor(x))
 
 
 def powerlaw_distribution(choices: list[int], intensity: float) -> list[float]:
