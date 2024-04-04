@@ -15,9 +15,14 @@ runs:
           repository: JordanBarrett95/Hypergraphs
           path: ${{ inputs.working_directory }}
 
+      - name: Install poetry
+        working-directory: ${{ inputs.working_directory }}
+        run: pip install --upgrade poetry
+        shell: bash
+
       - name: Install dependencies
         working-directory: ${{ inputs.working_directory }}
-        run: pip install --upgrade poetry && poetry install
+        run: poetry install
         shell: bash
 
       - name: Run tests
