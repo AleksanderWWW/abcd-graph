@@ -17,7 +17,7 @@ runs:
 
       - name: Install dependencies
         working-directory: ${{ inputs.working_directory }}
-        run: pip install -e .[dev]
+        run: pip install --upgrade poetry && poetry install
         shell: bash
 
       - name: Run tests
