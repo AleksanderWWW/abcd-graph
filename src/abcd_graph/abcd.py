@@ -31,11 +31,11 @@ if TYPE_CHECKING:
     from abcd_graph.abcd_params import ABCDParams
 
 
-def generate_abcd(*, n: int, params: "ABCDParams") -> tuple[list[list[Any]], list[list[Any]]]:
+def generate_abcd(*, params: "ABCDParams", n: int = 1000) -> tuple[list[list[Any]], list[list[Any]]]:
     """
     < short description >
-    :param n: number of vertices (int)
     :param params: ABCD input params (ABCDParams)
+    :param n: number of vertices (int) - defaults to 1000
     :return:
     """
     degrees = build_degrees(
