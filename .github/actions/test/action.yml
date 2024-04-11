@@ -12,7 +12,7 @@ runs:
       - name: Checkout
         uses: actions/checkout@v2
         with:
-          repository: JordanBarrett95/Hypergraphs
+          repository:  AleksanderWWW/abcd-graph
           path: ${{ inputs.working_directory }}
 
       - name: Install poetry
