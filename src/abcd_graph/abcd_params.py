@@ -25,8 +25,6 @@ from pydantic import BaseModel, Field, field_validator
 
 
 class ABCDParams(BaseModel):
-    # TODO: add docstrings
-    """"""
     gamma: float = Field(description="Power-law parameter for degrees, between 2 and 3", kw_only=True, default=2.5)
     delta: int = Field(description="Min degree", kw_only=True, default=5)
     zeta: float = Field(description="Parameter for max degree, between 0 and 1", kw_only=True, default=0.5)
