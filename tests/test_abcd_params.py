@@ -51,3 +51,8 @@ def test_abcd_params_invalid_xi():
 def test_abcd_params_proper_init():
     ABCDParams(gamma=2.5, delta=1, zeta=0.5, beta=1.5, tau=0.5, xi=0.5, s=1)
     assert True
+
+
+def test_abcd_params_default_init():
+    ABCDParams()
+    assert True
