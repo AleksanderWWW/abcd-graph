@@ -25,15 +25,15 @@ from pydantic import BaseModel, Field, field_validator
 
 
 class ABCDParams(BaseModel):
-    # TODO: add docstrings
-    """"""
-    gamma: float = Field(description="Power-law parameter for degrees, between 2 and 3", kw_only=True)
-    delta: int = Field(description="Min degree", kw_only=True)
-    zeta: float = Field(description="Parameter for max degree, between 0 and 1", kw_only=True)
-    beta: float = Field(description="Power-law parameter for community sizes, between 1 and 2", kw_only=True)
-    tau: float = Field(description="Parameter for max community size, between zeta and 1", kw_only=True)
-    xi: float = Field(description="Noise parameter, between 0 and 1", kw_only=True)
-    s: int = Field(description="Min community size", kw_only=True)
+    gamma: float = Field(description="Power-law parameter for degrees, between 2 and 3", kw_only=True, default=2.5)
+    delta: int = Field(description="Min degree", kw_only=True, default=5)
+    zeta: float = Field(description="Parameter for max degree, between 0 and 1", kw_only=True, default=0.5)
+    beta: float = Field(
+        description="Power-law parameter for community sizes, between 1 and 2", kw_only=True, default=1.5,
+    )
+    s: int = Field(description="Min community size", kw_only=True, default=20)
+    tau: float = Field(description="Parameter for max community size, between zeta and 1", kw_only=True, default=0.8)
+    xi: float = Field(description="Noise parameter, between 0 and 1", kw_only=True, default=0.25)
 
     @field_validator("gamma")
     @classmethod
