@@ -22,10 +22,20 @@ __all__ = [
     "generate_abcd",
 ]
 
-from typing import Any, TYPE_CHECKING
+from typing import (
+    TYPE_CHECKING,
+    Any,
+)
 
-from abcd_graph.core import build_degrees, build_community_sizes, build_communities, assign_degrees, split_degrees, \
-    build_community_edges, build_background_edges
+from abcd_graph.core import (
+    assign_degrees,
+    build_background_edges,
+    build_communities,
+    build_community_edges,
+    build_community_sizes,
+    build_degrees,
+    split_degrees,
+)
 
 if TYPE_CHECKING:
     from abcd_graph.abcd_params import ABCDParams
