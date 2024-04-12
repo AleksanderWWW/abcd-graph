@@ -22,6 +22,7 @@ __all__ = ["rand_round", "powerlaw_distribution"]
 
 import math
 import random
+from typing import Iterable
 
 
 def rand_round(x: float) -> int:
@@ -29,6 +30,6 @@ def rand_round(x: float) -> int:
     return int(math.floor(x) + 1) if random.uniform(0, 1) <= p else int(math.floor(x))
 
 
-def powerlaw_distribution(choices: list[int], intensity: float) -> list[float]:
+def powerlaw_distribution(choices: Iterable[int], intensity: float) -> list[float]:
     norm = sum(y ** (-intensity) for y in choices)
     return [(y ** (-intensity)) / norm for y in choices]

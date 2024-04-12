@@ -32,6 +32,7 @@ __all__ = [
 import random
 
 import numpy as np
+from numpy.typing import NDArray
 from typing_extensions import TypeAlias
 
 from abcd_graph.utils import (
@@ -65,20 +66,20 @@ def build_degrees(n: int, gamma: float, delta: int, zeta: float) -> DEGREE_LIST:
     return degrees
 
 
-def build_community_sizes(n: int, beta: float, s: int, tau: float) -> list[int]:
-    max_community_size = int(np.floor(n**tau))
-    max_community_number = int(np.ceil(n / s))
-    avail = list(range(s, max_community_size + 1))
+def build_community_sizes(n: int, beta: float, s: int, tau: float) -> NDArray[np.int64]:
+    max_community_size = np.floor(n**tau)
+    max_community_number = np.ceil(n / s)
+    avail = range(s, max_community_size + 1)
 
     probabilities = powerlaw_distribution(avail, beta)
 
-    big_list = np.random.choice(avail, size=max_community_number, p=probabilities)
-    community_sizes: list[int] = []
+    big_list: NDArray[np.int64] = np.random.choice(avail, size=max_community_number, p=probabilities)
+    community_sizes: NDArray[np.int64] = np.array([], dtype=np.int64)
     index = 0
-    while sum(community_sizes) < n:
-        community_sizes.append(big_list[index])
+    while community_sizes.sum() < n:
+        np.append(community_sizes, big_list[index])
         index += 1
-    excess = sum(community_sizes) - n
+    excess = community_sizes.sum() - n
     if excess > 0:
         if (community_sizes[-1] - excess) >= s:
             community_sizes[-1] -= excess
@@ -87,11 +88,10 @@ def build_community_sizes(n: int, beta: float, s: int, tau: float) -> list[int]:
             community_sizes = community_sizes[:-1]
             for i in range(removed - excess):
                 community_sizes[i] += 1
-    community_sizes = list(reversed(sorted(community_sizes)))
-    return community_sizes
+    return np.sort(community_sizes)[::-1]
 
 
-def build_communities(community_sizes: list[int]) -> COMMUNITIES:
+def build_communities(community_sizes: NDArray[np.int64]) -> COMMUNITIES:
     communities = {}
     v_last = -1
     for i, c in enumerate(community_sizes):
@@ -103,7 +103,7 @@ def build_communities(community_sizes: list[int]) -> COMMUNITIES:
 def assign_degrees(
     degrees: list[int],
     communities: COMMUNITIES,
-    community_sizes: list[int],
+    community_sizes: NDArray[np.int64],
     xi: float,
 ) -> DEGREE_SEQUENCE:
     phi = 1 - sum(c**2 for c in community_sizes) / (len(degrees) ** 2)
