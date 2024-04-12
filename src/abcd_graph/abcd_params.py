@@ -21,7 +21,11 @@
 
 __all__ = ["ABCDParams"]
 
-from pydantic import BaseModel, Field, field_validator
+from pydantic import (
+    BaseModel,
+    Field,
+    field_validator,
+)
 
 
 class ABCDParams(BaseModel):
@@ -29,7 +33,9 @@ class ABCDParams(BaseModel):
     delta: int = Field(description="Min degree", kw_only=True, default=5)
     zeta: float = Field(description="Parameter for max degree, between 0 and 1", kw_only=True, default=0.5)
     beta: float = Field(
-        description="Power-law parameter for community sizes, between 1 and 2", kw_only=True, default=1.5,
+        description="Power-law parameter for community sizes, between 1 and 2",
+        kw_only=True,
+        default=1.5,
     )
     s: int = Field(description="Min community size", kw_only=True, default=20)
     tau: float = Field(description="Parameter for max community size, between zeta and 1", kw_only=True, default=0.8)
@@ -37,35 +43,35 @@ class ABCDParams(BaseModel):
 
     @field_validator("gamma")
     @classmethod
-    def check_gamma(cls, v: float):
+    def check_gamma(cls, v: float) -> float:
         if v < 2 or v > 3:
             raise ValueError("gamma must be between 2 and 3")
         return v
 
     @field_validator("zeta")
     @classmethod
-    def check_zeta(cls, v: float):
+    def check_zeta(cls, v: float) -> float:
         if v < 0 or v > 1:
             raise ValueError("zeta must be between 0 and 1")
         return v
 
     @field_validator("beta")
     @classmethod
-    def check_beta(cls, v: float):
+    def check_beta(cls, v: float) -> float:
         if v < 1 or v > 2:
             raise ValueError("beta must be between 1 and 2")
         return v
 
     @field_validator("tau")
     @classmethod
-    def check_tau(cls, v: float):
+    def check_tau(cls, v: float) -> float:
         if v < 0 or v > 1:
             raise ValueError("tau must be between 0 and 1")
         return v
 
     @field_validator("xi")
     @classmethod
-    def check_xi(cls, v: float):
+    def check_xi(cls, v: float) -> float:
         if v < 0 or v > 1:
             raise ValueError("xi must be between 0 and 1")
         return v
