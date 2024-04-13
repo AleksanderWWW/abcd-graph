@@ -22,7 +22,9 @@ __all__ = ["rand_round", "powerlaw_distribution"]
 
 import math
 import random
-from typing import Iterable
+
+import numpy as np
+from numpy.typing import NDArray
 
 
 def rand_round(x: float) -> int:
@@ -30,6 +32,6 @@ def rand_round(x: float) -> int:
     return int(math.floor(x) + 1) if random.uniform(0, 1) <= p else int(math.floor(x))
 
 
-def powerlaw_distribution(choices: Iterable[int], intensity: float) -> list[float]:
-    norm = sum(y ** (-intensity) for y in choices)
-    return [(y ** (-intensity)) / norm for y in choices]
+def powerlaw_distribution(choices: NDArray[np.int64], intensity: float) -> NDArray[np.float64]:
+    dist: NDArray[np.float64] = (choices ** (-intensity)) / np.sum(choices ** (-intensity))
+    return dist

@@ -29,8 +29,6 @@ __all__ = [
     "build_background_edges",
 ]
 
-import random
-
 import numpy as np
 from numpy.typing import NDArray
 from typing_extensions import TypeAlias
@@ -41,7 +39,7 @@ from abcd_graph.utils import (
 )
 
 COMMUNITIES: TypeAlias = dict[int, list[int]]
-DEGREE_LIST: TypeAlias = list[int]
+DEGREE_LIST: TypeAlias = NDArray[np.int64]
 DEGREE_SEQUENCE: TypeAlias = dict[int, int]
 
 
@@ -49,19 +47,20 @@ def configuration_model(degree_sequence: dict) -> list[list[int]]:
     l = []  # noqa: E741
     for v in degree_sequence.keys():
         l.extend([v] * degree_sequence[v])
-    random.shuffle(l)
+    np.random.shuffle(l)
     E = [[l[2 * i], l[2 * i + 1]] for i in range(int(np.floor(sum(degree_sequence.values()) / 2)))]
     return E
 
 
 def build_degrees(n: int, gamma: float, delta: int, zeta: float) -> DEGREE_LIST:
-    max_degree = int(np.floor(n**zeta))
-    avail = list(range(delta, max_degree + 1))
+    max_degree = np.floor(n**zeta)
+    avail = np.arange(delta, max_degree + 1)
 
     probabilities = powerlaw_distribution(avail, gamma)
 
-    degrees = list(reversed(sorted(np.random.choice(avail, size=n, p=probabilities))))
-    if sum(degrees) % 2 == 1:
+    degrees = np.sort(np.random.choice(avail, size=n, p=probabilities))[::-1]
+
+    if degrees.sum() % 2 == 1:
         degrees[0] += 1
     return degrees
 
@@ -69,7 +68,7 @@ def build_degrees(n: int, gamma: float, delta: int, zeta: float) -> DEGREE_LIST:
 def build_community_sizes(n: int, beta: float, s: int, tau: float) -> NDArray[np.int64]:
     max_community_size = np.floor(n**tau)
     max_community_number = np.ceil(n / s)
-    avail = range(s, max_community_size + 1)
+    avail = np.arange(s, max_community_size + 1)
 
     probabilities = powerlaw_distribution(avail, beta)
 
@@ -101,12 +100,12 @@ def build_communities(community_sizes: NDArray[np.int64]) -> COMMUNITIES:
 
 
 def assign_degrees(
-    degrees: list[int],
+    degrees: DEGREE_LIST,
     communities: COMMUNITIES,
     community_sizes: NDArray[np.int64],
     xi: float,
 ) -> DEGREE_SEQUENCE:
-    phi = 1 - sum(c**2 for c in community_sizes) / (len(degrees) ** 2)
+    phi = 1 - np.sum(community_sizes**2) / (len(degrees) ** 2)
     deg = {}
     avail = []
     lock = 0
