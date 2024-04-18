@@ -46,7 +46,7 @@ DEGREE_SEQUENCE: TypeAlias = dict[int, int]
 def configuration_model(degree_sequence: dict) -> list[list[int]]:
     l = []  # noqa: E741
     for v in degree_sequence.keys():
-        l.extend([v] * degree_sequence[v])
+        l.extend([v] * int(degree_sequence[v]))
     np.random.shuffle(l)
     E = [[l[2 * i], l[2 * i + 1]] for i in range(int(np.floor(sum(degree_sequence.values()) / 2)))]
     return E
@@ -62,22 +62,26 @@ def build_degrees(n: int, gamma: float, delta: int, zeta: float) -> DEGREE_LIST:
 
     if degrees.sum() % 2 == 1:
         degrees[0] += 1
+
     return degrees
 
 
 def build_community_sizes(n: int, beta: float, s: int, tau: float) -> NDArray[np.int64]:
-    max_community_size = np.floor(n**tau)
-    max_community_number = np.ceil(n / s)
+    max_community_size = int(np.floor(n**tau))
+    max_community_number = int(np.ceil(n / s))
     avail = np.arange(s, max_community_size + 1)
 
     probabilities = powerlaw_distribution(avail, beta)
 
     big_list: NDArray[np.int64] = np.random.choice(avail, size=max_community_number, p=probabilities)
-    community_sizes: NDArray[np.int64] = np.array([], dtype=np.int64)
+    community_sizes: NDArray[np.int64] = np.zeros(max_community_number, dtype=np.int64)
+
     index = 0
     while community_sizes.sum() < n:
-        np.append(community_sizes, big_list[index])
+        community_sizes[index] = big_list[index]
         index += 1
+
+    community_sizes = community_sizes[:index]
     excess = community_sizes.sum() - n
     if excess > 0:
         if (community_sizes[-1] - excess) >= s:
@@ -86,7 +90,7 @@ def build_community_sizes(n: int, beta: float, s: int, tau: float) -> NDArray[np
             removed = community_sizes[-1]
             community_sizes = community_sizes[:-1]
             for i in range(removed - excess):
-                community_sizes[i] += 1
+                community_sizes[i % len(community_sizes)] += 1
     return np.sort(community_sizes)[::-1]
 
 
@@ -107,19 +111,38 @@ def assign_degrees(
 ) -> DEGREE_SEQUENCE:
     phi = 1 - np.sum(community_sizes**2) / (len(degrees) ** 2)
     deg = {}
-    avail = []
+    avail = 0
+    already_chosen = set()
+
     lock = 0
     d_previous = degrees[0] + 1
-    for d in degrees:
+
+    for i, d in enumerate(degrees):
         if (d < d_previous) and (lock < len(community_sizes)):
             threshold = d * (1 - xi * phi) + 1
             while community_sizes[lock] >= threshold:
-                avail.extend(communities[lock])
+                avail = communities[lock][-1]
                 lock += 1
                 if lock == len(community_sizes):
                     break
-        v = avail.pop(np.random.choice(len(avail)))
+
+        v = np.random.choice(avail)
+        while v in already_chosen:
+            v = np.random.choice(avail)
+
+        already_chosen.add(v)
         deg[v] = d
+
+        if avail == len(degrees) - 1:
+            still_not_chosen_set = set(range(len(degrees))) - already_chosen
+            still_not_chosen: NDArray[np.int64] = np.array([v for v in still_not_chosen_set])
+            degrees_remaining: NDArray[np.int64] = degrees[i + 1 :]  # noqa: E203
+
+            np.random.shuffle(still_not_chosen)
+
+            deg.update({label: degree for label, degree in zip(still_not_chosen, degrees_remaining)})
+            return deg
+
         d_previous = d
     return deg
 
@@ -130,18 +153,27 @@ def split_degrees(
     communities: COMMUNITIES,
     xi: float,
 ) -> tuple[dict[int, int], dict[int, int]]:
-    deg_c = {v: rand_round((1 - xi) * degrees[v]) for v in degrees.keys()}
+    deg_c = {v: rand_round((1 - xi) * degrees[v]) for v in degrees}
     for community in communities.values():
-        if sum(deg_c[v] for v in community) % 2 == 1:
-            v_max = deg_c[community[0]]
-            for v in community:
-                if deg_c[v] > deg_c[v_max]:
-                    v_max = v
-            deg_c[v_max] += 1
-            if deg_c[v_max] > degrees[v_max]:
-                deg_c[v_max] -= 2
-    deg_b = {v: (degrees[v] - deg_c[v]) for v in degrees.keys()}
+        if sum(deg_c[v] for v in community) % 2 == 0:
+            continue
+
+        v_max = _get_v_max(deg_c, community)
+        deg_c[v_max] += 1
+        if deg_c[v_max] > degrees[v_max]:
+            deg_c[v_max] -= 2
+
+    deg_b = {v: (degrees[v] - deg_c[v]) for v in degrees}
     return deg_c, deg_b
+
+
+def _get_v_max(deg_c: dict[int, int], community: list[int]) -> int:
+    deg_c_subset = {v: deg_c[v] for v in community}
+    max_value = max(deg_c_subset.values())
+    for elem, value in deg_c_subset.items():
+        if value == max_value:
+            return elem
+    return community[0]
 
 
 def build_community_edges(community_degrees: dict[int, int], communities: COMMUNITIES) -> list[list]:

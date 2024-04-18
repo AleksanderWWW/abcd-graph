@@ -18,15 +18,9 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-__all__ = [
-    "generate_abcd",
-]
+import pytest
 
-from typing import (
-    TYPE_CHECKING,
-    Any,
-)
-
+from abcd_graph import ABCDParams
 from abcd_graph.core import (
     assign_degrees,
     build_background_edges,
@@ -37,23 +31,21 @@ from abcd_graph.core import (
     split_degrees,
 )
 
-if TYPE_CHECKING:
-    from abcd_graph.abcd_params import ABCDParams
 
+@pytest.mark.parametrize("n", [100, 1000, 10000])
+@pytest.mark.parametrize("gamma", [2.1, 2.5, 2.9])
+@pytest.mark.parametrize("beta", [1.1, 1.5, 1.9])
+def test_core(n, gamma, beta):
+    params = ABCDParams(gamma=gamma, beta=beta, delta=5)
 
-def generate_abcd(*, params: "ABCDParams", n: int = 1000) -> tuple[list[list[Any]], list[list[Any]]]:
-    """
-    < short description >
-    :param params: ABCD input params (ABCDParams)
-    :param n: number of vertices (int) - defaults to 1000
-    :return:
-    """
     degrees = build_degrees(
         n,
         params.gamma,
         params.delta,
         params.zeta,
     )
+
+    assert len(degrees) == n
 
     community_sizes = build_community_sizes(
         n,
@@ -62,14 +54,21 @@ def generate_abcd(*, params: "ABCDParams", n: int = 1000) -> tuple[list[list[Any
         params.tau,
     )
 
+    assert sum(community_sizes) == n
+
     communities = build_communities(community_sizes)
 
     deg = assign_degrees(degrees, communities, community_sizes, params.xi)
 
+    assert sum(deg.values()) == degrees.sum()
+
     deg_c, deg_b = split_degrees(deg, communities, params.xi)
+
+    assert sum(deg_c.values()) + sum(deg_b.values()) == sum(deg.values())
 
     community_edges = build_community_edges(deg_c, communities)
 
     background_edges = build_background_edges(deg_b)
 
-    return community_edges, background_edges
+    assert 2 * len(community_edges) == sum(deg_c.values())
+    assert 2 * len(background_edges) == sum(deg_b.values())
