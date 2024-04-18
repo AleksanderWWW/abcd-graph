@@ -44,16 +44,22 @@ DEGREE_SEQUENCE: TypeAlias = dict[int, int]
 
 
 def configuration_model(degree_sequence: dict) -> list[list[int]]:
-    adj_matrix = np.zeros(shape=(len(degree_sequence), len(degree_sequence)), dtype=np.int64)
-    half_edge_list = np.zeros(sum(degree_sequence.values()), dtype=np.int64)
+    # adj_matrix = np.zeros(shape=(len(degree_sequence), len(degree_sequence)), dtype=np.int64)
+    half_edge_list = np.zeros(int(sum(degree_sequence.values())), dtype=np.int64)
     i = 0
     for vertex_label, vertex_degree in degree_sequence.items():
-        half_edge_list[i: i + vertex_degree] = vertex_label
+        vertex_degree = int(vertex_degree)
+
+        half_edge_list[i : i + vertex_degree] = vertex_label
+
         i += vertex_degree
 
     np.random.shuffle(half_edge_list)
 
-    E = [[half_edge_list[2 * i], half_edge_list[2 * i + 1]] for i in range(int(np.floor(sum(degree_sequence.values()) / 2)))]
+    E = [
+        [half_edge_list[2 * i], half_edge_list[2 * i + 1]]
+        for i in range(int(np.floor(sum(degree_sequence.values()) / 2)))
+    ]
     return E
 
 
