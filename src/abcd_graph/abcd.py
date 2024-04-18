@@ -25,7 +25,16 @@ __all__ = [
 from typing import (
     TYPE_CHECKING,
     Any,
+    Union,
 )
+
+import numpy as np
+from numpy import (
+    dtype,
+    ndarray,
+    signedinteger,
+)
+from numpy._typing import _64Bit
 
 from abcd_graph.core import (
     assign_degrees,
@@ -41,7 +50,9 @@ if TYPE_CHECKING:
     from abcd_graph.abcd_params import ABCDParams
 
 
-def generate_abcd(*, params: "ABCDParams", n: int = 1000) -> tuple[list[list[Any]], list[list[Any]]]:
+def generate_abcd(
+    *, params: "ABCDParams", n: int = 1000
+) -> tuple[list[list], ndarray[Any, dtype[Union[signedinteger[_64Bit], np.longfloat]]]]:
     """
     < short description >
     :param params: ABCD input params (ABCDParams)

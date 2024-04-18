@@ -43,24 +43,21 @@ DEGREE_LIST: TypeAlias = NDArray[np.int64]
 DEGREE_SEQUENCE: TypeAlias = dict[int, int]
 
 
-def configuration_model(degree_sequence: dict) -> list[list[int]]:
+def configuration_model(degree_sequence: dict) -> NDArray[np.int64]:
     # adj_matrix = np.zeros(shape=(len(degree_sequence), len(degree_sequence)), dtype=np.int64)
-    half_edge_list = np.zeros(int(sum(degree_sequence.values())), dtype=np.int64)
-    i = 0
-    for vertex_label, vertex_degree in degree_sequence.items():
-        vertex_degree = int(vertex_degree)
+    degrees = list(degree_sequence.keys())
+    counts = list(degree_sequence.values())
 
-        half_edge_list[i : i + vertex_degree] = vertex_label
+    # Create an array containing repeated vertices based on their degrees
+    vertices = np.repeat(degrees, counts)
 
-        i += vertex_degree
+    # Shuffle the array of vertices
+    np.random.shuffle(vertices)
 
-    np.random.shuffle(half_edge_list)
+    # Create pairs of vertices to represent edges
+    edges = np.array(vertices).reshape(-1, 2)
 
-    E = [
-        [half_edge_list[2 * i], half_edge_list[2 * i + 1]]
-        for i in range(int(np.floor(sum(degree_sequence.values()) / 2)))
-    ]
-    return E
+    return edges
 
 
 def build_degrees(n: int, gamma: float, delta: int, zeta: float) -> DEGREE_LIST:
@@ -188,11 +185,11 @@ def _get_v_max(deg_c: dict[int, int], community: list[int]) -> int:
 
 
 def build_community_edges(community_degrees: dict[int, int], communities: COMMUNITIES) -> list[list]:
-    community_edges = []
+    community_edges: list = []
     for community in communities.values():
         community_edges.extend(configuration_model({v: community_degrees[v] for v in community}))
     return community_edges
 
 
-def build_background_edges(background_degrees: dict[int, int]) -> list[list]:
+def build_background_edges(background_degrees: dict[int, int]) -> NDArray[np.int64]:
     return configuration_model(background_degrees)
