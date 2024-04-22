@@ -14,5 +14,8 @@ jobs:
         with:
           python-version: ${{ matrix.python-version }}
 
+      - name: Build
+        uses: ./.github/actions/build
+
       - name: Test
         uses: ./.github/actions/test
