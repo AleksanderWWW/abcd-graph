@@ -83,6 +83,7 @@ class StdOutLogger(ABCDLogger):
             level=logging_level,
             format="[%(name)s] - %(asctime)s - %(levelname)s - %(message)s",
         )
+        self.logging_level = logging_level
         self.logger = logging.getLogger(self.NAME)
 
     def info(self, message: str) -> None:
