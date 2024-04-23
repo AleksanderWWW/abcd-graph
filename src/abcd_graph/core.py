@@ -47,10 +47,35 @@ DEGREE_SEQUENCE: TypeAlias = dict[int, int]
 
 
 @dataclass
-class BadEdge:
+class Edge:
     row_idx: int
     column_idx: int
-    community: int
+    community_id: int
+
+    def is_loop(self) -> bool:
+        return self.row_idx == self.column_idx
+
+    def is_multi_edge(self, adj_matrix: NDArray[np.int64]) -> bool:
+        result: bool = adj_matrix[self.row_idx, self.column_idx] > 1
+        return result
+
+    def is_bad(self, adj_matrix: NDArray[np.int64]) -> bool:
+        return self.is_loop() or self.is_multi_edge(adj_matrix)
+
+
+class BadEdgeRegistry:
+    def __init__(self) -> None:
+        self._bad_edges: dict[int, list[Edge]] = {}
+
+    @property
+    def bad_edges(self) -> dict[int, list[Edge]]:
+        return self._bad_edges
+
+    def add_bad_edge(self, bad_edge: Edge) -> None:
+        if bad_edge.community_id in self._bad_edges:
+            self._bad_edges[bad_edge.community_id].append(bad_edge)
+        else:
+            self._bad_edges[bad_edge.community_id] = [bad_edge]
 
 
 class GraphGenerator:
@@ -58,11 +83,14 @@ class GraphGenerator:
         self._adj_matrix = np.zeros(shape=(n, n), dtype=np.int64)
         self._abcd_params = abcd_params
 
-        self._bad_edges: dict[int, list[BadEdge]] = {}
+        self._bad_edge_registry = BadEdgeRegistry()
 
     @property
     def adj_matrix(self) -> NDArray[np.int64]:
         return self._adj_matrix
+
+    def _register_edge(self, edge: Edge) -> None:
+        self._adj_matrix[edge.row_idx, edge.column_idx] += 1
 
     def _configuration_model(self, degree_sequence: dict, community_id: int = -1) -> None:
         degrees = list(degree_sequence.keys())
@@ -70,28 +98,19 @@ class GraphGenerator:
 
         assert sum(counts) % 2 == 0
 
-        # Create an array containing repeated vertices based on their degrees
         vertices = np.repeat(degrees, counts)
 
-        # Shuffle the array of vertices
         np.random.shuffle(vertices)
 
         edges = np.array(vertices).reshape(-1, 2)
 
-        for edge in edges:
-            row = min(edge)
-            column = max(edge)
+        for edge_point in edges:
+            edge = Edge(min(edge_point), max(edge_point), community_id)
 
-            self._adj_matrix[row, column] += 1
+            self._register_edge(edge)
 
-            if _is_loop(row, column) or _is_multi_edge(self._adj_matrix, row, column):
-                self._add_bad_edge(BadEdge(row, column, community_id))
-
-    def _add_bad_edge(self, bad_edge: BadEdge) -> None:
-        if bad_edge.community in self._bad_edges:
-            self._bad_edges[bad_edge.community].append(bad_edge)
-        else:
-            self._bad_edges[bad_edge.community] = [bad_edge]
+            if edge.is_bad(self._adj_matrix):
+                self._bad_edge_registry.add_bad_edge(bad_edge=edge)
 
 
 def _is_loop(row: int, column: int) -> bool:
