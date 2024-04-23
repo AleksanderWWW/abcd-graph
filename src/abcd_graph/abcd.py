@@ -36,24 +36,41 @@ from abcd_graph.core import (
     build_degrees,
     split_degrees,
 )
+from abcd_graph.logger import (
+    LoggerType,
+    construct_logger,
+)
 
 if TYPE_CHECKING:
     from abcd_graph.abcd_params import ABCDParams
 
 
-def generate_abcd(*, params: "ABCDParams", n: int = 1000) -> tuple[list[list[Any]], list[list[Any]]]:
+def generate_abcd(
+    *,
+    params: "ABCDParams",
+    n: int = 1000,
+    logger: LoggerType = False,
+) -> tuple[list[list[Any]], list[list[Any]]]:
     """
     < short description >
     :param params: ABCD input params (ABCDParams)
     :param n: number of vertices (int) - defaults to 1000
+    :param logger: logger object (ABCDLogger | bool) - defaults to False
     :return:
     """
+    abcd_logger = construct_logger(logger)
+
+    abcd_logger.info("Generating ABCD graph")
+
+    abcd_logger.info("Building degrees")
     degrees = build_degrees(
         n,
         params.gamma,
         params.delta,
         params.zeta,
     )
+
+    abcd_logger.info("Building community sizes")
 
     community_sizes = build_community_sizes(
         n,
@@ -62,14 +79,26 @@ def generate_abcd(*, params: "ABCDParams", n: int = 1000) -> tuple[list[list[Any
         params.tau,
     )
 
+    abcd_logger.info("Building communities")
+
     communities = build_communities(community_sizes)
+
+    abcd_logger.info("Assigning degrees")
 
     deg = assign_degrees(degrees, communities, community_sizes, params.xi)
 
+    abcd_logger.info("Splitting degrees")
+
     deg_c, deg_b = split_degrees(deg, communities, params.xi)
+
+    abcd_logger.info("Building community edges")
 
     community_edges = build_community_edges(deg_c, communities)
 
+    abcd_logger.info("Building background edges")
+
     background_edges = build_background_edges(deg_b)
+
+    abcd_logger.info("ABCD graph generated")
 
     return community_edges, background_edges
