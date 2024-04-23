@@ -29,10 +29,13 @@ __all__ = [
     "build_background_edges",
 ]
 
+from dataclasses import dataclass
+
 import numpy as np
 from numpy.typing import NDArray
 from typing_extensions import TypeAlias
 
+from abcd_graph import ABCDParams
 from abcd_graph.utils import (
     powerlaw_distribution,
     rand_round,
@@ -43,8 +46,66 @@ DEGREE_LIST: TypeAlias = NDArray[np.int64]
 DEGREE_SEQUENCE: TypeAlias = dict[int, int]
 
 
+@dataclass
+class BadEdge:
+    row_idx: int
+    column_idx: int
+    community: int
+
+
+class GraphGenerator:
+    def __init__(self, abcd_params: ABCDParams, n: int) -> None:
+        self._adj_matrix = np.zeros(shape=(n, n), dtype=np.int64)
+        self._abcd_params = abcd_params
+
+        self._bad_edges: dict[int, list[BadEdge]] = {}
+
+    @property
+    def adj_matrix(self) -> NDArray[np.int64]:
+        return self._adj_matrix
+
+    def _configuration_model(self, degree_sequence: dict, community_id: int = -1) -> None:
+        degrees = list(degree_sequence.keys())
+        counts = list(degree_sequence.values())
+
+        assert sum(counts) % 2 == 0
+
+        # Create an array containing repeated vertices based on their degrees
+        vertices = np.repeat(degrees, counts)
+
+        # Shuffle the array of vertices
+        np.random.shuffle(vertices)
+
+        edges = np.array(vertices).reshape(-1, 2)
+
+        for edge in edges:
+            row = min(edge)
+            column = max(edge)
+
+            self._adj_matrix[row, column] += 1
+
+            if _is_loop(row, column) or _is_multi_edge(self._adj_matrix, row, column):
+                self._add_bad_edge(BadEdge(row, column, community_id))
+
+    def _add_bad_edge(self, bad_edge: BadEdge) -> None:
+        if bad_edge.community in self._bad_edges:
+            self._bad_edges[bad_edge.community].append(bad_edge)
+        else:
+            self._bad_edges[bad_edge.community] = [bad_edge]
+
+
+def _is_loop(row: int, column: int) -> bool:
+    return row == column
+
+
+def _is_multi_edge(adj_matrix: NDArray[np.int64], row: int, column: int) -> bool:
+    result: bool = adj_matrix[row, column] > 1
+    return result
+
+
 def configuration_model(degree_sequence: dict) -> NDArray[np.int64]:
     # adj_matrix = np.zeros(shape=(len(degree_sequence), len(degree_sequence)), dtype=np.int64)
+
     degrees = list(degree_sequence.keys())
     counts = list(degree_sequence.values())
 
