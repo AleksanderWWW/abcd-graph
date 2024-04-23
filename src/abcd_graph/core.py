@@ -44,13 +44,14 @@ from abcd_graph.utils import (
 COMMUNITIES: TypeAlias = dict[int, list[int]]
 DEGREE_LIST: TypeAlias = NDArray[np.int64]
 DEGREE_SEQUENCE: TypeAlias = dict[int, int]
+COMMUNITY_ID: TypeAlias = int
 
 
 @dataclass
 class Edge:
     row_idx: int
     column_idx: int
-    community_id: int
+    community_id: COMMUNITY_ID
 
     def is_loop(self) -> bool:
         return self.row_idx == self.column_idx
@@ -65,7 +66,7 @@ class Edge:
 
 class BadEdgeRegistry:
     def __init__(self) -> None:
-        self._bad_edges: dict[int, list[Edge]] = {}
+        self._bad_edges: dict[COMMUNITY_ID, list[Edge]] = {}
 
     @property
     def bad_edges(self) -> dict[int, list[Edge]]:
