@@ -9,22 +9,6 @@ inputs:
 runs:
     using: "composite"
     steps:
-      - name: Checkout
-        uses: actions/checkout@v2
-        with:
-          repository:  AleksanderWWW/abcd-graph
-          path: ${{ inputs.working_directory }}
-
-      - name: Install poetry
-        working-directory: ${{ inputs.working_directory }}
-        run: pip install --upgrade poetry
-        shell: bash
-
-      - name: Install dependencies
-        working-directory: ${{ inputs.working_directory }}
-        run: poetry install
-        shell: bash
-
       - name: Run tests
         working-directory: ${{ inputs.working_directory }}
         run: poetry run pytest -v
