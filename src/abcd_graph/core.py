@@ -30,6 +30,8 @@ __all__ = [
 ]
 
 from dataclasses import dataclass
+from functools import cached_property
+from typing import Optional
 
 import numpy as np
 from numpy.typing import NDArray
@@ -52,16 +54,45 @@ class Edge:
     row_idx: int
     column_idx: int
     community_id: COMMUNITY_ID
+    graph: Optional["ABCDGraph"] = None
 
+    @property
     def is_loop(self) -> bool:
         return self.row_idx == self.column_idx
 
-    def is_multi_edge(self, adj_matrix: NDArray[np.int64]) -> bool:
-        result: bool = adj_matrix[self.row_idx, self.column_idx] > 1
+    @property
+    def is_multi_edge(self) -> bool:
+        if self.graph is None:  # we cannot say that an edge is bad, if it's not linked to any graph instance
+            return False
+
+        result: bool = self.graph.adj_matrix[self.row_idx, self.column_idx] > 1
         return result
 
-    def is_bad(self, adj_matrix: NDArray[np.int64]) -> bool:
-        return self.is_loop() or self.is_multi_edge(adj_matrix)
+    @cached_property
+    def is_bad(self) -> bool:
+        return self.is_loop or self.is_multi_edge
+
+    def link_graph(self, graph: "ABCDGraph") -> None:
+        self.graph = graph
+
+
+class ABCDGraph:
+    def __init__(self, params: ABCDParams, n: int) -> None:
+        self._params = params
+        self._n = n
+        self._adj_matrix = np.zeros(shape=(n, n), dtype=np.int64)
+
+    @property
+    def adj_matrix(self) -> NDArray[np.int64]:
+        return self._adj_matrix
+
+    @property
+    def params(self) -> ABCDParams:
+        return self._params
+
+    def register_edge(self, edge: Edge) -> None:
+        self._adj_matrix[edge.row_idx, edge.column_idx] += 1
+        edge.link_graph(graph=self)
 
 
 class BadEdgeRegistry:
@@ -79,21 +110,15 @@ class BadEdgeRegistry:
             self._bad_edges[bad_edge.community_id] = [bad_edge]
 
 
-class GraphGenerator:
-    def __init__(self, abcd_params: ABCDParams, n: int) -> None:
-        self._adj_matrix = np.zeros(shape=(n, n), dtype=np.int64)
-        self._abcd_params = abcd_params
-
-        self._bad_edge_registry = BadEdgeRegistry()
-
-    @property
-    def adj_matrix(self) -> NDArray[np.int64]:
-        return self._adj_matrix
+class ConfigurationModelRunner:
+    def __init__(self, graph: ABCDGraph, bad_edge_registry: BadEdgeRegistry) -> None:
+        self._graph = graph
+        self._bad_edge_registry = bad_edge_registry
 
     def _register_edge(self, edge: Edge) -> None:
-        self._adj_matrix[edge.row_idx, edge.column_idx] += 1
+        self._graph.adj_matrix[edge.row_idx, edge.column_idx] += 1
 
-    def _configuration_model(self, degree_sequence: dict, community_id: int = -1) -> None:
+    def run_configuration_model(self, degree_sequence: dict, community_id: int = -1) -> None:
         degrees = list(degree_sequence.keys())
         counts = list(degree_sequence.values())
 
@@ -108,9 +133,9 @@ class GraphGenerator:
         for edge_point in edges:
             edge = Edge(min(edge_point), max(edge_point), community_id)
 
-            self._register_edge(edge)
+            self._graph.register_edge(edge=edge)
 
-            if edge.is_bad(self._adj_matrix):
+            if edge.is_bad:
                 self._bad_edge_registry.add_bad_edge(bad_edge=edge)
 
 
