@@ -19,14 +19,18 @@
 # SOFTWARE.
 
 __all__ = [
-    "configuration_model",
     "build_degrees",
     "build_community_sizes",
     "build_communities",
     "assign_degrees",
     "split_degrees",
+    "configuration_model",
+    "build_recycle_list",
+    "rewire_edge",
+    "push_to_background",
+    "rewire",
     "build_community_edges",
-    "build_background_edges",
+    "add_background_edges",
 ]
 
 import numpy as np
@@ -41,15 +45,8 @@ from abcd_graph.utils import (
 COMMUNITIES: TypeAlias = dict[int, list[int]]
 DEGREE_LIST: TypeAlias = NDArray[np.int64]
 DEGREE_SEQUENCE: TypeAlias = dict[int, int]
-
-
-def configuration_model(degree_sequence: dict) -> list[list[int]]:
-    l = []  # noqa: E741
-    for v in degree_sequence.keys():
-        l.extend([v] * int(degree_sequence[v]))
-    np.random.shuffle(l)
-    E = [[l[2 * i], l[2 * i + 1]] for i in range(int(np.floor(sum(degree_sequence.values()) / 2)))]
-    return E
+EDGE_LIST: TypeAlias = list[list[int]]
+EDGE_DICT: TypeAlias = dict[int, NDArray[np.int64]]
 
 
 def build_degrees(n: int, gamma: float, delta: int, zeta: float) -> DEGREE_LIST:
@@ -176,12 +173,111 @@ def _get_v_max(deg_c: dict[int, int], community: list[int]) -> int:
     return community[0]
 
 
-def build_community_edges(community_degrees: dict[int, int], communities: COMMUNITIES) -> list[list]:
-    community_edges = []
+def configuration_model(degree_sequence: DEGREE_SEQUENCE) -> NDArray[np.int64]:
+    labels = list(degree_sequence.keys())
+    counts = list(degree_sequence.values())
+
+    # Create an array containing repeated vertices based on their degrees
+    vertices = np.repeat(labels, counts)
+
+    # Shuffle the array of vertices
+    np.random.shuffle(vertices)
+
+    # Create pairs of vertices to represent edges
+    edges = np.array(vertices).reshape(-1, 2)
+
+    return edges
+
+
+def build_recycle_list(edges: EDGE_DICT) -> list[int]]:
+    edge_count = {}
+    recycle_list = []
+    for i, e in enumerate(edges):
+        e_left = min(e[0], e[1])
+        e_right = max(e[0], e[1])
+        try:
+            edge_count[e_left][e_right] += 1
+            recycle_list.append(i)
+        except:
+            edge_count[e_left] = {e_right: 1}
+            if e_left == e_right:
+                recycle_list.append(i)
+    return recycle_list
+
+
+def rewire_edge(
+    edges: EDGE_DICT, 
+    edge_index: int, 
+    skip_set: set, 
+    rewire_candidates: list[int], 
+    recycle_list: list[int]
+) -> tuple[EDGE_DICT, set, list[int]]
+    if edge_index not in skip_set:
+        rewire_candidates.remove(edge_index)
+        paired_edge_index = np.random.choice(rewire_candidates)
+        rewire_candidates.remove(paired_edge_index)
+        if paired_edge_index in recycle_list:
+            skip_set.add(paired_edge_index)
+        edges[edge_index] = np.array([edges[edge_index][0], edges[paired_edge_index][0]])
+        edges[paired_edge_index] = np.array([edges[edge_index][1], edges[paired_edge_index][1]])
+    return edges, skip_set, rewire_candidates
+
+
+def push_to_background(
+    edges: EDGE_DICT, 
+    background_degree_sequence: DEGREE_SEQUENCE, 
+    recycle_list: list[int]
+) -> tuple[EDGES, DEGREE_SEQUENCE]:
+    for i in recycle_list:
+        e = edges.pop(i)
+        background_degree_sequence[e[0]] += 1
+        background_degree_sequence[e[1]] += 1
+    return edges, background_degree_sequence
+
+
+def rewire(
+    edges: EDGE_DICT, 
+    background_degree_sequence: DEGREE_SEQUENCE, 
+    is_community: bool = True
+) -> tuple[EDGES, DEGREE_SEQUENCE]:
+    recycle_list = build_recycle_list(edges)
+    while len(recycle_list) > 0:
+        rewire_candidates = list(edges.keys())
+        skip_set = set()
+        for i in recycle_list:
+            edges, skip_set, rewire_candidates = rewire_edge(edges, i, skip_set, rewire_candidates, recycle_list)
+        new_recycle_list = build_recycle_list(edges)
+        if len(new_recycle_list) >= len(recycle_list) and is_community:
+            return push_to_background(edges, background_degree_sequence, new_recycle_list)
+        else:
+            recycle_list = new_recycle_list
+    return edges, background_degree_sequence
+        
+
+def build_community_edges(
+    community_degree_sequence: DEGREE_SEQUENCE, 
+    background_degree_sequence: DEGREE_SEQUENCE, 
+    communities: COMMUNITIES
+) -> tuple[EDGE_LIST, DEGREE_SEQUENCE]:
+    edge_list = []
     for community in communities.values():
-        community_edges.extend(configuration_model({v: community_degrees[v] for v in community}))
-    return community_edges
+        community_edges = configuration_model({v: community_degree_sequence[v] for v in community})
+        community_edges, background_degree_sequence = rewire(community_edges, background_degree_sequence)
+        edge_list.extend(list(community_edges.values()))
+    return edge_list, background_degree_sequence
 
 
-def build_background_edges(background_degrees: dict[int, int]) -> list[list]:
-    return configuration_model(background_degrees)
+def add_background_edges(
+    edge_list: EDGE_LIST, 
+    background_degree_sequence: DEGREE_SEQUENCE
+) -> EDGE_LIST:
+    background_edges = configuration_model(background_degree_sequence)
+    background_edge_list = list(background_edges.values())
+    edge_list.extend(background_edge_list)
+    edges = dict(enumerate(edge_list))
+    edges, background_degree_sequence = rewire(edges, background_degree_sequence, is_community = False)
+    return edges
+
+
+
+
