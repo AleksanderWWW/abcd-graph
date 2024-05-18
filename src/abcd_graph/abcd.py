@@ -30,8 +30,8 @@ from typing import (
 import igraph
 
 from abcd_graph.core import (
-    assign_degrees,
     add_background_edges,
+    assign_degrees,
     build_communities,
     build_community_edges,
     build_community_sizes,
