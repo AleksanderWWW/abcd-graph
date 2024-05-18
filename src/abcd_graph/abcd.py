@@ -27,9 +27,11 @@ from typing import (
     Any,
 )
 
+import igraph
+
 from abcd_graph.core import (
     assign_degrees,
-    build_background_edges,
+    add_background_edges,
     build_communities,
     build_community_edges,
     build_community_sizes,
@@ -93,12 +95,27 @@ def generate_abcd(
 
     abcd_logger.info("Building community edges")
 
-    community_edges = build_community_edges(deg_c, communities)
+    community_edges, deg_b = build_community_edges(deg_c, deg_b, communities)
+
+    print(community_edges)
 
     abcd_logger.info("Building background edges")
 
-    background_edges = build_background_edges(deg_b)
+    edges = add_background_edges(community_edges, deg_b)
 
     abcd_logger.info("ABCD graph generated")
 
-    return community_edges, background_edges
+    for i, edge_i in edges.items():
+        for j, edge_j in edges.items():
+            if i == j:
+                continue
+
+            if edge_i[0] == edge_j[0] and edge_i[1] == edge_j[1]:
+                print(edge_i, edge_j)
+                print("Duplicate edge found")
+
+            if edge_i[1] == edge_j[0] and edge_i[0] == edge_j[1]:
+                print(edge_i, edge_j)
+                print("Duplicate edge found")
+
+    return edges
