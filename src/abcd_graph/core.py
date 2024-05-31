@@ -24,20 +24,20 @@ __all__ = [
     "build_communities",
     "assign_degrees",
     "split_degrees",
-    "configuration_model",
-    "build_recycle_list",
+    "ABCDGraph",
 ]
 
 import abc
 import random
 from dataclasses import dataclass
-from typing import Optional
+from typing import Optional, Callable
 
 import igraph
 import networkx
 import numpy as np
 from numpy.typing import NDArray
 
+from abcd_graph.models import Model, configuration_model
 from abcd_graph.typing import (
     Communities,
     DegreeList,
@@ -173,19 +173,6 @@ def _get_v_max(deg_c: dict[int, int], community: list[int]) -> int:
     return community[0]
 
 
-def configuration_model(degree_sequence: DegreeSequence) -> NDArray[np.int64]:
-    labels = list(degree_sequence.keys())
-    counts = list(degree_sequence.values())
-
-    vertices = np.repeat(labels, counts)
-
-    np.random.shuffle(vertices)
-
-    edges = np.array(vertices).reshape(-1, 2)
-
-    return edges
-
-
 @dataclass
 class Edge:
     __slots__ = ["v1", "v2"]
@@ -265,9 +252,10 @@ class BackgroundGraph(AbstractCommunity):
 
 
 class ABCDGraph:
-    def __init__(self, deg_b, deg_c) -> None:
+    def __init__(self, deg_b, deg_c, model: Model = configuration_model) -> None:
         self.deg_b = deg_b
         self.deg_c = deg_c
+        self.model = model
 
         self.communities: list[Community] = []
         self.background_graph: Optional[BackgroundGraph] = None
@@ -277,7 +265,7 @@ class ABCDGraph:
     def build_communities(self, communities: Communities) -> None:
         print(len(communities.keys()))
         for community in communities.values():
-            community_edges = configuration_model({v: self.deg_c[v] for v in community})
+            community_edges = self.model({v: self.deg_c[v] for v in community})
             community_obj = Community([Edge(e[0], e[1]) for e in community_edges])
             community_obj.rewire_community(self.deg_b)
 
@@ -286,7 +274,7 @@ class ABCDGraph:
             self.communities.append(community_obj)
 
     def build_background_edges(self) -> None:
-        edges = [Edge(edge[0], edge[1]) for edge in configuration_model(self.deg_b)]
+        edges = [Edge(edge[0], edge[1]) for edge in self.model(self.deg_b)]
         self.background_graph = BackgroundGraph(edges)
         self._adj_matrix = self.background_graph._adj_matrix
 
