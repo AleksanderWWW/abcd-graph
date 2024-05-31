@@ -22,18 +22,12 @@ __all__ = [
     "generate_abcd",
 ]
 
-from typing import (
-    TYPE_CHECKING,
-    Any,
-)
-
-import igraph
+from typing import TYPE_CHECKING
 
 from abcd_graph.core import (
-    add_background_edges,
+    ABCDGraph,
     assign_degrees,
     build_communities,
-    build_community_edges,
     build_community_sizes,
     build_degrees,
     split_degrees,
@@ -52,7 +46,7 @@ def generate_abcd(
     params: "ABCDParams",
     n: int = 1000,
     logger: LoggerType = False,
-) -> tuple[list[list[Any]], list[list[Any]]]:
+) -> ABCDGraph:
     """
     < short description >
     :param params: ABCD input params (ABCDParams)
@@ -93,29 +87,22 @@ def generate_abcd(
 
     deg_c, deg_b = split_degrees(deg, communities, params.xi)
 
+    g = ABCDGraph(deg_b, deg_c)
+
     abcd_logger.info("Building community edges")
 
-    community_edges, deg_b = build_community_edges(deg_c, deg_b, communities)
-
-    print(community_edges)
+    g.build_communities(communities)
 
     abcd_logger.info("Building background edges")
 
-    edges = add_background_edges(community_edges, deg_b)
+    g.build_background_edges()
+
+    abcd_logger.info("Resolving collisions")
+
+    g.combine_edges()
+
+    g.rewire_graph()
 
     abcd_logger.info("ABCD graph generated")
 
-    for i, edge_i in edges.items():
-        for j, edge_j in edges.items():
-            if i == j:
-                continue
-
-            if edge_i[0] == edge_j[0] and edge_i[1] == edge_j[1]:
-                print(edge_i, edge_j)
-                print("Duplicate edge found")
-
-            if edge_i[1] == edge_j[0] and edge_i[0] == edge_j[1]:
-                print(edge_i, edge_j)
-                print("Duplicate edge found")
-
-    return edges
+    return g
