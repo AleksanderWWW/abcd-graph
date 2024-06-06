@@ -36,7 +36,6 @@ from typing import (
     Tuple,
 )
 
-import networkx  # type: ignore[import]
 import numpy as np
 from numpy.typing import NDArray
 
@@ -47,6 +46,7 @@ from abcd_graph.models import (
 from abcd_graph.utils import (
     powerlaw_distribution,
     rand_round,
+    require,
 )
 
 
@@ -332,7 +332,10 @@ class ABCDGraph:
 
     def to_igraph(self) -> Any: ...
 
+    @require("networkx")
     def to_networkx(self) -> Any:
+        import networkx  # type: ignore[import]
+
         return networkx.Graph(self.edges)
 
     def draw_communities(self) -> None: ...

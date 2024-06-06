@@ -18,13 +18,34 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-__all__ = ["rand_round", "powerlaw_distribution"]
+__all__ = ["rand_round", "powerlaw_distribution", "require"]
 
 import math
 import random
+from typing import Callable
 
 import numpy as np
 from numpy.typing import NDArray
+from typing_extensions import (
+    ParamSpec,
+    TypeVar,
+)
+
+P = ParamSpec("P")
+R = TypeVar("R")
+
+
+def require(package_name: str) -> Callable[[Callable[P, R]], Callable[P, R]]:
+    def deco(func: Callable[P, R]) -> Callable[P, R]:
+        def wrapper(*args: P.args, **kwargs: P.kwargs) -> R:
+            try:
+                return func(*args, **kwargs)
+            except ImportError:
+                raise ImportError(f"{package_name} is required to use this function")
+
+        return wrapper
+
+    return deco
 
 
 def rand_round(x: float) -> int:

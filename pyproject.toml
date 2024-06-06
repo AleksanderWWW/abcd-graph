@@ -30,6 +30,13 @@ dev = [
 networkx = ["networkx"]
 matplotlib = ["matplotlib"]
 
+all = [
+    "pre-commit",
+    "pytest",
+    "networkx",
+    "matplotlib",
+]
+
 
 [build-system]
 requires = ["poetry-core"]
