@@ -22,16 +22,12 @@ __all__ = [
     "generate_abcd",
 ]
 
-from typing import (
-    TYPE_CHECKING,
-    Any,
-)
+from typing import TYPE_CHECKING
 
 from abcd_graph.core import (
+    ABCDGraph,
     assign_degrees,
-    build_background_edges,
     build_communities,
-    build_community_edges,
     build_community_sizes,
     build_degrees,
     split_degrees,
@@ -50,7 +46,7 @@ def generate_abcd(
     params: "ABCDParams",
     n: int = 1000,
     logger: LoggerType = False,
-) -> tuple[list[list[Any]], list[list[Any]]]:
+) -> ABCDGraph:
     """
     < short description >
     :param params: ABCD input params (ABCDParams)
@@ -91,14 +87,22 @@ def generate_abcd(
 
     deg_c, deg_b = split_degrees(deg, communities, params.xi)
 
+    g = ABCDGraph(deg_b, deg_c)
+
     abcd_logger.info("Building community edges")
 
-    community_edges = build_community_edges(deg_c, communities)
+    g.build_communities(communities)
 
     abcd_logger.info("Building background edges")
 
-    background_edges = build_background_edges(deg_b)
+    g.build_background_edges()
+
+    abcd_logger.info("Resolving collisions")
+
+    g.combine_edges()
+
+    g.rewire_graph()
 
     abcd_logger.info("ABCD graph generated")
 
-    return community_edges, background_edges
+    return g
