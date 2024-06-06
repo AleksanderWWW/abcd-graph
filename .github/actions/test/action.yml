@@ -11,5 +11,5 @@ runs:
     steps:
       - name: Run tests
         working-directory: ${{ inputs.working_directory }}
-        run: pytest -v
+        run: poetry run pytest -v
         shell: bash
