@@ -8,15 +8,12 @@ from typing import Protocol
 import numpy as np
 from numpy.typing import NDArray
 
-from abcd_graph.typing import DegreeSequence
-
 
 class Model(Protocol):
-    def __call__(self, degree_sequence: DegreeSequence) -> NDArray:
-        ...
+    def __call__(self, degree_sequence: dict[int, int]) -> NDArray: ...
 
 
-def configuration_model(degree_sequence: DegreeSequence) -> NDArray[np.int64]:
+def configuration_model(degree_sequence: dict[int, int]) -> NDArray[np.int64]:
     labels = list(degree_sequence.keys())
     counts = list(degree_sequence.values())
 
@@ -27,3 +24,7 @@ def configuration_model(degree_sequence: DegreeSequence) -> NDArray[np.int64]:
     edges = np.array(vertices).reshape(-1, 2)
 
     return edges
+
+
+def chung_lu(degree_sequence: dict[int, int]) -> NDArray[np.int64]:
+    return np.array([])

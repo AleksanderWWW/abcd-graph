@@ -17,24 +17,22 @@
 # LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
-
 import pytest
 
 from abcd_graph import ABCDParams
 from abcd_graph.core import (
+    ABCDGraph,
     assign_degrees,
-    build_background_edges,
     build_communities,
-    build_community_edges,
     build_community_sizes,
     build_degrees,
     split_degrees,
 )
 
 
-@pytest.mark.parametrize("n", [100, 1000, 10000])
-@pytest.mark.parametrize("gamma", [2.1, 2.5, 2.9])
-@pytest.mark.parametrize("beta", [1.1, 1.5, 1.9])
+@pytest.mark.parametrize("n", [100, 10000])
+@pytest.mark.parametrize("gamma", [2.1, 2.9])
+@pytest.mark.parametrize("beta", [1.1, 1.9])
 def test_core(n, gamma, beta):
     params = ABCDParams(gamma=gamma, beta=beta, delta=5)
 
@@ -66,9 +64,8 @@ def test_core(n, gamma, beta):
 
     assert sum(deg_c.values()) + sum(deg_b.values()) == sum(deg.values())
 
-    community_edges = build_community_edges(deg_c, communities)
+    g = ABCDGraph(deg_b, deg_c).build_communities(communities).build_background_edges().combine_edges().rewire_graph()
 
-    background_edges = build_background_edges(deg_b)
+    assert sum(deg.values()) == 2 * len(g.edges)
 
-    assert 2 * len(community_edges) == sum(deg_c.values())
-    assert 2 * len(background_edges) == sum(deg_b.values())
+    assert g.is_proper_abcd

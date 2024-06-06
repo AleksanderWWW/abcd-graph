@@ -30,18 +30,19 @@ __all__ = [
 import abc
 import random
 from dataclasses import dataclass
-from typing import Optional, Callable
+from typing import (
+    Any,
+    Optional,
+    Tuple,
+)
 
-import igraph
-import networkx
+import networkx  # type: ignore[import]
 import numpy as np
 from numpy.typing import NDArray
 
-from abcd_graph.models import Model, configuration_model
-from abcd_graph.typing import (
-    Communities,
-    DegreeList,
-    DegreeSequence,
+from abcd_graph.models import (
+    Model,
+    configuration_model,
 )
 from abcd_graph.utils import (
     powerlaw_distribution,
@@ -49,7 +50,7 @@ from abcd_graph.utils import (
 )
 
 
-def build_degrees(n: int, gamma: float, delta: int, zeta: float) -> DegreeList:
+def build_degrees(n: int, gamma: float, delta: int, zeta: float) -> NDArray[np.int64]:
     max_degree = np.floor(n**zeta)
     avail = np.arange(delta, max_degree + 1)
 
@@ -91,7 +92,7 @@ def build_community_sizes(n: int, beta: float, s: int, tau: float) -> NDArray[np
     return np.sort(community_sizes)[::-1]
 
 
-def build_communities(community_sizes: NDArray[np.int64]) -> Communities:
+def build_communities(community_sizes: NDArray[np.int64]) -> dict[int, list[int]]:
     communities = {}
     v_last = -1
     for i, c in enumerate(community_sizes):
@@ -101,11 +102,11 @@ def build_communities(community_sizes: NDArray[np.int64]) -> Communities:
 
 
 def assign_degrees(
-    degrees: DegreeList,
-    communities: Communities,
+    degrees: NDArray[np.int64],
+    communities: dict[int, list[int]],
     community_sizes: NDArray[np.int64],
     xi: float,
-) -> DegreeSequence:
+) -> dict[int, Any]:
     phi = 1 - np.sum(community_sizes**2) / (len(degrees) ** 2)
     deg = {}
     avail = 0
@@ -147,7 +148,7 @@ def assign_degrees(
 # TODO: naming degree list vs degree sequence (as dict)
 def split_degrees(
     degrees: dict[int, int],
-    communities: Communities,
+    communities: dict[int, list[int]],
     xi: float,
 ) -> tuple[dict[int, int], dict[int, int]]:
     deg_c = {v: rand_round((1 - xi) * degrees[v]) for v in degrees}
@@ -183,7 +184,9 @@ class Edge:
     def __post_init__(self) -> None:
         self.to_ordered()
 
-    def __eq__(self, other: "Edge") -> bool:
+    def __eq__(self, other: Any) -> bool:
+        if not isinstance(other, Edge):
+            return NotImplemented
         return self.v1 == other.v1 and self.v2 == other.v2
 
     def __hash__(self) -> int:
@@ -200,8 +203,8 @@ class Edge:
 
 class AbstractCommunity(abc.ABC):
     def __init__(self, edges: list[Edge]) -> None:
-        self._adj_matrix = {}
-        self._bad_edges = []
+        self._adj_matrix: dict[Edge, int] = {}
+        self._bad_edges: list[Edge] = []
 
         for edge in edges:
             if edge.is_loop:
@@ -215,7 +218,7 @@ class AbstractCommunity(abc.ABC):
 
 
 class Community(AbstractCommunity):
-    def push_to_background(self, edges: list[Edge], deg_b: DegreeSequence) -> None:
+    def push_to_background(self, edges: list[Edge], deg_b: dict[int, int]) -> None:
         for edge in edges:
             if edge.is_loop:
                 for i in range(self._adj_matrix[edge]):
@@ -232,7 +235,7 @@ class Community(AbstractCommunity):
                     deg_b[edge.v1] += 1
                     deg_b[edge.v2] += 1
 
-    def rewire_community(self, deg_b: DegreeSequence) -> None:
+    def rewire_community(self, deg_b: dict[int, int]) -> None:
         while len(self._bad_edges) > 0:
             for edge in self._bad_edges:
                 other_edge = choose_other_edge(self._adj_matrix, edge)
@@ -251,19 +254,42 @@ class BackgroundGraph(AbstractCommunity):
         super().__init__(edges)
 
 
+class MalformedGraphException(Exception):
+    pass
+
+
 class ABCDGraph:
-    def __init__(self, deg_b, deg_c, model: Model = configuration_model) -> None:
+    def __init__(self, deg_b: dict[int, int], deg_c: dict[int, int], model: Optional[Model] = None) -> None:
         self.deg_b = deg_b
         self.deg_c = deg_c
-        self.model = model
+        self.model = model if model else configuration_model
 
         self.communities: list[Community] = []
         self.background_graph: Optional[BackgroundGraph] = None
 
         self._adj_matrix: dict[Edge, int] = {}
 
-    def build_communities(self, communities: Communities) -> None:
-        print(len(communities.keys()))
+    @property
+    def adj_matrix(self) -> NDArray[np.bool_]:
+        if not self.is_proper_abcd:
+            raise MalformedGraphException("Graph is not proper ABCD so the adjacency matrix is not accurate")
+
+        adj_matrix = np.zeros((len(self.deg_b), len(self.deg_b)), dtype=bool)
+        for edge in self._adj_matrix:
+            adj_matrix[edge.v1, edge.v2] = True
+            adj_matrix[edge.v2, edge.v1] = True
+
+        return adj_matrix
+
+    @property
+    def edges(self) -> list[Tuple[int, int]]:
+        return [(edge.v1, edge.v2) for edge in self._adj_matrix]
+
+    @property
+    def is_proper_abcd(self) -> bool:
+        return len(build_recycle_list(self._adj_matrix)) == 0
+
+    def build_communities(self, communities: dict[int, list[int]]) -> "ABCDGraph":
         for community in communities.values():
             community_edges = self.model({v: self.deg_c[v] for v in community})
             community_obj = Community([Edge(e[0], e[1]) for e in community_edges])
@@ -273,12 +299,16 @@ class ABCDGraph:
 
             self.communities.append(community_obj)
 
-    def build_background_edges(self) -> None:
+        return self
+
+    def build_background_edges(self) -> "ABCDGraph":
         edges = [Edge(edge[0], edge[1]) for edge in self.model(self.deg_b)]
         self.background_graph = BackgroundGraph(edges)
         self._adj_matrix = self.background_graph._adj_matrix
 
-    def combine_edges(self) -> None:
+        return self
+
+    def combine_edges(self) -> "ABCDGraph":
         for community in self.communities:
             for edge, count in community._adj_matrix.items():
                 if edge in self._adj_matrix:
@@ -286,7 +316,9 @@ class ABCDGraph:
                 else:
                     self._adj_matrix[edge] = count
 
-    def rewire_graph(self) -> None:
+        return self
+
+    def rewire_graph(self) -> "ABCDGraph":
         bad_edges = build_recycle_list(self._adj_matrix)
 
         while len(bad_edges) > 0:
@@ -296,14 +328,14 @@ class ABCDGraph:
 
             bad_edges = build_recycle_list(self._adj_matrix)
 
-    def to_igraph(self) -> igraph.Graph: ...
+        return self
 
-    def to_networkx(self) -> networkx.Graph:
-        result = []
-        for edge in self._adj_matrix:
-            result.append((edge.v1, edge.v2))
+    def to_igraph(self) -> Any: ...
 
-        return networkx.Graph(result)
+    def to_networkx(self) -> Any:
+        return networkx.Graph(self.edges)
+
+    def draw_communities(self) -> None: ...
 
 
 def build_recycle_list(adj_matrix: dict[Edge, int]) -> list[Edge]:

@@ -26,8 +26,7 @@ from typing import NewType
 
 import numpy as np
 from numpy.typing import NDArray
-from typing_extensions import TypeAlias
 
-Communities: TypeAlias = NewType("Communities", dict[int, list[int]])
-DegreeList: TypeAlias = NewType("DegreeList", NDArray[np.int64])
-DegreeSequence: TypeAlias = NewType("DegreeSequence", dict[int, int])
+Communities = NewType("Communities", dict[int, list[int]])
+DegreeList = NewType("DegreeList", NDArray[np.int64])
+DegreeSequence = NewType("DegreeSequence", dict[int, int])
