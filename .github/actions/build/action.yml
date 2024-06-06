@@ -15,12 +15,7 @@ runs:
           repository: AleksanderWWW/abcd-graph
           path: ${{ inputs.working_directory }}
 
-      - name: Install poetry
-        working-directory: ${{ inputs.working_directory }}
-        run: pip install --upgrade poetry
-        shell: bash
-
       - name: Install dependencies
         working-directory: ${{ inputs.working_directory }}
-        run: poetry install
+        run: pip install -e .[dev]
         shell: bash
