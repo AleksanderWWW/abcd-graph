@@ -8,10 +8,11 @@ readme = "README.md"
 packages = [{include = "abcd_graph", from = "src"}]
 
 [tool.poetry.dependencies]
-python = "^3.9"
+python = "^3.10"
 numpy = "^1.26.4"
 typing-extensions = "^4.10.0"
 pydantic = "^2.6.4"
+networkx = "^3.3"
 
 [tool.poetry.group.dev.dependencies]
 pytest = "^8.1.1"
