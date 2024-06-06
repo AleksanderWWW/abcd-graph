@@ -1,4 +1,4 @@
-# Copyright (c) 2024 Jordan Barrett
+# Copyright (c) 2024 Jordan Barrett & Aleksander Wojnarowicz
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
@@ -22,6 +22,7 @@ __all__ = ["rand_round", "powerlaw_distribution", "require"]
 
 import math
 import random
+from functools import wraps
 from typing import Callable
 
 import numpy as np
@@ -37,11 +38,15 @@ R = TypeVar("R")
 
 def require(package_name: str) -> Callable[[Callable[P, R]], Callable[P, R]]:
     def deco(func: Callable[P, R]) -> Callable[P, R]:
+        @wraps(func)
         def wrapper(*args: P.args, **kwargs: P.kwargs) -> R:
             try:
                 return func(*args, **kwargs)
-            except ImportError:
-                raise ImportError(f"{package_name} is required to use this function")
+            except ImportError as e:
+                raise ImportError(
+                    f"{package_name} is required to use '{func.__name__}'. Run "
+                    f"`pip install abcd_graph[{package_name}]` to install it."
+                ) from e
 
         return wrapper
 
