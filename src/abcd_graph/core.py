@@ -46,7 +46,6 @@ from abcd_graph.models import (
 from abcd_graph.utils import (
     powerlaw_distribution,
     rand_round,
-    require,
 )
 
 
@@ -203,50 +202,50 @@ class Edge:
 
 class AbstractCommunity(abc.ABC):
     def __init__(self, edges: list[Edge]) -> None:
-        self._adj_matrix: dict[Edge, int] = {}
-        self._bad_edges: list[Edge] = []
+        self.adj_matrix: dict[Edge, int] = {}
+        self.bad_edges: list[Edge] = []
 
         for edge in edges:
             if edge.is_loop:
-                self._bad_edges.append(edge)
+                self.bad_edges.append(edge)
 
-            if edge in self._adj_matrix:
-                self._bad_edges.append(edge)
-                self._adj_matrix[edge] += 1
+            if edge in self.adj_matrix:
+                self.bad_edges.append(edge)
+                self.adj_matrix[edge] += 1
             else:
-                self._adj_matrix[edge] = 1
+                self.adj_matrix[edge] = 1
 
 
 class Community(AbstractCommunity):
     def push_to_background(self, edges: list[Edge], deg_b: dict[int, int]) -> None:
         for edge in edges:
             if edge.is_loop:
-                for i in range(self._adj_matrix[edge]):
-                    self._adj_matrix[edge] -= 1
-                    if self._adj_matrix[edge] == 0:
-                        del self._adj_matrix[edge]
+                for i in range(self.adj_matrix[edge]):
+                    self.adj_matrix[edge] -= 1
+                    if self.adj_matrix[edge] == 0:
+                        del self.adj_matrix[edge]
 
                     deg_b[edge.v1] += 1
                     deg_b[edge.v2] += 1
             else:
-                for i in range(self._adj_matrix[edge] - 1):
-                    self._adj_matrix[edge] -= 1
+                for i in range(self.adj_matrix[edge] - 1):
+                    self.adj_matrix[edge] -= 1
 
                     deg_b[edge.v1] += 1
                     deg_b[edge.v2] += 1
 
     def rewire_community(self, deg_b: dict[int, int]) -> None:
-        while len(self._bad_edges) > 0:
-            for edge in self._bad_edges:
-                other_edge = choose_other_edge(self._adj_matrix, edge)
-                rewire_edge(self._adj_matrix, edge, other_edge)
+        while len(self.bad_edges) > 0:
+            for edge in self.bad_edges:
+                other_edge = choose_other_edge(self.adj_matrix, edge)
+                rewire_edge(self.adj_matrix, edge, other_edge)
 
-            new_bad_edges = build_recycle_list(self._adj_matrix)
-            if len(new_bad_edges) >= len(self._bad_edges):
+            new_bad_edges = build_recycle_list(self.adj_matrix)
+            if len(new_bad_edges) >= len(self.bad_edges):
                 self.push_to_background(new_bad_edges, deg_b)
                 return
             else:
-                self._bad_edges = new_bad_edges
+                self.bad_edges = new_bad_edges
 
 
 class BackgroundGraph(AbstractCommunity):
@@ -269,11 +268,9 @@ class ABCDGraph:
 
         self._adj_matrix: dict[Edge, int] = {}
 
-    @property
-    def adj_matrix(self) -> NDArray[np.bool_]:
+    def to_adj_matrix(self) -> NDArray[np.bool_]:
         if not self.is_proper_abcd:
             raise MalformedGraphException("Graph is not proper ABCD so the adjacency matrix is not accurate")
-
         adj_matrix = np.zeros((len(self.deg_b), len(self.deg_b)), dtype=bool)
         for edge in self._adj_matrix:
             adj_matrix[edge.v1, edge.v2] = True
@@ -295,7 +292,7 @@ class ABCDGraph:
             community_obj = Community([Edge(e[0], e[1]) for e in community_edges])
             community_obj.rewire_community(self.deg_b)
 
-            assert len(build_recycle_list(community_obj._adj_matrix)) == 0
+            assert len(build_recycle_list(community_obj.adj_matrix)) == 0
 
             self.communities.append(community_obj)
 
@@ -304,13 +301,13 @@ class ABCDGraph:
     def build_background_edges(self) -> "ABCDGraph":
         edges = [Edge(edge[0], edge[1]) for edge in self.model(self.deg_b)]
         self.background_graph = BackgroundGraph(edges)
-        self._adj_matrix = self.background_graph._adj_matrix
+        self._adj_matrix = self.background_graph.adj_matrix
 
         return self
 
     def combine_edges(self) -> "ABCDGraph":
         for community in self.communities:
-            for edge, count in community._adj_matrix.items():
+            for edge, count in community.adj_matrix.items():
                 if edge in self._adj_matrix:
                     self._adj_matrix[edge] += count
                 else:
@@ -329,17 +326,6 @@ class ABCDGraph:
             bad_edges = build_recycle_list(self._adj_matrix)
 
         return self
-
-    def to_igraph(self) -> Any: ...
-
-    @require("networkx")
-    def to_networkx(self) -> Any:
-        import networkx  # type: ignore[import]
-
-        return networkx.Graph(self.edges)
-
-    @require("matplotlib")
-    def draw_communities(self) -> None: ...
 
 
 def build_recycle_list(adj_matrix: dict[Edge, int]) -> list[Edge]:

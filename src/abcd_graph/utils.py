@@ -44,7 +44,7 @@ def require(package_name: str) -> Callable[[Callable[P, R]], Callable[P, R]]:
                 return func(*args, **kwargs)
             except ImportError as e:
                 raise ImportError(
-                    f"{package_name} is required to use '{func.__name__}'. Run "
+                    f"Package '{package_name}' is required to use '{func.__name__}'. Run "
                     f"`pip install abcd_graph[{package_name}]` to install it."
                 ) from e
 

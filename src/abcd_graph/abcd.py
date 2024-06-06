@@ -19,10 +19,17 @@
 # SOFTWARE.
 
 __all__ = [
-    "generate_abcd",
+    "Graph",
 ]
 
-from typing import TYPE_CHECKING
+from typing import (
+    TYPE_CHECKING,
+    Any,
+    Optional,
+)
+
+import numpy as np
+from numpy.typing import NDArray
 
 from abcd_graph.core import (
     ABCDGraph,
@@ -36,73 +43,97 @@ from abcd_graph.logger import (
     LoggerType,
     construct_logger,
 )
+from abcd_graph.utils import require
 
 if TYPE_CHECKING:
     from abcd_graph.abcd_params import ABCDParams
 
 
-def generate_abcd(
-    *,
-    params: "ABCDParams",
-    n: int = 1000,
-    logger: LoggerType = False,
-) -> ABCDGraph:
-    """
-    < short description >
-    :param params: ABCD input params (ABCDParams)
-    :param n: number of vertices (int) - defaults to 1000
-    :param logger: logger object (ABCDLogger | bool) - defaults to False
-    :return:
-    """
-    abcd_logger = construct_logger(logger)
+class Graph:
+    def __init__(self, params: "ABCDParams", n: int = 1000, logger: LoggerType = False) -> None:
+        self.params = params
+        self.n = n
+        self.logger = construct_logger(logger)
 
-    abcd_logger.info("Generating ABCD graph")
+        self._graph: Optional[ABCDGraph] = None
 
-    abcd_logger.info("Building degrees")
-    degrees = build_degrees(
-        n,
-        params.gamma,
-        params.delta,
-        params.zeta,
-    )
+    @property
+    def is_built(self) -> bool:
+        return self._graph is not None
 
-    abcd_logger.info("Building community sizes")
+    @property
+    def is_proper_abcd(self) -> bool:
+        if not self.is_built:
+            raise RuntimeError("Graph has not been built yet")
 
-    community_sizes = build_community_sizes(
-        n,
-        params.beta,
-        params.s,
-        params.tau,
-    )
+        assert self._graph is not None
+        return self._graph.is_proper_abcd
 
-    abcd_logger.info("Building communities")
+    @property
+    def adj_matrix(self) -> NDArray[np.bool_]:
+        if not self.is_built:
+            raise RuntimeError("Graph has not been built yet")
 
-    communities = build_communities(community_sizes)
+        assert self._graph is not None
+        return self._graph.to_adj_matrix()
 
-    abcd_logger.info("Assigning degrees")
+    @require("igraph")
+    def to_igraph(self) -> Any:
+        import igraph  # type: ignore[import]
 
-    deg = assign_degrees(degrees, communities, community_sizes, params.xi)
+        assert self._graph is not None
+        return igraph.Graph(self._graph.edges)
 
-    abcd_logger.info("Splitting degrees")
+    @require("networkx")
+    def to_networkx(self) -> Any:
+        import networkx  # type: ignore[import]
 
-    deg_c, deg_b = split_degrees(deg, communities, params.xi)
+        assert self._graph is not None
+        return networkx.Graph(self._graph.edges)
 
-    g = ABCDGraph(deg_b, deg_c)
+    @require("matplotlib")
+    def draw_communities(self) -> None: ...
 
-    abcd_logger.info("Building community edges")
+    def build(self) -> "Graph":
+        degrees = build_degrees(
+            self.n,
+            self.params.gamma,
+            self.params.delta,
+            self.params.zeta,
+        )
 
-    g.build_communities(communities)
+        self.logger.info("Building community sizes")
 
-    abcd_logger.info("Building background edges")
+        community_sizes = build_community_sizes(
+            self.n,
+            self.params.beta,
+            self.params.s,
+            self.params.tau,
+        )
 
-    g.build_background_edges()
+        self.logger.info("Building communities")
 
-    abcd_logger.info("Resolving collisions")
+        communities = build_communities(community_sizes)
 
-    g.combine_edges()
+        self.logger.info("Assigning degrees")
 
-    g.rewire_graph()
+        deg = assign_degrees(degrees, communities, community_sizes, self.params.xi)
 
-    abcd_logger.info("ABCD graph generated")
+        self.logger.info("Splitting degrees")
 
-    return g
+        deg_c, deg_b = split_degrees(deg, communities, self.params.xi)
+
+        self._graph = ABCDGraph(deg_b, deg_c)
+
+        self.logger.info("Building community edges")
+        self._graph.build_communities(communities)
+
+        self.logger.info("Building background edges")
+        self._graph.build_background_edges()
+
+        self.logger.info("Resolving collisions")
+        self._graph.combine_edges()
+
+        self._graph.rewire_graph()
+
+        return self
