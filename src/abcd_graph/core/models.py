@@ -62,8 +62,8 @@ class Edge:
 
 
 class AbstractGraph(abc.ABC):
-    @abc.abstractmethod
     @property
+    @abc.abstractmethod
     def adj_dict(self) -> dict[Edge, int]: ...
 
 
