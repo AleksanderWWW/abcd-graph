@@ -22,36 +22,15 @@ import os
 from unittest.mock import patch
 
 from abcd_graph.logger import (
-    ABCDLogger,
     NoOpLogger,
     StdOutLogger,
     construct_logger,
 )
 
 
-class MockLogger(ABCDLogger):
-    def info(self, message: str) -> None:
-        pass
-
-    def debug(self, message: str) -> None:
-        pass
-
-    def warning(self, message: str) -> None:
-        pass
-
-    def error(self, message: str) -> None:
-        pass
-
-    def critical(self, message: str) -> None:
-        pass
-
-
 def test_construct_logger():
-    mock_logger = MockLogger()
-
     assert isinstance(construct_logger(False), NoOpLogger)
     assert isinstance(construct_logger(True), StdOutLogger)
-    assert construct_logger(mock_logger) == mock_logger
 
 
 def test_default_logging_level(caplog):

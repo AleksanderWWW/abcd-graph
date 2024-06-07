@@ -44,10 +44,7 @@ from abcd_graph.core.build import (
 )
 from abcd_graph.core.exceptions import MalformedGraphException
 from abcd_graph.core.models import ABCDGraph
-from abcd_graph.logger import (
-    LoggerType,
-    construct_logger,
-)
+from abcd_graph.logger import construct_logger
 from abcd_graph.utils import require
 
 if TYPE_CHECKING:
@@ -60,7 +57,7 @@ class Graph:
         params: "ABCDParams",
         n: int = 1000,
         model: Optional[Model] = None,
-        logger: LoggerType = False,
+        logger: bool = False,
     ) -> None:
         self.params = params
         self.n = n

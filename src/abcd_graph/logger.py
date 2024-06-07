@@ -19,8 +19,6 @@
 # SOFTWARE.
 
 __all__ = [
-    "ABCDLogger",
-    "LoggerType",
     "construct_logger",
 ]
 
@@ -105,8 +103,5 @@ class StdOutLogger(ABCDLogger):
 LoggerType: TypeAlias = Union[ABCDLogger, bool]
 
 
-def construct_logger(logger: LoggerType) -> ABCDLogger:
-    if isinstance(logger, bool):
-        return StdOutLogger() if logger else NoOpLogger()
-
-    return logger
+def construct_logger(logger: bool) -> ABCDLogger:
+    return StdOutLogger() if logger else NoOpLogger()
