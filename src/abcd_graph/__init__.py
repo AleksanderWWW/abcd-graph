@@ -24,4 +24,4 @@ __all__ = [
 ]
 
 from abcd_graph.abcd import Graph
-from abcd_graph.abcd_params import ABCDParams
+from abcd_graph.api.abcd_params import ABCDParams

@@ -31,14 +31,19 @@ from typing import (
 import numpy as np
 from numpy.typing import NDArray
 
-from abcd_graph.core import (
-    ABCDGraph,
+from abcd_graph.api.abcd_models import (
+    Model,
+    configuration_model,
+)
+from abcd_graph.core.build import (
     assign_degrees,
     build_communities,
     build_community_sizes,
     build_degrees,
     split_degrees,
 )
+from abcd_graph.core.exceptions import MalformedGraphException
+from abcd_graph.core.models import ABCDGraph
 from abcd_graph.logger import (
     LoggerType,
     construct_logger,
@@ -46,13 +51,20 @@ from abcd_graph.logger import (
 from abcd_graph.utils import require
 
 if TYPE_CHECKING:
-    from abcd_graph.abcd_params import ABCDParams
+    from abcd_graph.api.abcd_params import ABCDParams
 
 
 class Graph:
-    def __init__(self, params: "ABCDParams", n: int = 1000, logger: LoggerType = False) -> None:
+    def __init__(
+        self,
+        params: "ABCDParams",
+        n: int = 1000,
+        model: Optional[Model] = None,
+        logger: LoggerType = False,
+    ) -> None:
         self.params = params
         self.n = n
+        self.model = model if model else configuration_model
         self.logger = construct_logger(logger)
 
         self._graph: Optional[ABCDGraph] = None
@@ -73,6 +85,9 @@ class Graph:
     def adj_matrix(self) -> NDArray[np.bool_]:
         if not self.is_built:
             raise RuntimeError("Graph has not been built yet")
+
+        if not self.is_proper_abcd:
+            raise MalformedGraphException("Graph is not proper ABCD so the adjacency matrix is not accurate")
 
         assert self._graph is not None
         return self._graph.to_adj_matrix()
@@ -123,7 +138,7 @@ class Graph:
 
         deg_c, deg_b = split_degrees(deg, communities, self.params.xi)
 
-        self._graph = ABCDGraph(deg_b, deg_c)
+        self._graph = ABCDGraph(deg_b, deg_c, model=self.model)
 
         self.logger.info("Building community edges")
         self._graph.build_communities(communities)

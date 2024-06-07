@@ -20,20 +20,27 @@
 import pytest
 
 from abcd_graph import ABCDParams
-from abcd_graph.core import (
-    ABCDGraph,
+from abcd_graph.api.abcd_models import configuration_model  # , chung_lu
+from abcd_graph.core.build import (
     assign_degrees,
     build_communities,
     build_community_sizes,
     build_degrees,
     split_degrees,
 )
+from abcd_graph.core.models import ABCDGraph
 
 
 @pytest.mark.parametrize("n", [100, 10000])
 @pytest.mark.parametrize("gamma", [2.1, 2.9])
 @pytest.mark.parametrize("beta", [1.1, 1.9])
-def test_core(n, gamma, beta):
+@pytest.mark.parametrize(
+    "model",
+    [
+        configuration_model,
+    ],
+)  # chung_lu])
+def test_core(n, gamma, beta, model):
     params = ABCDParams(gamma=gamma, beta=beta, delta=5)
 
     degrees = build_degrees(
@@ -64,7 +71,13 @@ def test_core(n, gamma, beta):
 
     assert sum(deg_c.values()) + sum(deg_b.values()) == sum(deg.values())
 
-    g = ABCDGraph(deg_b, deg_c).build_communities(communities).build_background_edges().combine_edges().rewire_graph()
+    g = (
+        ABCDGraph(deg_b, deg_c, model)
+        .build_communities(communities)
+        .build_background_edges()
+        .combine_edges()
+        .rewire_graph()
+    )
 
     assert sum(deg.values()) == 2 * len(g.edges)
 

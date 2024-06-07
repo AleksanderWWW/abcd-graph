@@ -18,15 +18,10 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-__all__ = ["rand_round", "powerlaw_distribution", "require"]
 
-import math
-import random
 from functools import wraps
 from typing import Callable
 
-import numpy as np
-from numpy.typing import NDArray
 from typing_extensions import (
     ParamSpec,
     TypeVar,
@@ -51,13 +46,3 @@ def require(package_name: str) -> Callable[[Callable[P, R]], Callable[P, R]]:
         return wrapper
 
     return deco
-
-
-def rand_round(x: float) -> int:
-    p = x - math.floor(x)
-    return int(math.floor(x) + 1) if random.uniform(0, 1) <= p else int(math.floor(x))
-
-
-def powerlaw_distribution(choices: NDArray[np.int64], intensity: float) -> NDArray[np.float64]:
-    dist: NDArray[np.float64] = (choices ** (-intensity)) / np.sum(choices ** (-intensity))
-    return dist

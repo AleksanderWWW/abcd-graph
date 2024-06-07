@@ -20,7 +20,7 @@
 
 import pytest
 
-from abcd_graph.abcd_params import ABCDParams
+from abcd_graph import ABCDParams
 
 
 def test_abcd_params_invalid_gamma():
