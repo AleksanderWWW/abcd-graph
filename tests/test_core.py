@@ -20,7 +20,7 @@
 import pytest
 
 from abcd_graph import ABCDParams
-from abcd_graph.api.abcd_models import configuration_model  # , chung_lu
+from abcd_graph.api.abcd_models import configuration_model
 from abcd_graph.core.build import (
     assign_degrees,
     build_communities,
@@ -39,7 +39,7 @@ from abcd_graph.core.models import ABCDGraph
     [
         configuration_model,
     ],
-)  # chung_lu])
+)
 def test_core(n, gamma, beta, model):
     params = ABCDParams(gamma=gamma, beta=beta, delta=5)
 

@@ -33,6 +33,9 @@ from numpy.typing import NDArray
 class Model(Protocol):
     def __call__(self, degree_sequence: dict[int, int]) -> NDArray: ...
 
+    @property
+    def __name__(self) -> str: ...
+
 
 def configuration_model(degree_sequence: dict[int, int]) -> NDArray[np.int64]:
     labels = list(degree_sequence.keys())

@@ -56,18 +56,34 @@ class Graph:
         self,
         params: "ABCDParams",
         n: int = 1000,
-        model: Optional[Model] = None,
         logger: bool = False,
     ) -> None:
         self.params = params
         self.n = n
-        self.model = model if model else configuration_model
         self.logger = construct_logger(logger)
 
         self._graph: Optional[ABCDGraph] = None
 
+        self._model_used: Optional[Model] = None
+
     def reset(self) -> None:
         self._graph = None
+        self._model_used = None
+
+    @property
+    def summary(self) -> dict[str, Any]:
+        if not self.is_built:
+            raise RuntimeError("Graph has not been built yet")
+
+        assert self._graph is not None
+        assert self._model_used is not None
+        return {
+            "number_of_nodes": self.n,
+            "number_of_edges": self.num_edges,
+            "number_of_communities": self.num_communities,
+            "model": self._model_used.__name__,
+            "is_proper_abcd": self.is_proper_abcd,
+        }
 
     @property
     def num_communities(self) -> int:
@@ -76,6 +92,14 @@ class Graph:
 
         assert self._graph is not None
         return self._graph.num_communities
+
+    @property
+    def num_edges(self) -> int:
+        if not self.is_built:
+            raise RuntimeError("Graph has not been built yet")
+
+        assert self._graph is not None
+        return len(self._graph.edges)
 
     @property
     def is_built(self) -> bool:
@@ -125,6 +149,8 @@ class Graph:
 
     def build(self, model: Optional[Model] = None) -> "Graph":
         model = model if model else configuration_model
+
+        self._model_used = model
 
         degrees = build_degrees(
             self.n,
