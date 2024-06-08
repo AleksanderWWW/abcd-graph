@@ -66,6 +66,9 @@ class Graph:
 
         self._graph: Optional[ABCDGraph] = None
 
+    def reset(self) -> None:
+        self._graph = None
+
     @property
     def num_communities(self) -> int:
         if not self.is_built:
