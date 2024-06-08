@@ -93,12 +93,18 @@ class Graph:
     def to_igraph(self) -> Any:
         import igraph  # type: ignore[import]
 
+        if not self.is_built:
+            raise RuntimeError("Graph has not been built yet")
+
         assert self._graph is not None
         return igraph.Graph(self._graph.edges)
 
     @require("networkx")
     def to_networkx(self) -> Any:
         import networkx  # type: ignore[import]
+
+        if not self.is_built:
+            raise RuntimeError("Graph has not been built yet")
 
         assert self._graph is not None
         return networkx.Graph(self._graph.edges)
