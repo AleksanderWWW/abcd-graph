@@ -61,9 +61,9 @@ params = ABCDParams()
 graph = Graph(params).build().adj_matrix
 ```
 
-[!IMPORTANT]
-If the `build()` method is not run before calling any of the export methods, a `RuntimeError` will be raised.
+> [!IMPORTANT]
+> If the `build()` method is not run before calling any of the export methods, a `RuntimeError` will be raised.
 
-[!NOTE]
-The `numpy` array is of type `numpy.bool_`. If the graph was not properly generated (loops or multi-edges),
-a `MalformedGraphError` will be raised.
+> [!NOTE]
+> The `numpy` array is of type `numpy.bool_`. If the graph was not properly generated (loops or multi-edges),
+> a `MalformedGraphError` will be raised.
