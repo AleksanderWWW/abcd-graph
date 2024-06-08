@@ -18,7 +18,6 @@ graph = Graph(params).build()
 
 - `params`: An instance of `ABCDParams` class.
 - `n`: Number of nodes in the graph.
-- `model` A callable to build graph edges from a degree sequence. Default is a built-in implementation of the configuration model.
 - `logger` A boolean to enable or disable logging to the console. Default is `False` - no logs are shown.
 
 

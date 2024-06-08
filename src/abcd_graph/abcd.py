@@ -67,6 +67,14 @@ class Graph:
         self._graph: Optional[ABCDGraph] = None
 
     @property
+    def num_communities(self) -> int:
+        if not self.is_built:
+            raise RuntimeError("Graph has not been built yet")
+
+        assert self._graph is not None
+        return self._graph.num_communities
+
+    @property
     def is_built(self) -> bool:
         return self._graph is not None
 
@@ -112,7 +120,9 @@ class Graph:
     @require("matplotlib")
     def draw_communities(self) -> None: ...
 
-    def build(self) -> "Graph":
+    def build(self, model: Optional[Model] = None) -> "Graph":
+        model = model if model else configuration_model
+
         degrees = build_degrees(
             self.n,
             self.params.gamma,
@@ -141,13 +151,13 @@ class Graph:
 
         deg_c, deg_b = split_degrees(deg, communities, self.params.xi)
 
-        self._graph = ABCDGraph(deg_b, deg_c, model=self.model)
+        self._graph = ABCDGraph(deg_b, deg_c)
 
         self.logger.info("Building community edges")
-        self._graph.build_communities(communities)
+        self._graph.build_communities(communities, model)
 
         self.logger.info("Building background edges")
-        self._graph.build_background_edges()
+        self._graph.build_background_edges(model)
 
         self.logger.info("Resolving collisions")
         self._graph.combine_edges()

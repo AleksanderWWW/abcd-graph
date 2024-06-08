@@ -125,10 +125,9 @@ class BackgroundGraph(AbstractCommunity):
 
 
 class ABCDGraph(AbstractGraph):
-    def __init__(self, deg_b: dict[int, int], deg_c: dict[int, int], model: Model) -> None:
+    def __init__(self, deg_b: dict[int, int], deg_c: dict[int, int]) -> None:
         self.deg_b = deg_b
         self.deg_c = deg_c
-        self.model = model
 
         self.communities: list[Community] = []
         self.background_graph: Optional[BackgroundGraph] = None
@@ -155,9 +154,13 @@ class ABCDGraph(AbstractGraph):
     def is_proper_abcd(self) -> bool:
         return len(build_recycle_list(self._adj_dict)) == 0
 
-    def build_communities(self, communities: dict[int, list[int]]) -> "ABCDGraph":
+    @property
+    def num_communities(self) -> int:
+        return len(self.communities)
+
+    def build_communities(self, communities: dict[int, list[int]], model: Model) -> "ABCDGraph":
         for community in communities.values():
-            community_edges = self.model({v: self.deg_c[v] for v in community})
+            community_edges = model({v: self.deg_c[v] for v in community})
             community_obj = Community([Edge(e[0], e[1]) for e in community_edges])
             community_obj.rewire_community(self.deg_b)
 
@@ -167,8 +170,8 @@ class ABCDGraph(AbstractGraph):
 
         return self
 
-    def build_background_edges(self) -> "ABCDGraph":
-        edges = [Edge(edge[0], edge[1]) for edge in self.model(self.deg_b)]
+    def build_background_edges(self, model: Model) -> "ABCDGraph":
+        edges = [Edge(edge[0], edge[1]) for edge in model(self.deg_b)]
         self.background_graph = BackgroundGraph(edges)
         self._adj_dict = self.background_graph.adj_dict
 
