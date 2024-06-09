@@ -29,9 +29,15 @@ from abcd_graph.core.utils import (
     powerlaw_distribution,
     rand_round,
 )
+from abcd_graph.typing import (
+    Communities,
+    CommunitySizes,
+    Degrees,
+    DegreeSequence,
+)
 
 
-def build_degrees(n: int, gamma: float, delta: int, zeta: float) -> NDArray[np.int64]:
+def build_degrees(n: int, gamma: float, delta: int, zeta: float) -> Degrees:
     max_degree = np.floor(n**zeta)
     avail = np.arange(delta, max_degree + 1)
 
@@ -45,7 +51,7 @@ def build_degrees(n: int, gamma: float, delta: int, zeta: float) -> NDArray[np.i
     return degrees
 
 
-def build_community_sizes(n: int, beta: float, s: int, tau: float) -> NDArray[np.int64]:
+def build_community_sizes(n: int, beta: float, s: int, tau: float) -> CommunitySizes:
     max_community_size = int(np.floor(n**tau))
     max_community_number = int(np.ceil(n / s))
     avail = np.arange(s, max_community_size + 1)
@@ -73,7 +79,7 @@ def build_community_sizes(n: int, beta: float, s: int, tau: float) -> NDArray[np
     return np.sort(community_sizes)[::-1]
 
 
-def build_communities(community_sizes: NDArray[np.int64]) -> dict[int, list[int]]:
+def build_communities(community_sizes: CommunitySizes) -> Communities:
     communities = {}
     v_last = -1
     for i, c in enumerate(community_sizes):
@@ -83,9 +89,9 @@ def build_communities(community_sizes: NDArray[np.int64]) -> dict[int, list[int]
 
 
 def assign_degrees(
-    degrees: NDArray[np.int64],
-    communities: dict[int, list[int]],
-    community_sizes: NDArray[np.int64],
+    degrees: Degrees,
+    communities: Communities,
+    community_sizes: CommunitySizes,
     xi: float,
 ) -> dict[int, Any]:
     phi = 1 - np.sum(community_sizes**2) / (len(degrees) ** 2)
@@ -128,10 +134,10 @@ def assign_degrees(
 
 # TODO: naming degree list vs degree sequence (as dict)
 def split_degrees(
-    degrees: dict[int, int],
-    communities: dict[int, list[int]],
+    degrees: DegreeSequence,
+    communities: Communities,
     xi: float,
-) -> tuple[dict[int, int], dict[int, int]]:
+) -> tuple[DegreeSequence, DegreeSequence]:
     deg_c = {v: rand_round((1 - xi) * degrees[v]) for v in degrees}
     for community in communities.values():
         if sum(deg_c[v] for v in community) % 2 == 0:
