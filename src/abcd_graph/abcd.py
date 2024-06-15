@@ -48,6 +48,9 @@ from abcd_graph.logger import construct_logger
 from abcd_graph.utils import require
 
 if TYPE_CHECKING:
+    from igraph import Graph as IGraph  # type: ignore[import]
+    from networkx import Graph as NetworkXGraph  # type: ignore[import]
+
     from abcd_graph.api.abcd_params import ABCDParams
 
 
@@ -125,8 +128,8 @@ class Graph:
         return self._graph.to_adj_matrix()
 
     @require("igraph")
-    def to_igraph(self) -> Any:
-        import igraph  # type: ignore[import]
+    def to_igraph(self) -> "IGraph":  # type: ignore[no-any-unimported]
+        import igraph
 
         if not self.is_built:
             raise RuntimeError("Graph has not been built yet")
@@ -135,17 +138,50 @@ class Graph:
         return igraph.Graph(self._graph.edges)
 
     @require("networkx")
-    def to_networkx(self) -> Any:
-        import networkx  # type: ignore[import]
+    def to_networkx(self) -> "NetworkXGraph":  # type: ignore[no-any-unimported]
+        import networkx as nx
 
         if not self.is_built:
             raise RuntimeError("Graph has not been built yet")
 
         assert self._graph is not None
-        return networkx.Graph(self._graph.edges)
 
+        graph = nx.Graph()
+
+        graph.add_nodes_from(range(self.n))
+        graph.add_edges_from(self._graph.edges)
+        return graph
+
+    @require("networkx")
     @require("matplotlib")
-    def draw_communities(self) -> None: ...
+    def draw_communities(self) -> None:
+        if self._model_used is not None and self._model_used.__name__ != "configuration_model":
+            raise NotImplementedError("Drawing communities is only supported for the configuration model")
+
+        if not self.is_built:
+            raise RuntimeError("Graph has not been built yet")
+
+        assert self._graph is not None
+
+        if not self.is_proper_abcd:
+            raise MalformedGraphException("Graph is not proper ABCD so the adjacency matrix is not accurate")
+
+        import matplotlib.colors as colors  # type: ignore[import]
+        import networkx as nx
+        from matplotlib import pyplot as plt
+
+        colors_list = list(colors.BASE_COLORS.values())[: self.num_communities]
+
+        color_map = []
+
+        nx_g = self.to_networkx()
+
+        for i, community in enumerate(self._graph.communities):
+            color = colors_list[i]
+            color_map.extend([color] * len(community.vertices))
+
+        nx.draw(nx_g, node_color=color_map, with_labels=True, font_weight="bold")
+        plt.show()
 
     def build(self, model: Optional[Model] = None) -> "Graph":
         model = model if model else configuration_model

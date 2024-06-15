@@ -4,7 +4,10 @@ from abcd_graph import (
     ABCDParams,
     Graph,
 )
-from abcd_graph.api.abcd_models import configuration_model
+from abcd_graph.api.abcd_models import (
+    chung_lu,
+    configuration_model,
+)
 
 
 @pytest.mark.parametrize("n", [100, 10000])
@@ -14,6 +17,7 @@ from abcd_graph.api.abcd_models import configuration_model
     "model",
     [
         configuration_model,
+        chung_lu,
     ],
 )
 def test_graph_creation(n, gamma, beta, model):

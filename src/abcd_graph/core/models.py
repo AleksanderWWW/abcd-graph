@@ -32,6 +32,10 @@ import numpy as np
 from numpy.typing import NDArray
 
 from abcd_graph.api.abcd_models import Model
+from abcd_graph.typing import (
+    Communities,
+    DegreeSequence,
+)
 
 
 @dataclass
@@ -82,13 +86,19 @@ class AbstractCommunity(AbstractGraph):
             else:
                 self._adj_dict[edge] = 1
 
+        self._edges = edges
+
+    @property
+    def vertices(self) -> list[int]:
+        return list({edge.v1 for edge in self._edges} | {edge.v2 for edge in self._edges})
+
     @property
     def adj_dict(self) -> dict[Edge, int]:
         return self._adj_dict
 
 
 class Community(AbstractCommunity):
-    def push_to_background(self, edges: list[Edge], deg_b: dict[int, int]) -> None:
+    def push_to_background(self, edges: list[Edge], deg_b: DegreeSequence) -> None:
         for edge in edges:
             if edge.is_loop:
                 for i in range(self.adj_dict[edge]):
@@ -105,7 +115,7 @@ class Community(AbstractCommunity):
                     deg_b[edge.v1] += 1
                     deg_b[edge.v2] += 1
 
-    def rewire_community(self, deg_b: dict[int, int]) -> None:
+    def rewire_community(self, deg_b: DegreeSequence) -> None:
         while len(self._bad_edges) > 0:
             for edge in self._bad_edges:
                 other_edge = choose_other_edge(self.adj_dict, edge)
@@ -158,7 +168,7 @@ class ABCDGraph(AbstractGraph):
     def num_communities(self) -> int:
         return len(self.communities)
 
-    def build_communities(self, communities: dict[int, list[int]], model: Model) -> "ABCDGraph":
+    def build_communities(self, communities: Communities, model: Model) -> "ABCDGraph":
         for community in communities.values():
             community_edges = model({v: self.deg_c[v] for v in community})
             community_obj = Community([Edge(e[0], e[1]) for e in community_edges])

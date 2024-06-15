@@ -29,15 +29,20 @@ from typing import Protocol
 import numpy as np
 from numpy.typing import NDArray
 
+from abcd_graph.typing import (
+    Degrees,
+    DegreeSequence,
+)
+
 
 class Model(Protocol):
-    def __call__(self, degree_sequence: dict[int, int]) -> NDArray: ...
+    def __call__(self, degree_sequence: DegreeSequence) -> Degrees: ...
 
     @property
     def __name__(self) -> str: ...
 
 
-def configuration_model(degree_sequence: dict[int, int]) -> NDArray[np.int64]:
+def configuration_model(degree_sequence: DegreeSequence) -> Degrees:
     labels = list(degree_sequence.keys())
     counts = list(degree_sequence.values())
 
@@ -58,35 +63,9 @@ def normalize(degrees: list[int]) -> NDArray[np.float64]:
     return result
 
 
-def chung_lu(degree_sequence: dict[int, int]) -> NDArray[np.int64]:
+def chung_lu(degree_sequence: DegreeSequence) -> Degrees:
     """Generate a Chung-Lu random graph based on a given degree sequence."""
     nodes = list(degree_sequence.keys())
     degrees = list(degree_sequence.values())
 
-    # Normalize degrees to get the probabilities
-    probabilities = normalize(degrees)
-
-    # Total number of stubs (degree volume)
-    volume = sum(degrees)
-
-    # Sample nodes according to their degree distribution
-    samples = np.random.choice(a=nodes, size=volume, p=probabilities)
-
-    # Initialize adjacency matrix
-    num_nodes = len(nodes)
-    edges = np.zeros((num_nodes, num_nodes), dtype=np.int64)
-
-    # Form edges
-    for i in range(0, volume, 2):
-        u = samples[i]
-        v = samples[i + 1]
-        edges[u, v] += 1
-        edges[v, u] += 1
-
-    # Remove self-loops
-    np.fill_diagonal(edges, 0)
-
-    # Convert to simple graph (0 or 1 entries)
-    edges = np.minimum(edges, 1)
-
-    return edges
+    return np.random.choice(a=nodes, size=int(sum(degrees)), p=normalize(degrees)).reshape(-1, 2)
