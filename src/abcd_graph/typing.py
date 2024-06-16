@@ -1,4 +1,4 @@
-# Copyright (c) 2024 Jordan Barrett
+# Copyright (c) 2024 Jordan Barrett & Aleksander Wojnarowicz
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
@@ -19,14 +19,14 @@
 # SOFTWARE.
 __all__ = [
     "Communities",
-    "DegreeList",
+    "Degrees",
     "DegreeSequence",
 ]
-from typing import NewType
-
 import numpy as np
 from numpy.typing import NDArray
+from typing_extensions import TypeAlias
 
-Communities = NewType("Communities", dict[int, list[int]])
-DegreeList = NewType("DegreeList", NDArray[np.int64])
-DegreeSequence = NewType("DegreeSequence", dict[int, int])
+Communities: TypeAlias = dict[int, list[int]]
+CommunitySizes: TypeAlias = NDArray[np.int64]
+Degrees: TypeAlias = NDArray[np.int64]
+DegreeSequence: TypeAlias = dict[int, int]

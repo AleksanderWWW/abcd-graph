@@ -18,41 +18,38 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-import pytest
+__all__ = ["rand_round", "powerlaw_distribution", "get_community_color_map"]
 
-from abcd_graph import ABCDParams
+import math
+import random
+from typing import TYPE_CHECKING
 
+import numpy as np
+from numpy.typing import NDArray
 
-def test_abcd_params_invalid_gamma():
-    with pytest.raises(ValueError):
-        ABCDParams(gamma=1.5, delta=1, zeta=0.5, beta=1.5, tau=0.5, xi=0.5, s=1)
-
-
-def test_abcd_params_invalid_zeta():
-    with pytest.raises(ValueError):
-        ABCDParams(gamma=2.5, delta=1, zeta=1.5, beta=1.5, tau=0.5, xi=0.5, s=1)
+if TYPE_CHECKING:
+    from abcd_graph.core.models import Community
 
 
-def test_abcd_params_invalid_beta():
-    with pytest.raises(ValueError):
-        ABCDParams(gamma=2.5, delta=1, zeta=0.5, beta=0.5, tau=0.5, xi=0.5, s=1)
+def rand_round(x: float) -> int:
+    p = x - math.floor(x)
+    return int(math.floor(x) + 1) if random.uniform(0, 1) <= p else int(math.floor(x))
 
 
-def test_abcd_params_invalid_tau():
-    with pytest.raises(ValueError):
-        ABCDParams(gamma=2.5, delta=1, zeta=0.5, beta=1.5, tau=1.5, xi=0.5, s=1)
+def powerlaw_distribution(choices: NDArray[np.int64], intensity: float) -> NDArray[np.float64]:
+    dist: NDArray[np.float64] = (choices ** (-intensity)) / np.sum(choices ** (-intensity))
+    return dist
 
 
-def test_abcd_params_invalid_xi():
-    with pytest.raises(ValueError):
-        ABCDParams(gamma=2.5, delta=1, zeta=0.5, beta=1.5, tau=0.5, xi=1.5, s=1)
+def get_community_color_map(communities: list["Community"]) -> list[str]:
+    import matplotlib.colors as colors  # type: ignore[import]
 
+    colors_list = list(colors.BASE_COLORS.values())[: len(communities)]
 
-def test_abcd_params_proper_init():
-    ABCDParams(gamma=2.5, delta=1, zeta=0.5, beta=1.5, tau=0.5, xi=0.5, s=1)
-    assert True
+    color_map = []
 
+    for i, community in enumerate(communities):
+        color = colors_list[i]
+        color_map.extend([color] * len(community.vertices))
 
-def test_abcd_params_default_init():
-    ABCDParams()
-    assert True
+    return color_map

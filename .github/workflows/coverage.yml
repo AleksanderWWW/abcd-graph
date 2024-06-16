@@ -1,0 +1,23 @@
+name: coverage
+on: [push]
+jobs:
+    test:
+      runs-on: ubuntu-latest
+      steps:
+        - uses: actions/checkout@v2
+
+        - uses: actions/setup-python@v2
+          with:
+            python-version: "3.10"
+
+        - name: Build
+          uses: ./.github/actions/build
+
+        - name: Test
+          uses: ./.github/actions/test
+
+        - name: Pytest coverage comment
+          uses: MishaKav/pytest-coverage-comment@main
+          with:
+            pytest-coverage-path: ./pytest-coverage.txt
+            junitxml-path: ./pytest.xml

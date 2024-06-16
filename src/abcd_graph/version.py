@@ -17,42 +17,8 @@
 # LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
+__all__ = ["__version__"]
 
-import pytest
+from importlib.metadata import version as version_parser
 
-from abcd_graph import ABCDParams
-
-
-def test_abcd_params_invalid_gamma():
-    with pytest.raises(ValueError):
-        ABCDParams(gamma=1.5, delta=1, zeta=0.5, beta=1.5, tau=0.5, xi=0.5, s=1)
-
-
-def test_abcd_params_invalid_zeta():
-    with pytest.raises(ValueError):
-        ABCDParams(gamma=2.5, delta=1, zeta=1.5, beta=1.5, tau=0.5, xi=0.5, s=1)
-
-
-def test_abcd_params_invalid_beta():
-    with pytest.raises(ValueError):
-        ABCDParams(gamma=2.5, delta=1, zeta=0.5, beta=0.5, tau=0.5, xi=0.5, s=1)
-
-
-def test_abcd_params_invalid_tau():
-    with pytest.raises(ValueError):
-        ABCDParams(gamma=2.5, delta=1, zeta=0.5, beta=1.5, tau=1.5, xi=0.5, s=1)
-
-
-def test_abcd_params_invalid_xi():
-    with pytest.raises(ValueError):
-        ABCDParams(gamma=2.5, delta=1, zeta=0.5, beta=1.5, tau=0.5, xi=1.5, s=1)
-
-
-def test_abcd_params_proper_init():
-    ABCDParams(gamma=2.5, delta=1, zeta=0.5, beta=1.5, tau=0.5, xi=0.5, s=1)
-    assert True
-
-
-def test_abcd_params_default_init():
-    ABCDParams()
-    assert True
+__version__ = version_parser("abcd_graph")

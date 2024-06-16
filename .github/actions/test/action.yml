@@ -11,5 +11,5 @@ runs:
     steps:
       - name: Run tests
         working-directory: ${{ inputs.working_directory }}
-        run: poetry run pytest -v
+        run: pytest --junitxml=pytest.xml --cov-report=term-missing:skip-covered --cov=abcd_graph | tee pytest-coverage.txt
         shell: bash

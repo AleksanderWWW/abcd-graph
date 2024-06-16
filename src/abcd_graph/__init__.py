@@ -1,4 +1,4 @@
-# Copyright (c) 2024 Jordan Barrett
+# Copyright (c) 2024 Jordan Barrett & Aleksander Wojnarowicz
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
@@ -19,9 +19,9 @@
 # SOFTWARE.
 
 __all__ = [
-    "generate_abcd",
+    "Graph",
     "ABCDParams",
 ]
 
-from abcd_graph.abcd import generate_abcd
-from abcd_graph.abcd_params import ABCDParams
+from abcd_graph.abcd import Graph
+from abcd_graph.api.abcd_params import ABCDParams

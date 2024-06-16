@@ -12,11 +12,37 @@ python = "^3.10"
 numpy = "^1.26.4"
 typing-extensions = "^4.10.0"
 pydantic = "^2.6.4"
-networkx = "^3.3"
 
-[tool.poetry.group.dev.dependencies]
-pytest = "^8.1.1"
-pre-commit = "^3.7.0"
+# dev
+pre-commit = { version = "^3.7.0", optional = true }
+pytest = { version = "^8.1.1", optional = true }
+pytest-cov = { version = "^5.0.0", optional = true }
+
+# integrations
+networkx = { version = "^3.3", optional = true }
+igraph = { version = "*", optional = true }
+matplotlib = { version = "^3.9.0", optional = true }
+
+
+[tool.poetry.extras]
+dev = [
+    "pre-commit",
+    "pytest",
+    "pytest-cov",
+]
+networkx = ["networkx"]
+igraph = ["igraph"]
+matplotlib = ["matplotlib"]
+
+all = [
+    "pre-commit",
+    "pytest",
+    "pytest-cov",
+    "networkx",
+    "igraph",
+    "matplotlib",
+]
+
 
 [build-system]
 requires = ["poetry-core"]
