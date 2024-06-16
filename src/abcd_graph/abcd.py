@@ -22,6 +22,7 @@ __all__ = [
     "Graph",
 ]
 
+import warnings
 from typing import (
     TYPE_CHECKING,
     Any,
@@ -116,7 +117,7 @@ class Graph:
     @require_graph_built
     def adj_matrix(self) -> NDArray[np.bool_]:
         if not self.is_proper_abcd:
-            raise MalformedGraphException("Graph is not proper ABCD so the adjacency matrix is not accurate")
+            raise MalformedGraphException("Graph is not proper ABCD so the adjacency matrix cannot be built")
 
         assert self._graph is not None
         return self._graph.to_adj_matrix()
@@ -152,7 +153,7 @@ class Graph:
         assert self._graph is not None
 
         if not self.is_proper_abcd:
-            raise MalformedGraphException("Graph is not proper ABCD")
+            warnings.warn("Graph is not proper ABCD so the community coloring may not be accurate")
 
         import networkx as nx
         from matplotlib import pyplot as plt  # type: ignore[import]
@@ -165,6 +166,10 @@ class Graph:
         plt.show()
 
     def build(self, model: Optional[Model] = None) -> "Graph":
+        if self.is_built:
+            warnings.warn("Graph has already been built. Run `reset` and try again.")
+            return self
+
         model = model if model else configuration_model
 
         self._model_used = model
