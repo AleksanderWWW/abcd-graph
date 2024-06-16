@@ -18,13 +18,17 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-__all__ = ["rand_round", "powerlaw_distribution"]
+__all__ = ["rand_round", "powerlaw_distribution", "get_community_color_map"]
 
 import math
 import random
+from typing import TYPE_CHECKING
 
 import numpy as np
 from numpy.typing import NDArray
+
+if TYPE_CHECKING:
+    from abcd_graph.core.models import Community
 
 
 def rand_round(x: float) -> int:
@@ -35,3 +39,17 @@ def rand_round(x: float) -> int:
 def powerlaw_distribution(choices: NDArray[np.int64], intensity: float) -> NDArray[np.float64]:
     dist: NDArray[np.float64] = (choices ** (-intensity)) / np.sum(choices ** (-intensity))
     return dist
+
+
+def get_community_color_map(communities: list["Community"]) -> list[str]:
+    import matplotlib.colors as colors  # type: ignore[import]
+
+    colors_list = list(colors.BASE_COLORS.values())[: len(communities)]
+
+    color_map = []
+
+    for i, community in enumerate(communities):
+        color = colors_list[i]
+        color_map.extend([color] * len(community.vertices))
+
+    return color_map
