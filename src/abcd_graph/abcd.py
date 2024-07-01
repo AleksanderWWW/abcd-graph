@@ -55,6 +55,7 @@ from abcd_graph.utils import (
 if TYPE_CHECKING:
     from igraph import Graph as IGraph  # type: ignore[import]
     from networkx import Graph as NetworkXGraph  # type: ignore[import]
+    from scipy.sparse import csr_matrix  # type: ignore[import]
 
     from abcd_graph.api.abcd_params import ABCDParams
 
@@ -113,14 +114,24 @@ class Graph:
         assert self._graph is not None
         return self._graph.is_proper_abcd
 
-    @property
     @require_graph_built
-    def adj_matrix(self) -> NDArray[np.bool_]:
+    def to_adjacency_matrix(self) -> NDArray[np.bool_]:
         if not self.is_proper_abcd:
             raise MalformedGraphException("Graph is not proper ABCD so the adjacency matrix cannot be built")
 
         assert self._graph is not None
         return self._graph.to_adj_matrix()
+
+    @require("scipy")
+    @require_graph_built
+    def to_sparse_adjacency_matrix(self) -> "csr_matrix":  # type: ignore[no-any-unimported]
+        from scipy.sparse import csr_matrix
+
+        if not self.is_proper_abcd:
+            raise MalformedGraphException("Graph is not proper ABCD so the adjacency matrix cannot be built")
+
+        assert self._graph is not None
+        return csr_matrix(self.to_adjacency_matrix())
 
     @require("igraph")
     @require_graph_built
