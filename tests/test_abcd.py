@@ -29,7 +29,8 @@ def test_graph_creation(n, gamma, beta, model):
     g.build(model)
     assert g.is_built
     assert g.is_proper_abcd
-    assert g.adj_matrix.shape == (n, n)
+    assert g.to_adjacency_matrix().shape == (n, n)
+    assert g.to_sparse_adjacency_matrix().shape == (n, n)
 
     g.reset()
 
@@ -43,7 +44,10 @@ def _test_not_built(g: Graph) -> None:
         _ = g.is_proper_abcd
 
     with pytest.raises(RuntimeError):
-        _ = g.adj_matrix
+        _ = g.to_adjacency_matrix()
+
+    with pytest.raises(RuntimeError):
+        _ = g.to_sparse_adjacency_matrix()
 
     with pytest.raises(RuntimeError):
         _ = g.summary
