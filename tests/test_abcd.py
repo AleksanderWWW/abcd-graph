@@ -30,6 +30,8 @@ def test_graph_creation(n, gamma, beta, model):
     assert g.is_built
     assert g.is_proper_abcd
     assert g.to_adjacency_matrix().shape == (n, n)
+    assert g.to_edge_list().shape == (g.num_edges, 2)
+    assert len(g.vertex_partition) == g.num_communities
 
     g.reset()
 

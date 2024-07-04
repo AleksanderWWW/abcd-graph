@@ -234,3 +234,9 @@ class Graph:
         assert self._graph is not None
 
         return {i: community.vertices for i, community in enumerate(self._graph.communities)}
+
+    @require_graph_built
+    def to_edge_list(self) -> NDArray[np.int64]:
+        assert self._graph is not None
+
+        return np.array(self._graph.edges).reshape(-1, 2)
