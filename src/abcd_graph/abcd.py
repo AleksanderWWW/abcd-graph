@@ -227,3 +227,10 @@ class Graph:
         self._graph.rewire_graph()
 
         return self
+
+    @property
+    @require_graph_built
+    def vertex_partition(self) -> dict[int, list[int]]:
+        assert self._graph is not None
+
+        return {i: community.vertices for i, community in enumerate(self._graph.communities)}
