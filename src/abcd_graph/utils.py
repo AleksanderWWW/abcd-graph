@@ -19,12 +19,14 @@
 # SOFTWARE.
 
 
+import random
 from functools import wraps
 from typing import (
     TYPE_CHECKING,
     Callable,
 )
 
+import numpy
 from typing_extensions import (
     ParamSpec,
     TypeVar,
@@ -35,6 +37,11 @@ if TYPE_CHECKING:
 
 P = ParamSpec("P")
 R = TypeVar("R")
+
+
+def seed(num: int) -> None:
+    random.seed(num)
+    numpy.random.seed(num)
 
 
 def require(package_name: str) -> Callable[[Callable[P, R]], Callable[P, R]]:
