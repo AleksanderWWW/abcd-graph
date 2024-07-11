@@ -240,3 +240,25 @@ class Graph:
         assert self._graph is not None
 
         return np.array(self._graph.edges).reshape(-1, 2)
+
+    #The empirical xi is the fraction of background edges to total edges
+    @property
+    @require_graph_built
+    def empirical_xi(self) -> float:
+        assert self._graph is not None
+
+        num_edges = len(self._graph.edges)
+        num_community_edges = sum(len(community.edges) for community in self._graph.communities)
+        return 1-(num_community_edges/num_edges)
+
+    #This should be the same as self._graph.deg_b + self._graph.deg_c
+    @property
+    @require_graph_built
+    def degree_sequence(self) -> dict[int, int]:
+        assert self._graph is not None
+
+        deg = {v: 0 for v in range(self.n)}
+        for e in self._graph.edges:
+            deg[e[0]] += 1
+            deg[e[1]] += 1
+        return deg
