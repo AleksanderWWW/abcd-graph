@@ -86,10 +86,16 @@ class Graph:
         assert self._model_used is not None
         return {
             "number_of_nodes": self.n,
+            "params": self.params,
             "number_of_edges": self.num_edges,
             "number_of_communities": self.num_communities,
             "model": self._model_used.__name__,
             "is_proper_abcd": self.is_proper_abcd,
+            "empirical_xi": self.empirical_xi,
+            "empirical_xi_per_community": {
+                community.community_id: community.empirical_xi(self._graph.deg_b)
+                for community in self._graph.communities
+            },
         }
 
     @property
@@ -240,3 +246,21 @@ class Graph:
         assert self._graph is not None
 
         return np.array(self._graph.edges).reshape(-1, 2)
+
+    # The empirical xi is the fraction of background edges to total edges
+    @property
+    @require_graph_built
+    def empirical_xi(self) -> float:
+        assert self._graph is not None
+
+        num_edges = len(self._graph.edges)
+        num_community_edges = sum(len(community.edges) for community in self._graph.communities)
+        return 1 - (num_community_edges / num_edges)
+
+    # This should be the same as self._graph.deg_b + self._graph.deg_c
+    @property
+    @require_graph_built
+    def degree_sequence(self) -> dict[int, int]:
+        assert self._graph is not None
+
+        return self._graph.degree_sequence
