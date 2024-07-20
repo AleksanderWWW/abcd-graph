@@ -241,7 +241,7 @@ class Graph:
 
         return np.array(self._graph.edges).reshape(-1, 2)
 
-    #The empirical xi is the fraction of background edges to total edges
+    # The empirical xi is the fraction of background edges to total edges
     @property
     @require_graph_built
     def empirical_xi(self) -> float:
@@ -249,9 +249,9 @@ class Graph:
 
         num_edges = len(self._graph.edges)
         num_community_edges = sum(len(community.edges) for community in self._graph.communities)
-        return 1-(num_community_edges/num_edges)
+        return 1 - (num_community_edges / num_edges)
 
-    #This should be the same as self._graph.deg_b + self._graph.deg_c
+    # This should be the same as self._graph.deg_b + self._graph.deg_c
     @property
     @require_graph_built
     def degree_sequence(self) -> dict[int, int]:

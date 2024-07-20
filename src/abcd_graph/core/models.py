@@ -93,6 +93,10 @@ class AbstractCommunity(AbstractGraph):
         return list({edge.v1 for edge in self._edges} | {edge.v2 for edge in self._edges})
 
     @property
+    def edges(self) -> list[Edge]:
+        return self._edges
+
+    @property
     def adj_dict(self) -> dict[Edge, int]:
         return self._adj_dict
 
