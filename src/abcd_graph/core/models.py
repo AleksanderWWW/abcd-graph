@@ -72,7 +72,8 @@ class AbstractGraph(abc.ABC):
 
 
 class AbstractCommunity(AbstractGraph):
-    def __init__(self, edges: list[Edge]) -> None:
+    def __init__(self, edges: list[Edge], community_id: int) -> None:
+        self.community_id = community_id
         self._adj_dict: dict[Edge, int] = {}
         self._bad_edges: list[Edge] = []
 
@@ -89,10 +90,6 @@ class AbstractCommunity(AbstractGraph):
         self._edges = edges
 
     @property
-    def vertices(self) -> list[int]:
-        return list({edge.v1 for edge in self._edges} | {edge.v2 for edge in self._edges})
-
-    @property
     def edges(self) -> list[Edge]:
         return self._edges
 
@@ -102,6 +99,21 @@ class AbstractCommunity(AbstractGraph):
 
 
 class Community(AbstractCommunity):
+    def __init__(self, edges: list[Edge], vertices: list[int], deg_c: DegreeSequence, community_id: int) -> None:
+        super().__init__(edges, community_id)
+
+        self.vertices = vertices
+        self._deg_c = deg_c
+
+    @property
+    def local_deg_c(self) -> DegreeSequence:
+        return {k: v for k, v in self._deg_c.items() if k in self.vertices}
+
+    def empirical_xi(self, deg_b: DegreeSequence) -> float:
+        return sum(deg_b[i] for i in self.vertices) / (
+            sum(deg_b[i] for i in self.vertices) + sum(self.local_deg_c.values())
+        )
+
     def push_to_background(self, edges: list[Edge], deg_b: DegreeSequence) -> None:
         for edge in edges:
             if edge.is_loop:
@@ -110,14 +122,18 @@ class Community(AbstractCommunity):
                     if self.adj_dict[edge] == 0:
                         del self.adj_dict[edge]
 
-                    deg_b[edge.v1] += 1
-                    deg_b[edge.v2] += 1
+                    self._update_degree_sequences(edge, deg_b)
             else:
                 for i in range(self.adj_dict[edge] - 1):
                     self.adj_dict[edge] -= 1
 
-                    deg_b[edge.v1] += 1
-                    deg_b[edge.v2] += 1
+                    self._update_degree_sequences(edge, deg_b)
+
+    def _update_degree_sequences(self, edge: Edge, deg_b: DegreeSequence) -> None:
+        deg_b[edge.v1] += 1
+        deg_b[edge.v2] += 1
+        self._deg_c[edge.v1] -= 1
+        self._deg_c[edge.v2] -= 1
 
     def rewire_community(self, deg_b: DegreeSequence) -> None:
         while len(self._bad_edges) > 0:
@@ -135,7 +151,7 @@ class Community(AbstractCommunity):
 
 class BackgroundGraph(AbstractCommunity):
     def __init__(self, edges: list[Edge]) -> None:
-        super().__init__(edges)
+        super().__init__(edges, community_id=-1)
 
 
 class ABCDGraph(AbstractGraph):
@@ -147,6 +163,14 @@ class ABCDGraph(AbstractGraph):
         self.background_graph: Optional[BackgroundGraph] = None
 
         self._adj_dict: dict[Edge, int] = {}
+
+    @property
+    def degree_sequence(self) -> dict[int, int]:
+        deg = {v: 0 for v in range(len(self.deg_b))}
+        for e in self.edges:
+            deg[e[0]] += 1
+            deg[e[1]] += 1
+        return deg
 
     @property
     def adj_dict(self) -> dict[Edge, int]:
@@ -173,9 +197,14 @@ class ABCDGraph(AbstractGraph):
         return len(self.communities)
 
     def build_communities(self, communities: Communities, model: Model) -> "ABCDGraph":
-        for community in communities.values():
-            community_edges = model({v: self.deg_c[v] for v in community})
-            community_obj = Community([Edge(e[0], e[1]) for e in community_edges])
+        for community_id, community_vertices in communities.items():
+            community_edges = model({v: self.deg_c[v] for v in community_vertices})
+            community_obj = Community(
+                edges=[Edge(e[0], e[1]) for e in community_edges],
+                vertices=community_vertices,
+                deg_c=self.deg_c,
+                community_id=community_id,
+            )
             community_obj.rewire_community(self.deg_b)
 
             assert len(build_recycle_list(community_obj.adj_dict)) == 0

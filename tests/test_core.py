@@ -86,3 +86,5 @@ def test_core(n, gamma, beta, model):
     assert sum(deg.values()) == 2 * len(g.edges)
 
     assert g.is_proper_abcd
+
+    assert sum(g.degree_sequence.values()) == sum(deg_c.values()) + sum(deg_b.values())

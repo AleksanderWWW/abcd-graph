@@ -152,7 +152,6 @@ def split_degrees(
     return deg_c, deg_b
 
 
-# Shortened this function
 def _get_v_max(deg_c: dict[int, int], community: list[int]) -> int:
     deg_c_subset = {v: deg_c[v] for v in community}
-    return max(deg_c_subset, key=deg_c_subset.__getitem__)  # what if deg_c is an empty dictionary?
+    return max(deg_c_subset, key=deg_c_subset.__getitem__)

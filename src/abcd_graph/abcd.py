@@ -86,10 +86,16 @@ class Graph:
         assert self._model_used is not None
         return {
             "number_of_nodes": self.n,
+            "params": self.params,
             "number_of_edges": self.num_edges,
             "number_of_communities": self.num_communities,
             "model": self._model_used.__name__,
             "is_proper_abcd": self.is_proper_abcd,
+            "empirical_xi": self.empirical_xi,
+            "empirical_xi_per_community": {
+                community.community_id: community.empirical_xi(self._graph.deg_b)
+                for community in self._graph.communities
+            },
         }
 
     @property
@@ -257,8 +263,4 @@ class Graph:
     def degree_sequence(self) -> dict[int, int]:
         assert self._graph is not None
 
-        deg = {v: 0 for v in range(self.n)}
-        for e in self._graph.edges:
-            deg[e[0]] += 1
-            deg[e[1]] += 1
-        return deg
+        return self._graph.degree_sequence
