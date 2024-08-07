@@ -90,13 +90,40 @@ class Graph:
             "number_of_edges": self.num_edges,
             "number_of_communities": self.num_communities,
             "model": self._model_used.__name__,
-            "is_proper_abcd": self.is_proper_abcd,
             "empirical_xi": self.empirical_xi,
-            "empirical_xi_per_community": {
-                community.community_id: community.empirical_xi(self._graph.deg_b)
-                for community in self._graph.communities
-            },
+            "number_of_loops": ...,
+            "number_of_multi_edges": ...,  # TODO
+            "time_to_build": ...,  # TODO
+            "expected_average_degree": ...,
+            "actual_average_degree": ...,  # TODO
         }
+
+    @property
+    @require_graph_built
+    def xi_matrix(self) -> NDArray[np.float64]:
+        assert self._graph is not None
+
+        return self._graph.xi_matrix
+
+    @property
+    @require("matplotlib")
+    @require_graph_built
+    def draw_community_size_distribution(
+        self,
+    ) -> None:
+        assert self._graph is not None
+
+        import matplotlib.pyplot as plt
+
+    @property
+    @require("matplotlib")
+    @require_graph_built
+    def draw_degree_distribution(
+        self,
+    ) -> None:
+        assert self._graph is not None
+
+        import matplotlib.pyplot as plt
 
     @property
     @require_graph_built

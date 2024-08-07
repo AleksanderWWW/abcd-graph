@@ -99,19 +99,43 @@ class AbstractCommunity(AbstractGraph):
 
 
 class Community(AbstractCommunity):
-    def __init__(self, edges: list[Edge], vertices: list[int], deg_c: DegreeSequence, community_id: int) -> None:
+    def __init__(
+        self,
+        edges: list[Edge],
+        vertices: list[int],
+        deg_b: DegreeSequence,
+        deg_c: DegreeSequence,
+        community_id: int,
+    ) -> None:
         super().__init__(edges, community_id)
 
-        self.vertices = vertices
+        self._vertices = vertices
+        self._deg_b = deg_b
         self._deg_c = deg_c
+
+    @property
+    def vertices(self) -> list[int]:
+        return self._vertices
+
+    @property
+    def average_degree(self) -> float:
+        return sum(self.degree_sequence.values()) / len(self.vertices)
+
+    @property
+    def degree_sequence(self) -> DegreeSequence:
+        res = {}
+        for vert in self.vertices:
+            res[vert] = self._deg_c[vert] + self._deg_b[vert]
+        return res
 
     @property
     def local_deg_c(self) -> DegreeSequence:
         return {k: v for k, v in self._deg_c.items() if k in self.vertices}
 
-    def empirical_xi(self, deg_b: DegreeSequence) -> float:
-        return sum(deg_b[i] for i in self.vertices) / (
-            sum(deg_b[i] for i in self.vertices) + sum(self.local_deg_c.values())
+    @property
+    def empirical_xi(self) -> float:
+        return sum(self._deg_b[i] for i in self.vertices) / (
+            sum(self._deg_b[i] for i in self.vertices) + sum(self.local_deg_c.values())
         )
 
     def push_to_background(self, edges: list[Edge], deg_b: DegreeSequence) -> None:
@@ -135,7 +159,7 @@ class Community(AbstractCommunity):
         self._deg_c[edge.v1] -= 1
         self._deg_c[edge.v2] -= 1
 
-    def rewire_community(self, deg_b: DegreeSequence) -> None:
+    def rewire_community(self) -> None:
         while len(self._bad_edges) > 0:
             for edge in self._bad_edges:
                 other_edge = choose_other_edge(self.adj_dict, edge)
@@ -143,7 +167,7 @@ class Community(AbstractCommunity):
 
             new_bad_edges = build_recycle_list(self.adj_dict)
             if len(new_bad_edges) >= len(self._bad_edges):
-                self.push_to_background(new_bad_edges, deg_b)
+                self.push_to_background(new_bad_edges, self._deg_b)
                 return
             else:
                 self._bad_edges = new_bad_edges
@@ -202,10 +226,11 @@ class ABCDGraph(AbstractGraph):
             community_obj = Community(
                 edges=[Edge(e[0], e[1]) for e in community_edges],
                 vertices=community_vertices,
+                deg_b=self.deg_b,
                 deg_c=self.deg_c,
                 community_id=community_id,
             )
-            community_obj.rewire_community(self.deg_b)
+            community_obj.rewire_community()
 
             assert len(build_recycle_list(community_obj.adj_dict)) == 0
 
