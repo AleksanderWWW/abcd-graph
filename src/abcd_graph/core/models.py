@@ -77,13 +77,20 @@ class AbstractCommunity(AbstractGraph):
         self._adj_dict: dict[Edge, int] = {}
         self._bad_edges: list[Edge] = []
 
+        self._diagnostics = {
+            "num_loops": 0,
+            "num_multi_edges": 0,
+        }
+
         for edge in edges:
             if edge.is_loop:
                 self._bad_edges.append(edge)
+                self._diagnostics["num_loops"] += 1
 
             if edge in self.adj_dict:
                 self._bad_edges.append(edge)
                 self._adj_dict[edge] += 1
+                self._diagnostics["num_multi_edges"] += 1
             else:
                 self._adj_dict[edge] = 1
 
@@ -96,6 +103,10 @@ class AbstractCommunity(AbstractGraph):
     @property
     def adj_dict(self) -> dict[Edge, int]:
         return self._adj_dict
+
+    @property
+    def diagnostics(self) -> dict[str, int]:
+        return self._diagnostics
 
 
 class Community(AbstractCommunity):
@@ -179,14 +190,30 @@ class BackgroundGraph(AbstractCommunity):
 
 
 class ABCDGraph(AbstractGraph):
-    def __init__(self, deg_b: dict[int, int], deg_c: dict[int, int]) -> None:
+    def __init__(self, deg_b: dict[int, int], deg_c: dict[int, int], theoretical_xi: float) -> None:
         self.deg_b = deg_b
         self.deg_c = deg_c
+
+        self._xi = theoretical_xi
 
         self.communities: list[Community] = []
         self.background_graph: Optional[BackgroundGraph] = None
 
         self._adj_dict: dict[Edge, int] = {}
+
+    @property
+    def num_loops(self) -> int:
+        return sum(community.diagnostics["num_loops"] for community in self.communities) \
+            + self.background_graph.diagnostics["num_loops"]
+
+    @property
+    def num_multi_edges(self) -> int:
+        return sum(community.diagnostics["num_multi_edges"] for community in self.communities) \
+            + self.background_graph.diagnostics["num_multi_edges"]
+
+    @property
+    def xi_matrix(self) -> NDArray[np.float64]:
+        ...
 
     @property
     def degree_sequence(self) -> dict[int, int]:

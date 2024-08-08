@@ -22,6 +22,7 @@ __all__ = [
     "Graph",
 ]
 
+import time
 import warnings
 from typing import (
     TYPE_CHECKING,
@@ -75,6 +76,8 @@ class Graph:
 
         self._model_used: Optional[Model] = None
 
+        self._build_time = 0
+
     def reset(self) -> None:
         self._graph = None
         self._model_used = None
@@ -91,9 +94,9 @@ class Graph:
             "number_of_communities": self.num_communities,
             "model": self._model_used.__name__,
             "empirical_xi": self.empirical_xi,
-            "number_of_loops": ...,
-            "number_of_multi_edges": ...,  # TODO
-            "time_to_build": ...,  # TODO
+            "number_of_loops": self.num_loops,
+            "number_of_multi_edges": self.num_multi_edges,
+            "time_to_build": self._build_time,
             "expected_average_degree": ...,
             "actual_average_degree": ...,  # TODO
         }
@@ -104,6 +107,20 @@ class Graph:
         assert self._graph is not None
 
         return self._graph.xi_matrix
+
+    @property
+    @require_graph_built
+    def num_loops(self) -> int:
+        assert self._graph is not None
+
+        return self._graph.num_loops
+
+    @property
+    @require_graph_built
+    def num_multi_edges(self) -> int:
+        assert self._graph is not None
+
+        return self._graph.num_multi_edges
 
     @property
     @require("matplotlib")
@@ -210,6 +227,7 @@ class Graph:
         plt.show()
 
     def build(self, model: Optional[Model] = None) -> "Graph":
+        start = time.perf_counter()
         if self.is_built:
             warnings.warn("Graph has already been built. Run `reset` and try again.")
             return self
@@ -246,7 +264,7 @@ class Graph:
 
         deg_c, deg_b = split_degrees(deg, communities, self.params.xi)
 
-        self._graph = ABCDGraph(deg_b, deg_c)
+        self._graph = ABCDGraph(deg_b, deg_c, theoretical_xi=self.params.xi)
 
         self.logger.info("Building community edges")
         self._graph.build_communities(communities, model)
@@ -259,6 +277,7 @@ class Graph:
 
         self._graph.rewire_graph()
 
+        self._build_time = time.perf_counter() - start
         return self
 
     @property
