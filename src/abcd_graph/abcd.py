@@ -97,9 +97,35 @@ class Graph:
             "number_of_loops": self.num_loops,
             "number_of_multi_edges": self.num_multi_edges,
             "time_to_build": self._build_time,
-            "expected_average_degree": ...,
-            "actual_average_degree": ...,  # TODO
+            "expected_average_degree": self.expected_average_degree,
+            "actual_average_degree": self.actual_average_degree,
+            "expected_average_community_size": self.expected_average_community_size,
+            "actual_average_community_size": self.actual_average_community_size,
         }
+
+    @property
+    @require_graph_built
+    def expected_average_community_size(self) -> float:
+        assert self._graph is not None
+        return self._graph.expected_average_community_size
+
+    @property
+    @require_graph_built
+    def actual_average_community_size(self) -> float:
+        assert self._graph is not None
+        return self._graph.actual_average_community_size
+
+    @property
+    @require_graph_built
+    def actual_average_degree(self) -> float:
+        assert self._graph is not None
+        return self._graph.actual_average_degree
+
+    @property
+    @require_graph_built
+    def expected_average_degree(self) -> float:
+        assert self._graph is not None
+        return self._graph.expected_average_degree
 
     @property
     @require_graph_built
@@ -264,7 +290,7 @@ class Graph:
 
         deg_c, deg_b = split_degrees(deg, communities, self.params.xi)
 
-        self._graph = ABCDGraph(deg_b, deg_c, theoretical_xi=self.params.xi)
+        self._graph = ABCDGraph(deg_b, deg_c, params=self.params)
 
         self.logger.info("Building community edges")
         self._graph.build_communities(communities, model)

@@ -31,6 +31,7 @@ from typing import (
 import numpy as np
 from numpy.typing import NDArray
 
+from abcd_graph import ABCDParams
 from abcd_graph.api.abcd_models import Model
 from abcd_graph.typing import (
     Communities,
@@ -190,16 +191,32 @@ class BackgroundGraph(AbstractCommunity):
 
 
 class ABCDGraph(AbstractGraph):
-    def __init__(self, deg_b: dict[int, int], deg_c: dict[int, int], theoretical_xi: float) -> None:
+    def __init__(self, deg_b: dict[int, int], deg_c: dict[int, int], params: ABCDParams) -> None:
         self.deg_b = deg_b
         self.deg_c = deg_c
 
-        self._xi = theoretical_xi
+        self._params = params
 
         self.communities: list[Community] = []
         self.background_graph: Optional[BackgroundGraph] = None
 
         self._adj_dict: dict[Edge, int] = {}
+
+    @property
+    def actual_average_degree(self) -> float:
+        ...
+
+    @property
+    def expected_average_degree(self) -> float:
+        ...
+
+    @property
+    def actual_average_community_size(self) -> float:
+        ...
+
+    @property
+    def expected_average_community_size(self) -> float:
+        ...
 
     @property
     def num_loops(self) -> int:
