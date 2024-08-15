@@ -25,15 +25,13 @@ __all__ = [
 import time
 import warnings
 from datetime import datetime
-from typing import (
-    TYPE_CHECKING,
-    Optional,
-)
+from typing import Optional
 
 from abcd_graph.api.abcd_models import (
     Model,
     configuration_model,
 )
+from abcd_graph.api.abcd_params import ABCDParams
 from abcd_graph.callbacks.abstract import (
     ABCDCallback,
     BuildContext,
@@ -49,9 +47,6 @@ from abcd_graph.core.build import (
 from abcd_graph.core.exporter import GraphExporter
 from abcd_graph.logger import construct_logger
 
-if TYPE_CHECKING:
-    from abcd_graph.api.abcd_params import ABCDParams
-
 
 class Graph:
     def __init__(
@@ -63,14 +58,11 @@ class Graph:
 
         self._graph: Optional[ABCDGraph] = None
 
-        self._model_used: Optional[Model] = None
-
         self._exporter: Optional[GraphExporter] = None
         self._callbacks = callbacks or []
 
     def reset(self) -> None:
         self._graph = None
-        self._model_used = None
 
     @property
     def is_built(self) -> bool:
@@ -79,10 +71,10 @@ class Graph:
     @property
     def exporter(self) -> GraphExporter:
         if not self.is_built:
-            raise ValueError("Exporter is not available if the graph has not been built.")
+            raise RuntimeError("Exporter is not available if the graph has not been built.")
 
         if self._exporter is None:
-            raise ValueError("Exporter is not available.")
+            raise RuntimeError("Exporter is not available.")
 
         assert self._exporter is not None
 
@@ -105,65 +97,65 @@ class Graph:
         for callback in self._callbacks:
             callback.before_build(context)
 
-        build_start = time.perf_counter()
-
         try:
-            degrees = build_degrees(
-                self.n,
-                self.params.gamma,
-                self.params.delta,
-                self.params.zeta,
-            )
-
-            self.logger.info("Building community sizes")
-
-            community_sizes = build_community_sizes(
-                self.n,
-                self.params.beta,
-                self.params.s,
-                self.params.tau,
-            )
-
-            self.logger.info("Building communities")
-
-            communities = build_communities(community_sizes)
-
-            self.logger.info("Assigning degrees")
-
-            deg = assign_degrees(degrees, communities, community_sizes, self.params.xi)
-
-            self.logger.info("Splitting degrees")
-
-            deg_c, deg_b = split_degrees(deg, communities, self.params.xi)
-
-            self._graph = ABCDGraph(deg_b, deg_c, params=self.params)
-
-            self.logger.info("Building community edges")
-            self._graph.build_communities(communities, model)
-
-            self.logger.info("Building background edges")
-            self._graph.build_background_edges(model)
-
-            self.logger.info("Resolving collisions")
-            self._graph.combine_edges()
-
-            self._graph.rewire_graph()
-
+            build_start = time.perf_counter()
+            build_end = self._build_impl(model)
+            context.end_time = datetime.now()
         except Exception as e:
             self.logger.error(f"An error occurred while building the graph: {e}")
+            self.reset()
             raise e
 
-        finally:
-            self.reset()
-
-        build_end = time.perf_counter()
-
-        context.end_time = datetime.now()
         context.raw_build_time = build_end - build_start
 
+        assert self._graph is not None
         self._exporter = GraphExporter(self._graph, self.n)
 
         for callback in self._callbacks:
             callback.after_build(self._graph, context, self._exporter)
 
         return self
+
+    def _build_impl(self, model: Model) -> float:
+        degrees = build_degrees(
+            self.n,
+            self.params.gamma,
+            self.params.delta,
+            self.params.zeta,
+        )
+
+        self.logger.info("Building community sizes")
+
+        community_sizes = build_community_sizes(
+            self.n,
+            self.params.beta,
+            self.params.s,
+            self.params.tau,
+        )
+
+        self.logger.info("Building communities")
+
+        communities = build_communities(community_sizes)
+
+        self.logger.info("Assigning degrees")
+
+        deg = assign_degrees(degrees, communities, community_sizes, self.params.xi)
+
+        self.logger.info("Splitting degrees")
+
+        deg_c, deg_b = split_degrees(deg, communities, self.params.xi)
+
+        self._graph = ABCDGraph(deg_b, deg_c, params=self.params)
+
+        self.logger.info("Building community edges")
+        self._graph.build_communities(communities, model)
+
+        self.logger.info("Building background edges")
+        self._graph.build_background_edges(model)
+
+        self.logger.info("Resolving collisions")
+        self._graph.combine_edges()
+
+        self._graph.rewire_graph()
+
+        return time.perf_counter()
