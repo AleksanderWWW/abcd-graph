@@ -65,7 +65,7 @@ class Graph:
 
         self._model_used: Optional[Model] = None
 
-        self.exporter: Optional[GraphExporter] = None
+        self._exporter: Optional[GraphExporter] = None
         self._callbacks = callbacks or []
 
     def reset(self) -> None:
@@ -75,6 +75,18 @@ class Graph:
     @property
     def is_built(self) -> bool:
         return self._graph is not None
+
+    @property
+    def exporter(self) -> GraphExporter:
+        if not self.is_built:
+            raise ValueError("Exporter is not available if the graph has not been built.")
+
+        if self._exporter is None:
+            raise ValueError("Exporter is not available.")
+
+        assert self._exporter is not None
+
+        return self._exporter
 
     def build(self, model: Optional[Model] = None) -> "Graph":
         if self.is_built:
@@ -95,55 +107,63 @@ class Graph:
 
         build_start = time.perf_counter()
 
-        degrees = build_degrees(
-            self.n,
-            self.params.gamma,
-            self.params.delta,
-            self.params.zeta,
-        )
+        try:
+            degrees = build_degrees(
+                self.n,
+                self.params.gamma,
+                self.params.delta,
+                self.params.zeta,
+            )
 
-        self.logger.info("Building community sizes")
+            self.logger.info("Building community sizes")
 
-        community_sizes = build_community_sizes(
-            self.n,
-            self.params.beta,
-            self.params.s,
-            self.params.tau,
-        )
+            community_sizes = build_community_sizes(
+                self.n,
+                self.params.beta,
+                self.params.s,
+                self.params.tau,
+            )
 
-        self.logger.info("Building communities")
+            self.logger.info("Building communities")
 
-        communities = build_communities(community_sizes)
+            communities = build_communities(community_sizes)
 
-        self.logger.info("Assigning degrees")
+            self.logger.info("Assigning degrees")
 
-        deg = assign_degrees(degrees, communities, community_sizes, self.params.xi)
+            deg = assign_degrees(degrees, communities, community_sizes, self.params.xi)
 
-        self.logger.info("Splitting degrees")
+            self.logger.info("Splitting degrees")
 
-        deg_c, deg_b = split_degrees(deg, communities, self.params.xi)
+            deg_c, deg_b = split_degrees(deg, communities, self.params.xi)
 
-        self._graph = ABCDGraph(deg_b, deg_c, params=self.params)
+            self._graph = ABCDGraph(deg_b, deg_c, params=self.params)
 
-        self.logger.info("Building community edges")
-        self._graph.build_communities(communities, model)
+            self.logger.info("Building community edges")
+            self._graph.build_communities(communities, model)
 
-        self.logger.info("Building background edges")
-        self._graph.build_background_edges(model)
+            self.logger.info("Building background edges")
+            self._graph.build_background_edges(model)
 
-        self.logger.info("Resolving collisions")
-        self._graph.combine_edges()
+            self.logger.info("Resolving collisions")
+            self._graph.combine_edges()
 
-        self._graph.rewire_graph()
+            self._graph.rewire_graph()
+
+        except Exception as e:
+            self.logger.error(f"An error occurred while building the graph: {e}")
+            raise e
+
+        finally:
+            self.reset()
 
         build_end = time.perf_counter()
 
         context.end_time = datetime.now()
         context.raw_build_time = build_end - build_start
 
-        self.exporter = GraphExporter(self._graph, self.n)
+        self._exporter = GraphExporter(self._graph, self.n)
 
         for callback in self._callbacks:
-            callback.after_build(self._graph, context, self.exporter)
+            callback.after_build(self._graph, context, self._exporter)
 
         return self
