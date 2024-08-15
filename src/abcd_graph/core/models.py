@@ -24,6 +24,7 @@ import abc
 import random
 from dataclasses import dataclass
 from typing import (
+    TYPE_CHECKING,
     Any,
     Optional,
 )
@@ -36,6 +37,9 @@ from abcd_graph.typing import (
     Communities,
     DegreeSequence,
 )
+
+if TYPE_CHECKING:
+    from abcd_graph import ABCDParams
 
 
 @dataclass
@@ -77,13 +81,20 @@ class AbstractCommunity(AbstractGraph):
         self._adj_dict: dict[Edge, int] = {}
         self._bad_edges: list[Edge] = []
 
+        self._diagnostics = {
+            "num_loops": 0,
+            "num_multi_edges": 0,
+        }
+
         for edge in edges:
             if edge.is_loop:
                 self._bad_edges.append(edge)
+                self._diagnostics["num_loops"] += 1
 
             if edge in self.adj_dict:
                 self._bad_edges.append(edge)
                 self._adj_dict[edge] += 1
+                self._diagnostics["num_multi_edges"] += 1
             else:
                 self._adj_dict[edge] = 1
 
@@ -97,21 +108,49 @@ class AbstractCommunity(AbstractGraph):
     def adj_dict(self) -> dict[Edge, int]:
         return self._adj_dict
 
+    @property
+    def diagnostics(self) -> dict[str, int]:
+        return self._diagnostics
+
 
 class Community(AbstractCommunity):
-    def __init__(self, edges: list[Edge], vertices: list[int], deg_c: DegreeSequence, community_id: int) -> None:
+    def __init__(
+        self,
+        edges: list[Edge],
+        vertices: list[int],
+        deg_b: DegreeSequence,
+        deg_c: DegreeSequence,
+        community_id: int,
+    ) -> None:
         super().__init__(edges, community_id)
 
-        self.vertices = vertices
+        self._vertices = vertices
+        self._deg_b = deg_b
         self._deg_c = deg_c
+
+    @property
+    def vertices(self) -> list[int]:
+        return self._vertices
+
+    @property
+    def average_degree(self) -> float:
+        return sum(self.degree_sequence.values()) / len(self.vertices)
+
+    @property
+    def degree_sequence(self) -> DegreeSequence:
+        res = {}
+        for vert in self.vertices:
+            res[vert] = self._deg_c[vert] + self._deg_b[vert]
+        return res
 
     @property
     def local_deg_c(self) -> DegreeSequence:
         return {k: v for k, v in self._deg_c.items() if k in self.vertices}
 
-    def empirical_xi(self, deg_b: DegreeSequence) -> float:
-        return sum(deg_b[i] for i in self.vertices) / (
-            sum(deg_b[i] for i in self.vertices) + sum(self.local_deg_c.values())
+    @property
+    def empirical_xi(self) -> float:
+        return sum(self._deg_b[i] for i in self.vertices) / (
+            sum(self._deg_b[i] for i in self.vertices) + sum(self.local_deg_c.values())
         )
 
     def push_to_background(self, edges: list[Edge], deg_b: DegreeSequence) -> None:
@@ -135,7 +174,7 @@ class Community(AbstractCommunity):
         self._deg_c[edge.v1] -= 1
         self._deg_c[edge.v2] -= 1
 
-    def rewire_community(self, deg_b: DegreeSequence) -> None:
+    def rewire_community(self) -> None:
         while len(self._bad_edges) > 0:
             for edge in self._bad_edges:
                 other_edge = choose_other_edge(self.adj_dict, edge)
@@ -143,7 +182,7 @@ class Community(AbstractCommunity):
 
             new_bad_edges = build_recycle_list(self.adj_dict)
             if len(new_bad_edges) >= len(self._bad_edges):
-                self.push_to_background(new_bad_edges, deg_b)
+                self.push_to_background(new_bad_edges, self._deg_b)
                 return
             else:
                 self._bad_edges = new_bad_edges
@@ -155,14 +194,124 @@ class BackgroundGraph(AbstractCommunity):
 
 
 class ABCDGraph(AbstractGraph):
-    def __init__(self, deg_b: dict[int, int], deg_c: dict[int, int]) -> None:
+    def __init__(self, deg_b: dict[int, int], deg_c: dict[int, int], params: "ABCDParams") -> None:
         self.deg_b = deg_b
         self.deg_c = deg_c
+
+        self._params = params
 
         self.communities: list[Community] = []
         self.background_graph: Optional[BackgroundGraph] = None
 
         self._adj_dict: dict[Edge, int] = {}
+
+    @property
+    def average_degree(self) -> float:
+        return (sum(self.deg_b.values()) + sum(self.deg_c.values())) / len(self.deg_b)
+
+    @property
+    def expected_average_degree(self) -> float:
+        d_max = int(np.floor(len(self.deg_b) ** self._params.zeta))
+        bottom: float = sum(k ** (-self._params.gamma) for k in range(self._params.delta, d_max + 1))
+        top: float = sum(k ** (1 - self._params.gamma) for k in range(self._params.delta, d_max + 1))
+
+        return top / bottom
+
+    @property
+    def actual_degree_cdf(self) -> dict[int, float]:
+        n = len(self.deg_b)
+        deg = {v: self.deg_b[v] + self.deg_c[v] for v in self.deg_b}
+        sorted_deg = sorted(list(deg.values()))
+        val = sorted_deg[0]
+        cdf = {val: 1 / n}
+        for d in sorted_deg[1:]:
+            new_val = d
+            if new_val == val:
+                cdf[new_val] += 1 / n
+            else:
+                cdf[new_val] = cdf[val] + 1 / n
+            val = new_val
+        return cdf
+
+    @property
+    def expected_degree_cdf(self) -> dict[int, float]:
+        cdf = {}
+        n = len(self.deg_b)
+        gamma = self._params.gamma
+        d_min = self._params.delta
+        d_max = int(np.floor(n**self._params.zeta))
+        bottom = sum(k ** (-gamma) for k in range(d_min, d_max + 1))
+        for d in range(d_min, d_max + 1):
+            cdf[d] = sum(k ** (-gamma) for k in range(d_min, d + 1)) / bottom
+        return cdf
+
+    @property
+    def actual_average_community_size(self) -> float:
+        volume = sum(len(c.vertices) for c in self.communities)
+        return volume / len(self.communities)
+
+    @property
+    def expected_average_community_size(self) -> float:
+        n = len(self.deg_b)
+        beta = self._params.beta
+        c_min = self._params.s
+        c_max = int(np.floor(n**self._params.tau))
+        bottom: float = sum(k ** (-beta) for k in range(c_min, c_max + 1))
+        top: float = sum(k ** (1 - beta) for k in range(c_min, c_max + 1))
+        return top / bottom
+
+    @property
+    def actual_community_cdf(self) -> dict[int, float]:
+        L = len(self.communities)
+        sizes = {c: len(c.vertices) for c in self.communities}
+        sorted_sizes = sorted(list(sizes.values()))
+        val = sorted_sizes[0]
+        cdf = {val: 1 / L}
+        for s in sorted_sizes[1:]:
+            new_val = s
+            if new_val == val:
+                cdf[new_val] += 1 / L
+            else:
+                cdf[new_val] = cdf[val] + 1 / L
+            val = new_val
+        return cdf
+
+    @property
+    def expected_community_cdf(self) -> dict[int, float]:
+        cdf = {}
+        n = len(self.deg_b)
+        beta = self._params.beta
+        c_min = self._params.s
+        c_max = int(np.floor(n**self._params.tau))
+        bottom = sum(k ** (-beta) for k in range(c_min, c_max + 1))
+        for s in range(c_min, c_max + 1):
+            cdf[s] = sum(k ** (-beta) for k in range(c_min, s + 1)) / bottom
+        return cdf
+
+    @property
+    def num_loops(self) -> int:
+        assert self.background_graph is not None
+
+        return (
+            sum(community.diagnostics["num_loops"] for community in self.communities)
+            + self.background_graph.diagnostics["num_loops"]
+        )
+
+    @property
+    def num_multi_edges(self) -> int:
+        assert self.background_graph is not None
+
+        return (
+            sum(community.diagnostics["num_multi_edges"] for community in self.communities)
+            + self.background_graph.diagnostics["num_multi_edges"]
+        )
+
+    @property
+    def xi_matrix(self) -> NDArray[np.float64]:
+        if self._params.xi == 0:
+            raise ValueError("xi_matrix only available if xi > 0")
+
+        return XiMatrixBuilder(self._params.xi, self.communities, self._adj_dict, self.deg_b).build()
 
     @property
     def degree_sequence(self) -> dict[int, int]:
@@ -202,10 +351,11 @@ class ABCDGraph(AbstractGraph):
             community_obj = Community(
                 edges=[Edge(e[0], e[1]) for e in community_edges],
                 vertices=community_vertices,
+                deg_b=self.deg_b,
                 deg_c=self.deg_c,
                 community_id=community_id,
             )
-            community_obj.rewire_community(self.deg_b)
+            community_obj.rewire_community()
 
             assert len(build_recycle_list(community_obj.adj_dict)) == 0
 
@@ -281,3 +431,61 @@ def rewire_edge(adj_matrix: dict["Edge", int], edge: "Edge", other_edge: "Edge")
         adj_matrix[new_edge] += 1
     else:
         adj_matrix[new_edge] = 1
+
+
+class XiMatrixBuilder:
+    def __init__(
+        self,
+        xi: float,
+        communities: list[Community],
+        adj_matrix: dict[Edge, int],
+        deg_b: dict[int, int],
+    ) -> None:
+        self.xi = xi
+        self.communities = communities
+        self._community_len = len(communities)
+        self.adj_matrix = adj_matrix
+        self.deg_b = deg_b
+
+        self.location: dict[int, int] = {}
+        self.actual_betweenness_matrix = np.zeros((self._community_len, self._community_len))
+        self.expected_betweenness_matrix = np.zeros((self._community_len, self._community_len))
+        self.normalized_betweeness_matrix = np.zeros((self._community_len, self._community_len))
+
+    def _build_location(self) -> None:
+        for i, c in enumerate(self.communities):
+            for v in c.vertices:
+                self.location[v] = i
+
+    def _build_actual_matrix(self) -> None:
+        for edge in self.adj_matrix:
+            self.actual_betweenness_matrix[self.location[edge.v1]][self.location[edge.v2]] += 1
+            self.actual_betweenness_matrix[self.location[edge.v2]][self.location[edge.v1]] += 1
+
+    def _build_expectation_matrix(self) -> None:
+        bottom = sum(self.deg_b.values()) - 1
+        for i, c_i in enumerate(self.communities):
+            for j, c_j in enumerate(self.communities):
+                vol_i = sum(c_i.degree_sequence.values()) * c_i.empirical_xi
+                vol_j = sum(c_j.degree_sequence.values()) * c_j.empirical_xi
+                top = vol_i * vol_j
+                self.expected_betweenness_matrix[i][j] = top / bottom
+                self.expected_betweenness_matrix[j][i] = top / bottom
+
+    def _build_normalized_matrix(self) -> None:
+        for i, c_i in enumerate(self.communities):
+            for j, c_j in enumerate(self.communities):
+                if i == j:
+                    self.normalized_betweeness_matrix[i][j] = (1 - c_i.empirical_xi) / (1 - self.xi)
+                else:
+                    self.normalized_betweeness_matrix[i][j] = (
+                        self.actual_betweenness_matrix[i][j] / self.expected_betweenness_matrix[i][j]
+                    )
+
+    def build(self) -> NDArray[np.float64]:
+        self._build_location()
+        self._build_actual_matrix()
+        self._build_expectation_matrix()
+        self._build_normalized_matrix()
+
+        return self.normalized_betweeness_matrix

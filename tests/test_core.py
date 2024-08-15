@@ -76,7 +76,7 @@ def test_core(n, gamma, beta, model):
     assert sum(deg_c.values()) + sum(deg_b.values()) == sum(deg.values())
 
     g = (
-        ABCDGraph(deg_b, deg_c)
+        ABCDGraph(deg_b, deg_c, params)
         .build_communities(communities, model)
         .build_background_edges(model)
         .combine_edges()
