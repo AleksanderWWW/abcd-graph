@@ -61,6 +61,14 @@ if TYPE_CHECKING:
     from abcd_graph.api.abcd_params import ABCDParams
 
 
+class GraphExporter:
+    def __init__(self, graph: "ABCDGraph") -> None:
+        self.graph = graph
+
+    def to_adjacency_matrix(self) -> NDArray[np.bool_]:
+        return self.graph.to_adj_matrix()
+
+
 class Graph:
     def __init__(
         self,
@@ -76,7 +84,7 @@ class Graph:
 
         self._model_used: Optional[Model] = None
 
-        self._build_time = 0
+        self._build_time: float = 0
 
     def reset(self) -> None:
         self._graph = None
@@ -98,7 +106,7 @@ class Graph:
             "number_of_multi_edges": self.num_multi_edges,
             "time_to_build": self._build_time,
             "expected_average_degree": self.expected_average_degree,
-            "actual_average_degree": self.actual_average_degree,
+            "actual_average_degree": self.average_degree,
             "expected_average_community_size": self.expected_average_community_size,
             "actual_average_community_size": self.actual_average_community_size,
         }
@@ -117,15 +125,39 @@ class Graph:
 
     @property
     @require_graph_built
-    def actual_average_degree(self) -> float:
+    def average_degree(self) -> float:
         assert self._graph is not None
-        return self._graph.actual_average_degree
+        return self._graph.average_degree
 
     @property
     @require_graph_built
     def expected_average_degree(self) -> float:
         assert self._graph is not None
         return self._graph.expected_average_degree
+
+    @property
+    @require_graph_built
+    def actual_degree_cdf(self) -> dict[int, float]:
+        assert self._graph is not None
+        return self._graph.actual_degree_cdf
+
+    @property
+    @require_graph_built
+    def expected_degree_cdf(self) -> dict[int, float]:
+        assert self._graph is not None
+        return self._graph.expected_degree_cdf
+
+    @property
+    @require_graph_built
+    def actual_community_cdf(self) -> dict[int, float]:
+        assert self._graph is not None
+        return self._graph.actual_community_cdf
+
+    @property
+    @require_graph_built
+    def expected_community_cdf(self) -> dict[int, float]:
+        assert self._graph is not None
+        return self._graph.expected_community_cdf
 
     @property
     @require_graph_built
@@ -156,8 +188,6 @@ class Graph:
     ) -> None:
         assert self._graph is not None
 
-        import matplotlib.pyplot as plt
-
     @property
     @require("matplotlib")
     @require_graph_built
@@ -165,8 +195,6 @@ class Graph:
         self,
     ) -> None:
         assert self._graph is not None
-
-        import matplotlib.pyplot as plt
 
     @property
     @require_graph_built
