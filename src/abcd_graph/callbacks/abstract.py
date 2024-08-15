@@ -18,38 +18,28 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-__all__ = ["rand_round", "powerlaw_distribution", "get_community_color_map"]
+import datetime
+from abc import ABC
+from dataclasses import dataclass
+from typing import Optional
 
-import math
-import random
-from typing import TYPE_CHECKING
-
-import numpy as np
-from numpy.typing import NDArray
-
-if TYPE_CHECKING:
-    from abcd_graph.core.abcd_objects.community import Community
+from abcd_graph.api.abcd_models import Model
+from abcd_graph.api.abcd_params import ABCDParams
+from abcd_graph.core.abcd_objects.graph import ABCDGraph
+from abcd_graph.core.exporter import GraphExporter
 
 
-def rand_round(x: float) -> int:
-    p = x - math.floor(x)
-    return int(math.floor(x) + 1) if random.uniform(0, 1) <= p else int(math.floor(x))
+@dataclass
+class BuildContext:
+    model_used: Model
+    start_time: datetime.datetime
+    params: ABCDParams
+    number_of_nodes: int
+    end_time: Optional[datetime.datetime] = None
+    raw_build_time: Optional[float] = None
 
 
-def powerlaw_distribution(choices: NDArray[np.int64], intensity: float) -> NDArray[np.float64]:
-    dist: NDArray[np.float64] = (choices ** (-intensity)) / np.sum(choices ** (-intensity))
-    return dist
+class ABCDCallback(ABC):
+    def before_build(self, context: BuildContext) -> None: ...
 
-
-def get_community_color_map(communities: list["Community"]) -> list[str]:
-    import matplotlib.colors as colors  # type: ignore[import]
-
-    colors_list = list(colors.BASE_COLORS.values())[: len(communities)]
-
-    color_map = []
-
-    for i, community in enumerate(communities):
-        color = colors_list[i]
-        color_map.extend([color] * len(community.vertices))
-
-    return color_map
+    def after_build(self, graph: ABCDGraph, context: BuildContext, exporter: GraphExporter) -> None: ...

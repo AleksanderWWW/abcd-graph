@@ -25,15 +25,15 @@ from typing import Any
 import numpy as np
 from numpy.typing import NDArray
 
-from abcd_graph.core.utils import (
-    powerlaw_distribution,
-    rand_round,
-)
-from abcd_graph.typing import (
+from abcd_graph.core.typing import (
     Communities,
     CommunitySizes,
     Degrees,
     DegreeSequence,
+)
+from abcd_graph.core.utils import (
+    powerlaw_distribution,
+    rand_round,
 )
 
 

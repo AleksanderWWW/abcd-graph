@@ -18,38 +18,45 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-__all__ = ["rand_round", "powerlaw_distribution", "get_community_color_map"]
-
-import math
-import random
-from typing import TYPE_CHECKING
+from typing import Optional
 
 import numpy as np
 from numpy.typing import NDArray
 
-if TYPE_CHECKING:
-    from abcd_graph.core.abcd_objects.community import Community
+from abcd_graph.callbacks.abstract import (
+    ABCDCallback,
+    BuildContext,
+)
+from abcd_graph.core.abcd_objects.community import Community
+from abcd_graph.core.abcd_objects.graph import ABCDGraph
+from abcd_graph.core.exporter import GraphExporter
 
 
-def rand_round(x: float) -> int:
-    p = x - math.floor(x)
-    return int(math.floor(x) + 1) if random.uniform(0, 1) <= p else int(math.floor(x))
+class PropertyCollector(ABCDCallback):
+    def __init__(self) -> None:
+        self._communities: list[Community] = []
 
+        self._degree_sequence: dict[int, int] = {}
 
-def powerlaw_distribution(choices: NDArray[np.int64], intensity: float) -> NDArray[np.float64]:
-    dist: NDArray[np.float64] = (choices ** (-intensity)) / np.sum(choices ** (-intensity))
-    return dist
+        self._xi_matrix: Optional[NDArray[np.float64]] = None
 
+    def after_build(self, graph: ABCDGraph, context: BuildContext, exporter: GraphExporter) -> None:
+        self._communities = graph.communities
 
-def get_community_color_map(communities: list["Community"]) -> list[str]:
-    import matplotlib.colors as colors  # type: ignore[import]
+        self._degree_sequence = graph.degree_sequence
 
-    colors_list = list(colors.BASE_COLORS.values())[: len(communities)]
+        self._xi_matrix = graph.xi_matrix
 
-    color_map = []
+    @property
+    def vertex_partition(self) -> dict[int, list[int]]:
+        return {i: community.vertices for i, community in enumerate(self._communities)}
 
-    for i, community in enumerate(communities):
-        color = colors_list[i]
-        color_map.extend([color] * len(community.vertices))
+    @property
+    def degree_sequence(self) -> dict[int, int]:
+        return self._degree_sequence
 
-    return color_map
+    @property
+    def xi_matrix(self) -> NDArray[np.float64]:
+        assert self._xi_matrix is not None
+
+        return self._xi_matrix

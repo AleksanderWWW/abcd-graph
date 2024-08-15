@@ -17,39 +17,8 @@
 # LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
+__all__ = ["StatsCollector", "PropertyCollector", "Visualizer"]
 
-__all__ = ["rand_round", "powerlaw_distribution", "get_community_color_map"]
-
-import math
-import random
-from typing import TYPE_CHECKING
-
-import numpy as np
-from numpy.typing import NDArray
-
-if TYPE_CHECKING:
-    from abcd_graph.core.abcd_objects.community import Community
-
-
-def rand_round(x: float) -> int:
-    p = x - math.floor(x)
-    return int(math.floor(x) + 1) if random.uniform(0, 1) <= p else int(math.floor(x))
-
-
-def powerlaw_distribution(choices: NDArray[np.int64], intensity: float) -> NDArray[np.float64]:
-    dist: NDArray[np.float64] = (choices ** (-intensity)) / np.sum(choices ** (-intensity))
-    return dist
-
-
-def get_community_color_map(communities: list["Community"]) -> list[str]:
-    import matplotlib.colors as colors  # type: ignore[import]
-
-    colors_list = list(colors.BASE_COLORS.values())[: len(communities)]
-
-    color_map = []
-
-    for i, community in enumerate(communities):
-        color = colors_list[i]
-        color_map.extend([color] * len(community.vertices))
-
-    return color_map
+from abcd_graph.callbacks.property_collector import PropertyCollector
+from abcd_graph.callbacks.stats_collector import StatsCollector
+from abcd_graph.callbacks.visualizer import Visualizer

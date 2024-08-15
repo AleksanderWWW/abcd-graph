@@ -24,6 +24,7 @@ from abcd_graph.api.abcd_models import (
     chung_lu,
     configuration_model,
 )
+from abcd_graph.core.abcd_objects.graph import ABCDGraph
 from abcd_graph.core.build import (
     assign_degrees,
     build_communities,
@@ -31,7 +32,6 @@ from abcd_graph.core.build import (
     build_degrees,
     split_degrees,
 )
-from abcd_graph.core.models import ABCDGraph
 
 
 @pytest.mark.parametrize("n", [100, 10000])

@@ -24,19 +24,21 @@ __all__ = [
 
 import time
 import warnings
+from datetime import datetime
 from typing import (
     TYPE_CHECKING,
-    Any,
     Optional,
 )
-
-import numpy as np
-from numpy.typing import NDArray
 
 from abcd_graph.api.abcd_models import (
     Model,
     configuration_model,
 )
+from abcd_graph.callbacks.abstract import (
+    ABCDCallback,
+    BuildContext,
+)
+from abcd_graph.core.abcd_objects.graph import ABCDGraph
 from abcd_graph.core.build import (
     assign_degrees,
     build_communities,
@@ -44,37 +46,16 @@ from abcd_graph.core.build import (
     build_degrees,
     split_degrees,
 )
-from abcd_graph.core.exceptions import MalformedGraphException
-from abcd_graph.core.models import ABCDGraph
-from abcd_graph.core.utils import get_community_color_map
+from abcd_graph.core.exporter import GraphExporter
 from abcd_graph.logger import construct_logger
-from abcd_graph.utils import (
-    require,
-    require_graph_built,
-)
 
 if TYPE_CHECKING:
-    from igraph import Graph as IGraph  # type: ignore[import]
-    from networkx import Graph as NetworkXGraph  # type: ignore[import]
-    from scipy.sparse import csr_matrix  # type: ignore[import]
-
     from abcd_graph.api.abcd_params import ABCDParams
-
-
-class GraphExporter:
-    def __init__(self, graph: "ABCDGraph") -> None:
-        self.graph = graph
-
-    def to_adjacency_matrix(self) -> NDArray[np.bool_]:
-        return self.graph.to_adj_matrix()
 
 
 class Graph:
     def __init__(
-        self,
-        params: "ABCDParams",
-        n: int = 1000,
-        logger: bool = False,
+        self, params: "ABCDParams", n: int = 1000, logger: bool = False, callbacks: Optional[list[ABCDCallback]] = None
     ) -> None:
         self.params = params
         self.n = n
@@ -84,211 +65,35 @@ class Graph:
 
         self._model_used: Optional[Model] = None
 
-        self._build_time: float = 0
+        self.exporter: Optional[GraphExporter] = None
+        self._callbacks = callbacks or []
 
     def reset(self) -> None:
         self._graph = None
         self._model_used = None
 
     @property
-    @require_graph_built
-    def summary(self) -> dict[str, Any]:
-        assert self._graph is not None
-        assert self._model_used is not None
-        return {
-            "number_of_nodes": self.n,
-            "params": self.params,
-            "number_of_edges": self.num_edges,
-            "number_of_communities": self.num_communities,
-            "model": self._model_used.__name__,
-            "empirical_xi": self.empirical_xi,
-            "number_of_loops": self.num_loops,
-            "number_of_multi_edges": self.num_multi_edges,
-            "time_to_build": self._build_time,
-            "expected_average_degree": self.expected_average_degree,
-            "actual_average_degree": self.average_degree,
-            "expected_average_community_size": self.expected_average_community_size,
-            "actual_average_community_size": self.actual_average_community_size,
-        }
-
-    @property
-    @require_graph_built
-    def expected_average_community_size(self) -> float:
-        assert self._graph is not None
-        return self._graph.expected_average_community_size
-
-    @property
-    @require_graph_built
-    def actual_average_community_size(self) -> float:
-        assert self._graph is not None
-        return self._graph.actual_average_community_size
-
-    @property
-    @require_graph_built
-    def average_degree(self) -> float:
-        assert self._graph is not None
-        return self._graph.average_degree
-
-    @property
-    @require_graph_built
-    def expected_average_degree(self) -> float:
-        assert self._graph is not None
-        return self._graph.expected_average_degree
-
-    @property
-    @require_graph_built
-    def actual_degree_cdf(self) -> dict[int, float]:
-        assert self._graph is not None
-        return self._graph.actual_degree_cdf
-
-    @property
-    @require_graph_built
-    def expected_degree_cdf(self) -> dict[int, float]:
-        assert self._graph is not None
-        return self._graph.expected_degree_cdf
-
-    @property
-    @require_graph_built
-    def actual_community_cdf(self) -> dict[int, float]:
-        assert self._graph is not None
-        return self._graph.actual_community_cdf
-
-    @property
-    @require_graph_built
-    def expected_community_cdf(self) -> dict[int, float]:
-        assert self._graph is not None
-        return self._graph.expected_community_cdf
-
-    @property
-    @require_graph_built
-    def xi_matrix(self) -> NDArray[np.float64]:
-        assert self._graph is not None
-
-        return self._graph.xi_matrix
-
-    @property
-    @require_graph_built
-    def num_loops(self) -> int:
-        assert self._graph is not None
-
-        return self._graph.num_loops
-
-    @property
-    @require_graph_built
-    def num_multi_edges(self) -> int:
-        assert self._graph is not None
-
-        return self._graph.num_multi_edges
-
-    @property
-    @require("matplotlib")
-    @require_graph_built
-    def draw_community_size_distribution(
-        self,
-    ) -> None:
-        assert self._graph is not None
-
-    @property
-    @require("matplotlib")
-    @require_graph_built
-    def draw_degree_distribution(
-        self,
-    ) -> None:
-        assert self._graph is not None
-
-    @property
-    @require_graph_built
-    def num_communities(self) -> int:
-        assert self._graph is not None
-        return self._graph.num_communities
-
-    @property
-    @require_graph_built
-    def num_edges(self) -> int:
-        assert self._graph is not None
-        return len(self._graph.edges)
-
-    @property
     def is_built(self) -> bool:
         return self._graph is not None
 
-    @property
-    @require_graph_built
-    def is_proper_abcd(self) -> bool:
-        assert self._graph is not None
-        return self._graph.is_proper_abcd
-
-    @require_graph_built
-    def to_adjacency_matrix(self) -> NDArray[np.bool_]:
-        if not self.is_proper_abcd:
-            raise MalformedGraphException("Graph is not proper ABCD so the adjacency matrix cannot be built")
-
-        assert self._graph is not None
-        return self._graph.to_adj_matrix()
-
-    @require("scipy")
-    @require_graph_built
-    def to_sparse_adjacency_matrix(self) -> "csr_matrix":  # type: ignore[no-any-unimported]
-        from scipy.sparse import csr_matrix
-
-        if not self.is_proper_abcd:
-            raise MalformedGraphException("Graph is not proper ABCD so the adjacency matrix cannot be built")
-
-        assert self._graph is not None
-        return csr_matrix(self.to_adjacency_matrix())
-
-    @require("igraph")
-    @require_graph_built
-    def to_igraph(self) -> "IGraph":  # type: ignore[no-any-unimported]
-        import igraph
-
-        assert self._graph is not None
-        return igraph.Graph(self._graph.edges)
-
-    @require("networkx")
-    @require_graph_built
-    def to_networkx(self) -> "NetworkXGraph":  # type: ignore[no-any-unimported]
-        import networkx as nx
-
-        assert self._graph is not None
-
-        graph = nx.Graph()
-
-        graph.add_nodes_from(range(self.n))
-        graph.add_edges_from(self._graph.edges)
-        return graph
-
-    @require("networkx")
-    @require("matplotlib")
-    @require_graph_built
-    def draw_communities(self) -> None:
-        if self._model_used is not None and self._model_used.__name__ != "configuration_model":
-            raise NotImplementedError("Drawing communities is only supported for the configuration model")
-
-        assert self._graph is not None
-
-        if not self.is_proper_abcd:
-            warnings.warn("Graph is not proper ABCD so the community coloring may not be accurate")
-
-        import networkx as nx
-        from matplotlib import pyplot as plt  # type: ignore[import]
-
-        nx_g = self.to_networkx()
-
-        color_map = get_community_color_map(communities=self._graph.communities)
-
-        nx.draw(nx_g, node_color=color_map, with_labels=True, font_weight="bold")
-        plt.show()
-
     def build(self, model: Optional[Model] = None) -> "Graph":
-        start = time.perf_counter()
         if self.is_built:
             warnings.warn("Graph has already been built. Run `reset` and try again.")
             return self
 
         model = model if model else configuration_model
 
-        self._model_used = model
+        context = BuildContext(
+            model_used=model,
+            start_time=datetime.now(),
+            params=self.params,
+            number_of_nodes=self.n,
+        )
+
+        for callback in self._callbacks:
+            callback.before_build(context)
+
+        build_start = time.perf_counter()
 
         degrees = build_degrees(
             self.n,
@@ -331,36 +136,14 @@ class Graph:
 
         self._graph.rewire_graph()
 
-        self._build_time = time.perf_counter() - start
+        build_end = time.perf_counter()
+
+        context.end_time = datetime.now()
+        context.raw_build_time = build_end - build_start
+
+        self.exporter = GraphExporter(self._graph, self.n)
+
+        for callback in self._callbacks:
+            callback.after_build(self._graph, context, self.exporter)
+
         return self
-
-    @property
-    @require_graph_built
-    def vertex_partition(self) -> dict[int, list[int]]:
-        assert self._graph is not None
-
-        return {i: community.vertices for i, community in enumerate(self._graph.communities)}
-
-    @require_graph_built
-    def to_edge_list(self) -> NDArray[np.int64]:
-        assert self._graph is not None
-
-        return np.array(self._graph.edges).reshape(-1, 2)
-
-    # The empirical xi is the fraction of background edges to total edges
-    @property
-    @require_graph_built
-    def empirical_xi(self) -> float:
-        assert self._graph is not None
-
-        num_edges = len(self._graph.edges)
-        num_community_edges = sum(len(community.edges) for community in self._graph.communities)
-        return 1 - (num_community_edges / num_edges)
-
-    # This should be the same as self._graph.deg_b + self._graph.deg_c
-    @property
-    @require_graph_built
-    def degree_sequence(self) -> dict[int, int]:
-        assert self._graph is not None
-
-        return self._graph.degree_sequence
