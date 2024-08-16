@@ -27,8 +27,8 @@ from abcd_graph.callbacks.abstract import (
     ABCDCallback,
     BuildContext,
 )
+from abcd_graph.core.abcd_objects.abcd_graph import ABCDGraph
 from abcd_graph.core.abcd_objects.community import Community
-from abcd_graph.core.abcd_objects.graph import ABCDGraph
 from abcd_graph.core.exporter import GraphExporter
 
 
@@ -40,12 +40,28 @@ class PropertyCollector(ABCDCallback):
 
         self._xi_matrix: Optional[NDArray[np.float64]] = None
 
+        self._expected_degree_cdf: dict[int, float] = {}
+
+        self._actual_degree_cdf: dict[int, float] = {}
+
+        self._expected_community_cdf: dict[int, float] = {}
+
+        self._actual_community_cdf: dict[int, float] = {}
+
     def after_build(self, graph: ABCDGraph, context: BuildContext, exporter: GraphExporter) -> None:
         self._communities = graph.communities
 
         self._degree_sequence = graph.degree_sequence
 
         self._xi_matrix = graph.xi_matrix
+
+        self._expected_degree_cdf = graph.expected_degree_cdf
+
+        self._actual_degree_cdf = graph.actual_degree_cdf
+
+        self._expected_community_cdf = graph.expected_community_cdf
+
+        self._actual_community_cdf = graph.actual_community_cdf
 
     @property
     def vertex_partition(self) -> dict[int, list[int]]:
@@ -60,3 +76,19 @@ class PropertyCollector(ABCDCallback):
         assert self._xi_matrix is not None
 
         return self._xi_matrix
+
+    @property
+    def expected_degree_cdf(self) -> dict[int, float]:
+        return self._expected_degree_cdf
+
+    @property
+    def actual_degree_cdf(self) -> dict[int, float]:
+        return self._actual_degree_cdf
+
+    @property
+    def expected_community_cdf(self) -> dict[int, float]:
+        return self._expected_community_cdf
+
+    @property
+    def actual_community_cdf(self) -> dict[int, float]:
+        return self._actual_community_cdf

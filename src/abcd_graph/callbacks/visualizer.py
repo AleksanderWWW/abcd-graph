@@ -25,8 +25,8 @@ from abcd_graph.callbacks.abstract import (
     ABCDCallback,
     BuildContext,
 )
+from abcd_graph.core.abcd_objects.abcd_graph import ABCDGraph
 from abcd_graph.core.abcd_objects.community import Community
-from abcd_graph.core.abcd_objects.graph import ABCDGraph
 from abcd_graph.core.exporter import GraphExporter
 from abcd_graph.core.utils import get_community_color_map
 from abcd_graph.utils import require

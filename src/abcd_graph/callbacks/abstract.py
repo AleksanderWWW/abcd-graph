@@ -25,7 +25,7 @@ from typing import Optional
 
 from abcd_graph.api.abcd_models import Model
 from abcd_graph.api.abcd_params import ABCDParams
-from abcd_graph.core.abcd_objects.graph import ABCDGraph
+from abcd_graph.core.abcd_objects.abcd_graph import ABCDGraph
 from abcd_graph.core.exporter import GraphExporter
 
 

@@ -36,7 +36,7 @@ from abcd_graph.callbacks.abstract import (
     ABCDCallback,
     BuildContext,
 )
-from abcd_graph.core.abcd_objects.graph import ABCDGraph
+from abcd_graph.core.abcd_objects.abcd_graph import ABCDGraph
 from abcd_graph.core.build import (
     assign_degrees,
     build_communities,
@@ -50,9 +50,14 @@ from abcd_graph.logger import construct_logger
 
 class Graph:
     def __init__(
-        self, params: "ABCDParams", n: int = 1000, logger: bool = False, callbacks: Optional[list[ABCDCallback]] = None
+        self,
+        params: Optional[ABCDParams] = None,
+        n: int = 1000,
+        logger: bool = False,
+        callbacks: Optional[list[ABCDCallback]] = None,
     ) -> None:
-        self.params = params
+
+        self.params = params or ABCDParams()
         self.n = n
         self.logger = construct_logger(logger)
 
