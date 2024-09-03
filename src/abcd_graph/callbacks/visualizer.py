@@ -37,17 +37,60 @@ class Visualizer(ABCDCallback):
         self._communities: list[Community] = []
         self._model_used: Optional[Model] = None
         self._exporter: Optional[GraphExporter] = None
+        self._graph: Optional[ABCDGraph] = None
 
     def after_build(self, graph: ABCDGraph, context: BuildContext, exporter: GraphExporter) -> None:
         self._communities = graph.communities
         self._model_used = context.model_used
         self._exporter = exporter
 
-    @require("matplotlib")
-    def draw_community_size_distribution(self) -> None: ...
+        self._graph = graph
 
     @require("matplotlib")
-    def draw_degree_distribution(self) -> None: ...
+    def draw_community_cdf(self) -> None:
+        import matplotlib.pyplot as plt  # type: ignore[import]
+
+        assert self._graph is not None
+
+        actual_cdf = self._graph.actual_community_cdf
+        expected_cdf = self._graph.expected_community_cdf
+
+        x_actual = list(actual_cdf.keys())
+        x_expected = list(expected_cdf.keys())
+        y_actual = list(actual_cdf.values())
+        y_expected = list(expected_cdf.values())
+
+        plt.plot(x_actual, y_actual, label="Actual")
+        plt.plot(x_expected, y_expected, label="Expected")
+
+        plt.xlabel("Community Size")
+        plt.ylabel("CDF")
+        plt.legend()
+        plt.title("Community size CDF")
+        plt.show()
+
+    @require("matplotlib")
+    def draw_degree_cdf(self) -> None:
+        import matplotlib.pyplot as plt
+
+        assert self._graph is not None
+
+        actual_cdf = self._graph.actual_degree_cdf
+        expected_cdf = self._graph.expected_degree_cdf
+
+        x_actual = list(actual_cdf.keys())
+        x_expected = list(expected_cdf.keys())
+        y_actual = list(actual_cdf.values())
+        y_expected = list(expected_cdf.values())
+
+        plt.plot(x_actual, y_actual, label="Actual")
+        plt.plot(x_expected, y_expected, label="Expected")
+
+        plt.xlabel("Degree")
+        plt.ylabel("CDF")
+        plt.legend()
+        plt.title("Degree CDF")
+        plt.show()
 
     @require("networkx")
     @require("matplotlib")
@@ -56,7 +99,7 @@ class Visualizer(ABCDCallback):
             raise NotImplementedError("Drawing communities is only supported for the configuration model")
 
         import networkx as nx  # type: ignore[import]
-        from matplotlib import pyplot as plt  # type: ignore[import]
+        from matplotlib import pyplot as plt
 
         assert self._exporter is not None
 
