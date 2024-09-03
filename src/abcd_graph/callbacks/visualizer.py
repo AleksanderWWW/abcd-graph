@@ -95,6 +95,10 @@ class Visualizer(ABCDCallback):
     @require("networkx")
     @require("matplotlib")
     def draw_communities(self) -> None:
+        assert self._graph is not None
+        if len(self._graph.deg_b) > 100:
+            raise ValueError("Drawing communities is only supported for graphs with at most 100 vertices")
+
         if self._model_used is not None and self._model_used.__name__ != "configuration_model":
             raise NotImplementedError("Drawing communities is only supported for the configuration model")
 
