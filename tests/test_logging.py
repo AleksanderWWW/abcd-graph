@@ -52,7 +52,7 @@ def test_default_logging_level(caplog):
     assert "critical" in captured_stdout
 
 
-@patch.dict(os.environ, {"ABCD_LOGGING_LEVEL": f"{logging.CRITICAL}"})
+@patch.dict(os.environ, {"ABCD_LOG": f"{logging.CRITICAL}"})
 def test_env_var_for_logging_level(caplog):
     logger = StdOutLogger()
     caplog.set_level(logger.logging_level)

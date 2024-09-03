@@ -18,10 +18,28 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-__all__ = [
-    "Graph",
-    "ABCDParams",
-]
+import datetime
+from abc import ABC
+from dataclasses import dataclass
+from typing import Optional
 
+from abcd_graph.api.abcd_models import Model
 from abcd_graph.api.abcd_params import ABCDParams
-from abcd_graph.graph import Graph
+from abcd_graph.core.abcd_objects.abcd_graph import ABCDGraph
+from abcd_graph.core.exporter import GraphExporter
+
+
+@dataclass
+class BuildContext:
+    model_used: Model
+    start_time: datetime.datetime
+    params: ABCDParams
+    number_of_nodes: int
+    end_time: Optional[datetime.datetime] = None
+    raw_build_time: Optional[float] = None
+
+
+class ABCDCallback(ABC):
+    def before_build(self, context: BuildContext) -> None: ...
+
+    def after_build(self, graph: ABCDGraph, context: BuildContext, exporter: GraphExporter) -> None: ...

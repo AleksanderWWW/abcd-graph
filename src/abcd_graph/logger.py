@@ -76,7 +76,7 @@ class StdOutLogger(ABCDLogger):
     NAME = "abcd-graph"
 
     def __init__(self) -> None:
-        logging_level = int(os.getenv("ABCD_LOGGING_LEVEL", logging.INFO))
+        logging_level = int(os.getenv("ABCD_LOG", logging.INFO))
         logging.basicConfig(
             level=logging_level,
             format="[%(name)s] - %(asctime)s - %(levelname)s - %(message)s",

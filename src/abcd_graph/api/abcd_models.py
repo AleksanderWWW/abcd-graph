@@ -29,7 +29,7 @@ from typing import Protocol
 import numpy as np
 from numpy.typing import NDArray
 
-from abcd_graph.typing import (
+from abcd_graph.core.typing import (
     Degrees,
     DegreeSequence,
 )
