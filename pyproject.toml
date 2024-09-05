@@ -1,11 +1,12 @@
 [tool.poetry]
 name = "abcd-graph"
 version = "0.2.1"
-description = ""
-authors = ["Your Name <you@example.com>"]
+description = "A python library for generating ABCD graphs."
+authors = ["Aleksander Wojnarowicz", "Jordan Barrett"]
 license = "MIT"
 readme = "README.md"
 packages = [{include = "abcd_graph", from = "src"}]
+repository = "https://github.com/AleksanderWWW/abcd-graph"
 
 [tool.poetry.dependencies]
 python = "^3.10"
