@@ -1,11 +1,13 @@
-FROM python:3.9.19
+FROM python:3.11.9-slim
+
 WORKDIR /home/abcd-graph
 
-RUN apt-get update && apt-get -y upgrade
-RUN apt-get install -y build-essential
-
 RUN python -m pip install --upgrade pip
-COPY . .
-RUN pip install -e .
-RUN git config --global --add safe.directory /home/abcd-graph
+
+COPY pyproject.toml poetry.lock README.md ./
+
+COPY src src/
+
+RUN pip install --no-cache-dir -e .
+
 CMD ["/bin/bash"]
