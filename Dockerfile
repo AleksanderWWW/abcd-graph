@@ -1,11 +1,19 @@
-FROM python:3.9.19
+FROM python:3.11.9-slim
+
+# Choose the type of installation (default - just the base package)
+ARG INSTALL_TYPE=normal
+
 WORKDIR /home/abcd-graph
 
-RUN apt-get update && apt-get -y upgrade
-RUN apt-get install -y build-essential
-
 RUN python -m pip install --upgrade pip
-COPY . .
-RUN pip install -e .
-RUN git config --global --add safe.directory /home/abcd-graph
-CMD ["/bin/bash"]
+
+COPY pyproject.toml poetry.lock README.md ./
+
+COPY src src/
+
+# Install the project
+RUN if [ "$INSTALL_TYPE" = "normal" ]; then \
+        pip install --no-cache-dir -e . ; \
+    else \
+        pip install --no-cache-dir -e .[$INSTALL_TYPE] ; \
+    fi

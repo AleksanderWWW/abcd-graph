@@ -2,9 +2,20 @@
 A python library for generating ABCD graphs.
 
 ## Installation
+
+### Using `pip`
 ```bash
 pip install abcd-graph
 ```
+Project available at [PyPI](https://pypi.org/project/abcd-graph/).
+
+### From source
+```bash
+git clone
+cd abcd-graph
+pip install .
+```
+
 
 ## Usage
 ```python
@@ -97,3 +108,43 @@ print(props.xi_matrix)
 
 vis.draw_community_cdf()
 ```
+
+## Docker
+
+To build a docker image containing the library, run:
+
+```bash
+docker build -t abcd-graph .
+```
+
+To run the image, use:
+
+```bash
+docker run -it abcd-graph /bin/bash
+```
+This will give you a terminal inside a container with the library installed.
+
+Available are also installation commands for the additional packages:
+
+```bash
+docker build -t abcd-test --build-arg INSTALL_TYPE=igraph .
+```
+
+Possible values for `INSTALL_TYPE` are `dev`, `matplotlib`,  `networkx`, `igraph`, `scipy`, `all` and `extended`.
+
+| Value        | Packages installed                                                                |
+|--------------|-----------------------------------------------------------------------------------|
+| `dev`        | `pytest`, `pre-commit`, `pytest-cov`                                              |
+| `matplotlib` | `matplotlib`                                                                      |
+| `networkx`   | `networkx`                                                                        |
+| `igraph`     | `igraph`                                                                          |
+| `scipy`      | `scipy`                                                                           |
+| `all`        | `networkx`, `igraph`, `scipy`, `pytest`, `pre-commit`, `pytest-cov`, `matplotlib` |
+| `extended`   | `scipy`, `matplotlib`                                                             |
+
+> [!NOTE]
+> Combinations of the above values are also possible, e.g. `igraph,networkx`.
+
+> [!WARNING]
+> If you choose and option outside the available ones, the installation will still succeed,
+> but only the base package will be installed.

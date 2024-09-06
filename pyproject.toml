@@ -47,6 +47,11 @@ all = [
     "scipy",
 ]
 
+extended = [
+    "scipy",
+    "matplotlib",
+]
+
 
 [build-system]
 requires = ["poetry-core"]

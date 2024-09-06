@@ -1,3 +1,12 @@
+## [UNRELEASED] abc-graph 0.3.0
+
+### Features
+- Improved `Dockerfile` and added option to install additional packages during image build ([#28](https://github.com/AleksanderWWW/abcd-graph/pull/28))
+
+
+## abcd-graph 0.2.1
+
+
 ## abcd-graph 0.2.0
 
 ### Features
