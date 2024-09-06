@@ -142,5 +142,9 @@ Possible values for `INSTALL_TYPE` are `dev`, `matplotlib`,  `networkx`, `igraph
 | `all`        | `networkx`, `igraph`, `scipy`, `pytest`, `pre-commit`, `pytest-cov`, `matplotlib` |
 | `extended`   | `scipy`, `matplotlib`                                                             |
 
-Note that if you choose and option outside the available ones, the installation will still succeed,
-but only the base package will be installed.
+[!NOTE]
+> Combinations of the above values are also possible, e.g. `igraph,networkx`.
+
+[!WARNING]
+> If you choose and option outside the available ones, the installation will still succeed,
+> but only the base package will be installed.
