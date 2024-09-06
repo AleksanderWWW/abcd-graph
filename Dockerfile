@@ -14,12 +14,6 @@ COPY src src/
 # Install the project
 RUN if [ "$INSTALL_TYPE" = "normal" ]; then \
         pip install --no-cache-dir -e . ; \
-    elif [ "$INSTALL_TYPE" = "igraph" ]; then \
-        pip install --no-cache-dir -e .[igraph] ; \
-    elif [ "$INSTALL_TYPE" = "networkx" ]; then \
-        pip install --no-cache-dir -e .[networkx] ; \
-    elif [ "$INSTALL_TYPE" = "extended" ]; then \
-        pip install --no-cache-dir -e .[extended] ; \
     else \
-        echo "Invalid INSTALL_TYPE value: $INSTALL_TYPE" && exit 1 ; \
+        pip install --no-cache-dir -e .[$INSTALL_TYPE] ; \
     fi
