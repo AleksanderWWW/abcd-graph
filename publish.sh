@@ -17,11 +17,9 @@ fi
 
 echo "Tag is consistent with the current version. Proceeding with the release."
 
-poetry config pypi-token.pypi "$PYPI_TOKEN"
-
 poetry build
 
 # Publish to PyPI
-poetry publish
+poetry publish  --username __token__ --password "$1"
 
 echo "Published $CURRENT_VERSION to PyPI."
