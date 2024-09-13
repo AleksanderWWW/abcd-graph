@@ -30,4 +30,4 @@ jobs:
       - name: Install poetry
         run: pip install poetry
       - name: Publish
-        run: ./publish.sh
+        run: ./publish.sh ${{ secrets.PYPI_TOKEN }}
