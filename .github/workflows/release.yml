@@ -27,8 +27,7 @@ jobs:
       - uses: actions/setup-python@v2
         with:
           python-version: "3.12"
-      - name: Uploading to PyPI
-        uses: pypa/gh-action-pypi-publish@v1.9.0
-        with:
-          user: __token__
-          password: ${{ secrets.PYPI_TOKEN }}
+      - name: Install poetry
+        run: pip install poetry
+      - name: Publish
+        run: ./publish.sh ${{ secrets.PYPI_TOKEN }}
