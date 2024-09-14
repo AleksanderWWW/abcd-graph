@@ -1,5 +1,8 @@
 ## [UNRELEASED] abc-graph 0.3.0
 
+### Misc
+- Added an example of using the library in a Jupyter notebook ([#29](https://github.com/AleksanderWWW/abcd-graph/pull/29))
+
 ### Features
 - Improved `Dockerfile` and added option to install additional packages during image build ([#28](https://github.com/AleksanderWWW/abcd-graph/pull/28))
 
