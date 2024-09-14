@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "abcd-graph"
-version = "0.3.0-rc1"
+version = "0.3.0-rc3"
 description = "A python library for generating ABCD graphs."
 authors = ["Aleksander Wojnarowicz", "Jordan Barrett"]
 license = "MIT"
