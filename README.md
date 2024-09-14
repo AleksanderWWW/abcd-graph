@@ -54,6 +54,32 @@ Arguments:
 
 Parameters are validated when the object is created. If any of the parameters are invalid, a `ValueError` will be raised.
 
+### Communities and edges
+
+The `Graph` object has two properties that can be used to access the communities and edges of the graph.
+
+- `communities` - A list of `ABCDCommunity` objects.
+- `edges` - A list of tuples representing the edges of the graph.
+
+Example:
+```python
+
+from abcd_graph import Graph, ABCDParams
+
+params = ABCDParams()
+
+graph = Graph(params, n=1000, logger=True).build()
+
+print(graph.communities)
+print(graph.edges)
+```
+
+Communities have the following properties:
+- vertices - A list of vertices in the community.
+- average_degree - The average degree of the community.
+- degree_sequence - The degree sequence of the community.
+- empirical_xi - The empirical xi of the community.
+
 ### Exporting
 
 Exporting the graph to different formats is done via the `exporter` property of the `Graph` object.
@@ -66,7 +92,6 @@ Possible formats are:
 | `to_igraph()`                  | Export the graph to an `igraph.Graph` object.                                             | `igraph`          | `pip install abcd[igraph]`   |
 | `adj_matrix`                   | Export the graph to a `numpy.ndarray` object representing the adjacency matrix.           |                   |                              |
 | `to_sparse_adjacency_matrix()` | Export the graph to a `scipy.sparse.csr_matrix` object representing the adjacency matrix. | `scipy`           | `pip install abcd[scipy]`    |
-| `to_edge_list()`               | Export the graph to a list of tuples representing the edges.                              |                   |                              |
 
 
 Example:

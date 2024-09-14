@@ -78,8 +78,3 @@ class GraphExporter:
         graph.add_nodes_from(range(self._n))
         graph.add_edges_from(self._graph.edges)
         return graph
-
-    def to_edge_list(self) -> NDArray[np.int64]:
-        assert self._graph is not None
-
-        return np.array(self._graph.edges).reshape(-1, 2)

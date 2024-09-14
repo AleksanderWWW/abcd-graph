@@ -64,10 +64,6 @@ class PropertyCollector(ABCDCallback):
         self._actual_community_cdf = graph.actual_community_cdf
 
     @property
-    def vertex_partition(self) -> dict[int, list[int]]:
-        return {i: community.vertices for i, community in enumerate(self._communities)}
-
-    @property
     def degree_sequence(self) -> dict[int, int]:
         return self._degree_sequence
 

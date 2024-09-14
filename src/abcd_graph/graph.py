@@ -27,6 +27,7 @@ import warnings
 from datetime import datetime
 from typing import Optional
 
+from abcd_graph.api.abcd_community import ABCDCommunity
 from abcd_graph.api.abcd_models import (
     Model,
     configuration_model,
@@ -84,6 +85,27 @@ class Graph:
         assert self._exporter is not None
 
         return self._exporter
+
+    @property
+    def edges(self) -> list[tuple[int, int]]:
+        assert self._graph is not None
+
+        return self._graph.edges
+
+    @property
+    def communities(self) -> list[ABCDCommunity]:
+        assert self._graph is not None
+
+        return [
+            ABCDCommunity(
+                community_id=community.community_id,
+                vertices=community.vertices,
+                average_degree=community.average_degree,
+                degree_sequence=community.degree_sequence,
+                empirical_xi=community.empirical_xi,
+            )
+            for community in self._graph.communities
+        ]
 
     def build(self, model: Optional[Model] = None) -> "Graph":
         if self.is_built:
