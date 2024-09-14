@@ -27,8 +27,8 @@ from abcd_graph.callbacks.abstract import (
     ABCDCallback,
     BuildContext,
 )
-from abcd_graph.core.abcd_objects.abcd_graph import ABCDGraph
 from abcd_graph.core.abcd_objects.community import Community
+from abcd_graph.core.abcd_objects.graph_impl import GraphImpl
 from abcd_graph.core.exporter import GraphExporter
 
 
@@ -48,7 +48,7 @@ class PropertyCollector(ABCDCallback):
 
         self._actual_community_cdf: dict[int, float] = {}
 
-    def after_build(self, graph: ABCDGraph, context: BuildContext, exporter: GraphExporter) -> None:
+    def after_build(self, graph: GraphImpl, context: BuildContext, exporter: GraphExporter) -> None:
         self._communities = graph.communities
 
         self._degree_sequence = graph.degree_sequence

@@ -24,7 +24,7 @@ from abcd_graph.api.abcd_models import (
     chung_lu,
     configuration_model,
 )
-from abcd_graph.core.abcd_objects.abcd_graph import ABCDGraph
+from abcd_graph.core.abcd_objects.graph_impl import GraphImpl
 from abcd_graph.core.build import (
     assign_degrees,
     build_communities,
@@ -76,7 +76,7 @@ def test_core(n, gamma, beta, model):
     assert sum(deg_c.values()) + sum(deg_b.values()) == sum(deg.values())
 
     g = (
-        ABCDGraph(deg_b, deg_c, params)
+        GraphImpl(deg_b, deg_c, params)
         .build_communities(communities, model)
         .build_background_edges(model)
         .combine_edges()

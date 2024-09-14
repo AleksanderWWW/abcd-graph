@@ -19,7 +19,7 @@
 # SOFTWARE.
 
 __all__ = [
-    "Graph",
+    "ABCDGraph",
 ]
 
 import time
@@ -37,7 +37,7 @@ from abcd_graph.callbacks.abstract import (
     ABCDCallback,
     BuildContext,
 )
-from abcd_graph.core.abcd_objects.abcd_graph import ABCDGraph
+from abcd_graph.core.abcd_objects.graph_impl import GraphImpl
 from abcd_graph.core.build import (
     assign_degrees,
     build_communities,
@@ -49,7 +49,7 @@ from abcd_graph.core.exporter import GraphExporter
 from abcd_graph.logger import construct_logger
 
 
-class Graph:
+class ABCDGraph:
     def __init__(
         self,
         params: Optional[ABCDParams] = None,
@@ -62,7 +62,7 @@ class Graph:
         self.n = n
         self.logger = construct_logger(logger)
 
-        self._graph: Optional[ABCDGraph] = None
+        self._graph: Optional[GraphImpl] = None
 
         self._exporter: Optional[GraphExporter] = None
         self._callbacks = callbacks or []
@@ -107,7 +107,7 @@ class Graph:
             for community in self._graph.communities
         ]
 
-    def build(self, model: Optional[Model] = None) -> "Graph":
+    def build(self, model: Optional[Model] = None) -> "ABCDGraph":
         if self.is_built:
             warnings.warn("Graph has already been built. Run `reset` and try again.")
             return self
@@ -172,7 +172,7 @@ class Graph:
 
         deg_c, deg_b = split_degrees(deg, communities, self.params.xi)
 
-        self._graph = ABCDGraph(deg_b, deg_c, params=self.params)
+        self._graph = GraphImpl(deg_b, deg_c, params=self.params)
 
         self.logger.info("Building community edges")
         self._graph.build_communities(communities, model)

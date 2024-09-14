@@ -19,7 +19,7 @@ from abcd_graph.core.abcd_objects.utils import (
 from abcd_graph.core.typing import Communities
 
 
-class ABCDGraph(AbstractGraph):
+class GraphImpl(AbstractGraph):
     def __init__(self, deg_b: dict[int, int], deg_c: dict[int, int], params: ABCDParams) -> None:
         self.deg_b = deg_b
         self.deg_c = deg_c
@@ -171,7 +171,7 @@ class ABCDGraph(AbstractGraph):
     def num_communities(self) -> int:
         return len(self.communities)
 
-    def build_communities(self, communities: Communities, model: Model) -> "ABCDGraph":
+    def build_communities(self, communities: Communities, model: Model) -> "GraphImpl":
         for community_id, community_vertices in communities.items():
             community_edges = model({v: self.deg_c[v] for v in community_vertices})
             community_obj = Community(
@@ -189,14 +189,14 @@ class ABCDGraph(AbstractGraph):
 
         return self
 
-    def build_background_edges(self, model: Model) -> "ABCDGraph":
+    def build_background_edges(self, model: Model) -> "GraphImpl":
         edges = [Edge(edge[0], edge[1]) for edge in model(self.deg_b)]
         self.background_graph = BackgroundGraph(edges)
         self._adj_dict = self.background_graph.adj_dict
 
         return self
 
-    def combine_edges(self) -> "ABCDGraph":
+    def combine_edges(self) -> "GraphImpl":
         for community in self.communities:
             for edge, count in community.adj_dict.items():
                 if edge in self._adj_dict:
@@ -206,7 +206,7 @@ class ABCDGraph(AbstractGraph):
 
         return self
 
-    def rewire_graph(self) -> "ABCDGraph":
+    def rewire_graph(self) -> "GraphImpl":
         bad_edges = build_recycle_list(self._adj_dict)
 
         while len(bad_edges) > 0:

@@ -23,7 +23,7 @@ from typing import TYPE_CHECKING
 import numpy as np
 from numpy.typing import NDArray
 
-from abcd_graph.core.abcd_objects.abcd_graph import ABCDGraph
+from abcd_graph.core.abcd_objects.graph_impl import GraphImpl
 from abcd_graph.core.exceptions import MalformedGraphException
 from abcd_graph.utils import require
 
@@ -34,7 +34,7 @@ if TYPE_CHECKING:
 
 
 class GraphExporter:
-    def __init__(self, graph: ABCDGraph, n: int) -> None:
+    def __init__(self, graph: GraphImpl, n: int) -> None:
         self._graph = graph
         self._n = n
 

@@ -25,8 +25,8 @@ from abcd_graph.callbacks.abstract import (
     ABCDCallback,
     BuildContext,
 )
-from abcd_graph.core.abcd_objects.abcd_graph import ABCDGraph
 from abcd_graph.core.abcd_objects.community import Community
+from abcd_graph.core.abcd_objects.graph_impl import GraphImpl
 from abcd_graph.core.exporter import GraphExporter
 from abcd_graph.core.utils import get_community_color_map
 from abcd_graph.utils import require
@@ -37,9 +37,9 @@ class Visualizer(ABCDCallback):
         self._communities: list[Community] = []
         self._model_used: Optional[Model] = None
         self._exporter: Optional[GraphExporter] = None
-        self._graph: Optional[ABCDGraph] = None
+        self._graph: Optional[GraphImpl] = None
 
-    def after_build(self, graph: ABCDGraph, context: BuildContext, exporter: GraphExporter) -> None:
+    def after_build(self, graph: GraphImpl, context: BuildContext, exporter: GraphExporter) -> None:
         self._communities = graph.communities
         self._model_used = context.model_used
         self._exporter = exporter
