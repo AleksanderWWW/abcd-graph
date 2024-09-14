@@ -26,7 +26,7 @@ from abcd_graph.callbacks.abstract import (
     ABCDCallback,
     BuildContext,
 )
-from abcd_graph.core.abcd_objects.abcd_graph import ABCDGraph
+from abcd_graph.core.abcd_objects.graph_impl import GraphImpl
 from abcd_graph.core.exporter import GraphExporter
 
 
@@ -49,7 +49,7 @@ class StatsCollector(ABCDCallback):
         self.log_statistic("params", context.params)
         self.log_statistic("number_of_nodes", context.number_of_nodes)
 
-    def after_build(self, graph: "ABCDGraph", context: BuildContext, exporter: GraphExporter) -> None:
+    def after_build(self, graph: "GraphImpl", context: BuildContext, exporter: GraphExporter) -> None:
         self.log_statistic("start_time", context.start_time)
         self.log_statistic("end_time", context.end_time)
         self.log_statistic("time_to_build", context.raw_build_time)
@@ -66,6 +66,6 @@ class StatsCollector(ABCDCallback):
         self.log_statistic("empirical_xi", get_empirical_xi(graph))
 
 
-def get_empirical_xi(graph: ABCDGraph) -> float:
+def get_empirical_xi(graph: GraphImpl) -> float:
     num_community_edges = sum(len(community.edges) for community in graph.communities)
     return 1 - (num_community_edges / len(graph.edges))

@@ -19,9 +19,9 @@
 # SOFTWARE.
 
 __all__ = [
-    "Graph",
+    "ABCDGraph",
     "ABCDParams",
 ]
 
+from abcd_graph.abcdgraph import ABCDGraph
 from abcd_graph.api.abcd_params import ABCDParams
-from abcd_graph.graph import Graph

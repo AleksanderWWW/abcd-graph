@@ -11,18 +11,21 @@ Project available at [PyPI](https://pypi.org/project/abcd-graph/).
 
 ### From source
 ```bash
-git clone
+git clone https://github.com/AleksanderWWW/abcd-graph.git
+
+# or - with ssh - git clone git@github.com:AleksanderWWW/abcd-graph.git
 cd abcd-graph
 pip install .
 ```
 
 
 ## Usage
+
 ```python
-from abcd_graph import Graph, ABCDParams
+from abcd_graph import ABCDGraph, ABCDParams
 
 params = ABCDParams()
-graph = Graph(params, n=1000, logger=True).build()
+graph = ABCDGraph(params, n=1000, logger=True).build()
 ```
 
 ### Parameters
@@ -34,7 +37,7 @@ graph = Graph(params, n=1000, logger=True).build()
 
 ### Returns
 
-The `Graph` object with the generated graph.
+The `ABCDGraph` object with the generated graph.
 
 ### Graph generation parameters - `ABCDParams`
 
@@ -54,6 +57,33 @@ Arguments:
 
 Parameters are validated when the object is created. If any of the parameters are invalid, a `ValueError` will be raised.
 
+### Communities and edges
+
+The `ABCDGraph` object has two properties that can be used to access the communities and edges of the graph.
+
+- `communities` - A list of `ABCDCommunity` objects.
+- `edges` - A list of tuples representing the edges of the graph.
+
+Example:
+
+```python
+
+from abcd_graph import ABCDGraph, ABCDParams
+
+params = ABCDParams()
+
+graph = ABCDGraph(params, n=1000, logger=True).build()
+
+print(graph.communities)
+print(graph.edges)
+```
+
+Communities have the following properties:
+- vertices - A list of vertices in the community.
+- average_degree - The average degree of the community.
+- degree_sequence - The degree sequence of the community.
+- empirical_xi - The empirical xi of the community.
+
 ### Exporting
 
 Exporting the graph to different formats is done via the `exporter` property of the `Graph` object.
@@ -66,15 +96,15 @@ Possible formats are:
 | `to_igraph()`                  | Export the graph to an `igraph.Graph` object.                                             | `igraph`          | `pip install abcd[igraph]`   |
 | `adj_matrix`                   | Export the graph to a `numpy.ndarray` object representing the adjacency matrix.           |                   |                              |
 | `to_sparse_adjacency_matrix()` | Export the graph to a `scipy.sparse.csr_matrix` object representing the adjacency matrix. | `scipy`           | `pip install abcd[scipy]`    |
-| `to_edge_list()`               | Export the graph to a list of tuples representing the edges.                              |                   |                              |
 
 
 Example:
+
 ```python
-from abcd_graph import Graph, ABCDParams
+from abcd_graph import ABCDGraph, ABCDParams
 
 params = ABCDParams()
-graph = Graph(params, n=1000, logger=True).build()
+graph = ABCDGraph(params, n=1000, logger=True).build()
 graph_networkx = graph.exporter.to_networkx()
 ```
 
@@ -89,18 +119,18 @@ Out of the box, the library provides three callbacks:
 - `Visualizer` - Visualizes the graph generation process.
 
 Example:
+
 ```python
 
-from abcd_graph import Graph, ABCDParams
+from abcd_graph import ABCDGraph, ABCDParams
 
 from abcd_graph.callbacks import StatsCollector, Visualizer, PropertyCollector
-
 
 stats = StatsCollector()
 vis = Visualizer()
 props = PropertyCollector()
 params = ABCDParams()
-g = Graph(params, n=1000, logger=True, callbacks=[stats, vis, props]).build()
+g = ABCDGraph(params, n=1000, logger=True, callbacks=[stats, vis, props]).build()
 
 print(stats.statistics)
 
@@ -148,3 +178,9 @@ Possible values for `INSTALL_TYPE` are `dev`, `matplotlib`,  `networkx`, `igraph
 > [!WARNING]
 > If you choose and option outside the available ones, the installation will still succeed,
 > but only the base package will be installed.
+
+
+## Examples
+
+The library comes with a set of examples that show how to use the library in different scenarios.
+You can find them in the `examples` directory in the format of Jupyter Notebooks.

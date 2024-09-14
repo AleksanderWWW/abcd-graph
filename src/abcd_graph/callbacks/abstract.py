@@ -25,7 +25,7 @@ from typing import Optional
 
 from abcd_graph.api.abcd_models import Model
 from abcd_graph.api.abcd_params import ABCDParams
-from abcd_graph.core.abcd_objects.abcd_graph import ABCDGraph
+from abcd_graph.core.abcd_objects.graph_impl import GraphImpl
 from abcd_graph.core.exporter import GraphExporter
 
 
@@ -42,4 +42,4 @@ class BuildContext:
 class ABCDCallback(ABC):
     def before_build(self, context: BuildContext) -> None: ...
 
-    def after_build(self, graph: ABCDGraph, context: BuildContext, exporter: GraphExporter) -> None: ...
+    def after_build(self, graph: GraphImpl, context: BuildContext, exporter: GraphExporter) -> None: ...
