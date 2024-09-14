@@ -178,3 +178,9 @@ Possible values for `INSTALL_TYPE` are `dev`, `matplotlib`,  `networkx`, `igraph
 > [!WARNING]
 > If you choose and option outside the available ones, the installation will still succeed,
 > but only the base package will be installed.
+
+
+## Examples
+
+The library comes with a set of examples that show how to use the library in different scenarios.
+You can find them in the `examples` directory in the format of Jupyter Notebooks.

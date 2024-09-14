@@ -3,14 +3,13 @@
 ### Misc
 - Added an example of using the library in a Jupyter notebook ([#29](https://github.com/AleksanderWWW/abcd-graph/pull/29))
 
-### Changes
-- Made retrieving edge and community lists the responsibility of the `ABCDGraph` object ([#31](https://github.com/AleksanderWWW/abcd-graph/pull/31))
-
 ### Features
 - Improved `Dockerfile` and added option to install additional packages during image build ([#28](https://github.com/AleksanderWWW/abcd-graph/pull/28))
+- Added a top-level `ABCDCommunity` class to represent user-facing community properties ([#31](https://github.com/AleksanderWWW/abcd-graph/pull/31))
 
 ### Breaking Changes
 - Renamed the top level graph object from `Graph` to `ABCDGraph` ([#31](https://github.com/AleksanderWWW/abcd-graph/pull/31))
+- Made retrieving edge and community lists the responsibility of the `ABCDGraph` object ([#31](https://github.com/AleksanderWWW/abcd-graph/pull/31))
 
 
 ## abcd-graph 0.2.1
