@@ -17,5 +17,5 @@ runs:
 
       - name: Install dependencies
         working-directory: ${{ inputs.working_directory }}
-        run: pip install -e .[dev]
+        run: pip install -e .[all]
         shell: bash

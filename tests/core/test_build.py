@@ -44,7 +44,7 @@ from abcd_graph.core.build import (
         chung_lu,
     ],
 )
-def test_core(n, gamma, beta, model):
+def test_build_graph(n, gamma, beta, model):
     params = ABCDParams(gamma=gamma, beta=beta, delta=5)
 
     degrees = build_degrees(
