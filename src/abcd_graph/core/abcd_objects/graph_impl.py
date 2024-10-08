@@ -171,6 +171,15 @@ class GraphImpl(AbstractGraph):
     def num_communities(self) -> int:
         return len(self.communities)
 
+    @property
+    def membership_list(self) -> list[int]:
+        result = []
+
+        for community in self.communities:
+            result += [community.community_id] * len(community.vertices)
+
+        return result
+
     def build_communities(self, communities: Communities, model: Model) -> "GraphImpl":
         for community_id, community_vertices in communities.items():
             community_edges = model({v: self.deg_c[v] for v in community_vertices})
