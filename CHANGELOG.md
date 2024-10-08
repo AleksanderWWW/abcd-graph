@@ -6,6 +6,8 @@
 ### Features
 - Improved `Dockerfile` and added option to install additional packages during image build ([#28](https://github.com/AleksanderWWW/abcd-graph/pull/28))
 - Added a top-level `ABCDCommunity` class to represent user-facing community properties ([#31](https://github.com/AleksanderWWW/abcd-graph/pull/31))
+- Added a method to retrieve membership list for the graph ([#34](https://github.com/AleksanderWWW/abcd-graph/pull/34))
+- Added ground truth community property to exported graph attributes ([#34](https://github.com/AleksanderWWW/abcd-graph/pull/34))
 
 ### Breaking Changes
 - Renamed the top level graph object from `Graph` to `ABCDGraph` ([#31](https://github.com/AleksanderWWW/abcd-graph/pull/31))

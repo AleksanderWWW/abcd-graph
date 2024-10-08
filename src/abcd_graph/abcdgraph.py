@@ -93,6 +93,12 @@ class ABCDGraph:
         return self._graph.edges
 
     @property
+    def membership_list(self) -> list[int]:
+        assert self._graph is not None
+
+        return self._graph.membership_list
+
+    @property
     def communities(self) -> list[ABCDCommunity]:
         assert self._graph is not None
 
