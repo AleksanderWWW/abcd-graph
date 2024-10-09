@@ -54,12 +54,14 @@ class ABCDGraph:
         self,
         params: Optional[ABCDParams] = None,
         n: int = 1000,
+        num_outliers: int = 0,
         logger: bool = False,
         callbacks: Optional[list[ABCDCallback]] = None,
     ) -> None:
 
         self.params = params or ABCDParams()
         self.n = n
+        self.num_outliers = num_outliers
         self.logger = construct_logger(logger)
 
         self._graph: Optional[GraphImpl] = None
@@ -177,6 +179,18 @@ class ABCDGraph:
         self.logger.info("Splitting degrees")
 
         deg_c, deg_b = split_degrees(deg, communities, self.params.xi)
+
+        if self.num_outliers > 0:
+            self.logger.info("Adding outliers")
+            communities, deg_c, deg_b = add_outliers(
+                self.num_outliers,
+                self.params.gamma, 
+                self.params.delta, 
+                self.params.zeta,
+                communities,
+                deg_c,
+                deg_b,
+            )
 
         self._graph = GraphImpl(deg_b, deg_c, params=self.params)
 
