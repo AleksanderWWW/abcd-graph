@@ -152,6 +152,25 @@ def split_degrees(
     return deg_c, deg_b
 
 
+######################################################
+def add_outliers(
+    num_outliers: int, 
+    gamma: float, 
+    delta: int, 
+    zeta: float,
+    communities: Communities,
+    deg_c: DegreeSequence,
+    deg_b: DegreeSequence,
+) -> tuple[Communities, DegreeSequence, DegreeSequence]:
+    n = len(deg_b)
+    outlier_degrees = build_degrees(num_outliers, gamma, delta, zeta)
+    communities = communities | {-1: list(range(n, n + num_outliers))}#I think setting the key as -1 is safe here
+    deg_b = deg_b | {n + i: outlier_degrees[i] for i in range(num_outliers)}
+    deg_c = deg_c | {n + i: 0 for i in range(num_outliers)}
+    return communities, deg_c, deg_b 
+######################################################
+
+
 def _get_v_max(deg_c: dict[int, int], community: list[int]) -> int:
     deg_c_subset = {v: deg_c[v] for v in community}
     return max(deg_c_subset, key=deg_c_subset.__getitem__)
