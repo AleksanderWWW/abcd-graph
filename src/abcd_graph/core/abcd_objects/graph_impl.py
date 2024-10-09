@@ -73,7 +73,8 @@ class GraphImpl(AbstractGraph):
 
     @property
     def actual_average_community_size(self) -> float:
-        volume = sum(len(c.vertices) for c in self.communities)
+        volume = sum(len(c.vertices) for c in self.communities if c.community_id != -1) #Excluding outliers
+        num_communities = len(c for c in self.communities if c.community_id != -1)
         return volume / len(self.communities)
 
     @property
@@ -88,8 +89,8 @@ class GraphImpl(AbstractGraph):
 
     @property
     def actual_community_cdf(self) -> dict[int, float]:
-        L = len(self.communities)
-        sizes = {c: len(c.vertices) for c in self.communities}
+        L = len(c for c in self.communities if c.community_id != -1) #Excluding outliers
+        sizes = {c: len(c.vertices) for c in self.communities if c.community_id != -1}
         sorted_sizes = sorted(list(sizes.values()))
         val = sorted_sizes[0]
         cdf = {val: 1 / L}
