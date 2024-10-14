@@ -34,7 +34,7 @@ from abcd_graph.core.build import (
 )
 
 
-@pytest.mark.parametrize("n", [100, 10000])
+@pytest.mark.parametrize("vcount", [100, 10000])
 @pytest.mark.parametrize("gamma", [2.1, 2.9])
 @pytest.mark.parametrize("beta", [1.1, 1.9])
 @pytest.mark.parametrize(
@@ -44,26 +44,26 @@ from abcd_graph.core.build import (
         chung_lu,
     ],
 )
-def test_core(n, gamma, beta, model):
-    params = ABCDParams(gamma=gamma, beta=beta, delta=5)
+def test_core(vcount, gamma, beta, model):
+    params = ABCDParams(gamma=gamma, beta=beta, min_degree=5)
 
     degrees = build_degrees(
-        n,
+        vcount,
         params.gamma,
-        params.delta,
-        params.zeta,
+        params.min_degree,
+        params.max_degree,
     )
 
-    assert len(degrees) == n
+    assert len(degrees) == vcount
 
     community_sizes = build_community_sizes(
-        n,
+        vcount,
         params.beta,
-        params.s,
-        params.tau,
+        params.min_community_size,
+        params.max_community_size,
     )
 
-    assert sum(community_sizes) == n
+    assert sum(community_sizes) == vcount
 
     communities = build_communities(community_sizes)
 

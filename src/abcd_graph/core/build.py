@@ -18,28 +18,29 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-__all__ = ["build_communities", "build_degrees", "assign_degrees", "split_degrees", "build_community_sizes"]
+__all__ = [
+    "build_communities",
+    "build_degrees",
+    "assign_degrees",
+    "split_degrees",
+    "build_community_sizes",
+    "add_outliers",
+]
 
 from typing import Any
 
 import numpy as np
 from numpy.typing import NDArray
 
-from abcd_graph.core.typing import (
-    Communities,
-    CommunitySizes,
-    Degrees,
-    DegreeSequence,
-)
+from abcd_graph.core.constants import OUTLIER_COMMUNITY_ID
 from abcd_graph.core.utils import (
     powerlaw_distribution,
     rand_round,
 )
 
 
-def build_degrees(n: int, gamma: float, delta: int, zeta: float) -> Degrees:
-    max_degree = np.floor(n**zeta)
-    avail = np.arange(delta, max_degree + 1)
+def build_degrees(n: int, gamma: float, min_degree: int, max_degree: int) -> NDArray[np.int64]:
+    avail = np.arange(min_degree, max_degree + 1)
 
     probabilities = powerlaw_distribution(avail, gamma)
 
@@ -51,10 +52,9 @@ def build_degrees(n: int, gamma: float, delta: int, zeta: float) -> Degrees:
     return degrees
 
 
-def build_community_sizes(n: int, beta: float, s: int, tau: float) -> CommunitySizes:
-    max_community_size = int(np.floor(n**tau))
-    max_community_number = int(np.ceil(n / s))
-    avail = np.arange(s, max_community_size + 1)
+def build_community_sizes(n: int, beta: float, min_community_size: int, max_community_size: int) -> NDArray[np.int64]:
+    max_community_number = int(np.ceil(n / min_community_size))
+    avail = np.arange(min_community_size, max_community_size + 1)
 
     probabilities = powerlaw_distribution(avail, beta)
 
@@ -69,7 +69,7 @@ def build_community_sizes(n: int, beta: float, s: int, tau: float) -> CommunityS
     community_sizes = community_sizes[:index]
     excess = community_sizes.sum() - n
     if excess > 0:
-        if (community_sizes[-1] - excess) >= s:
+        if (community_sizes[-1] - excess) >= min_community_size:
             community_sizes[-1] -= excess
         else:
             removed = community_sizes[-1]
@@ -79,19 +79,19 @@ def build_community_sizes(n: int, beta: float, s: int, tau: float) -> CommunityS
     return np.sort(community_sizes)[::-1]
 
 
-def build_communities(community_sizes: CommunitySizes) -> Communities:
+def build_communities(community_sizes: NDArray[np.int64]) -> dict[int, list[int]]:
     communities = {}
-    v_last = -1
+    v_last = 0
     for i, c in enumerate(community_sizes):
-        communities[i] = [v for v in range(v_last + 1, v_last + 1 + c)]
+        communities[i] = [v for v in range(v_last, v_last + c)]
         v_last += c
     return communities
 
 
 def assign_degrees(
-    degrees: Degrees,
-    communities: Communities,
-    community_sizes: CommunitySizes,
+    degrees: NDArray[np.int64],
+    communities: dict[int, list[int]],
+    community_sizes: NDArray[np.int64],
     xi: float,
 ) -> dict[int, Any]:
     phi = 1 - np.sum(community_sizes**2) / (len(degrees) ** 2)
@@ -132,12 +132,11 @@ def assign_degrees(
     return deg
 
 
-# TODO: naming degree list vs degree sequence (as dict)
 def split_degrees(
-    degrees: DegreeSequence,
-    communities: Communities,
+    degrees: dict[int, int],
+    communities: dict[int, list[int]],
     xi: float,
-) -> tuple[DegreeSequence, DegreeSequence]:
+) -> tuple[dict[int, int], dict[int, int]]:
     deg_c = {v: rand_round((1 - xi) * degrees[v]) for v in degrees}
     for community in communities.values():
         if sum(deg_c[v] for v in community) % 2 == 0:
@@ -152,23 +151,24 @@ def split_degrees(
     return deg_c, deg_b
 
 
-######################################################
 def add_outliers(
-    num_outliers: int, 
-    gamma: float, 
-    delta: int, 
-    zeta: float,
-    communities: Communities,
-    deg_c: DegreeSequence,
-    deg_b: DegreeSequence,
-) -> tuple[Communities, DegreeSequence, DegreeSequence]:
-    n = len(deg_b)
-    outlier_degrees = build_degrees(num_outliers, gamma, delta, zeta)
-    communities = communities | {-1: list(range(n, n + num_outliers))}#I think setting the key as -1 is safe here
-    deg_b = deg_b | {n + i: outlier_degrees[i] for i in range(num_outliers)}
-    deg_c = deg_c | {n + i: 0 for i in range(num_outliers)}
-    return communities, deg_c, deg_b 
-######################################################
+    *,
+    vcount: int,
+    num_outliers: int,
+    gamma: float,
+    min_degree: int,
+    max_degree: int,
+    communities: dict[int, list[int]],
+    deg_b: dict[int, int],
+    deg_c: dict[int, int],
+) -> tuple[dict[int, list[int]], dict[int, int], dict[int, int]]:
+    regular_vertices = vcount - num_outliers
+    outlier_degrees = build_degrees(num_outliers, gamma, min_degree, max_degree)
+    communities = communities | {OUTLIER_COMMUNITY_ID: list(range(regular_vertices, vcount))}
+    deg_b = deg_b | {regular_vertices + i: outlier_degrees[i] for i in range(num_outliers)}
+    deg_c = deg_c | {regular_vertices + i: 0 for i in range(num_outliers)}
+
+    return communities, deg_b, deg_c
 
 
 def _get_v_max(deg_c: dict[int, int], community: list[int]) -> int:

@@ -18,9 +18,7 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-__all__ = [
-    "ABCDGraph",
-]
+__all__ = ["ABCDGraph"]
 
 import time
 import warnings
@@ -39,6 +37,7 @@ from abcd_graph.callbacks.abstract import (
 )
 from abcd_graph.core.abcd_objects.graph_impl import GraphImpl
 from abcd_graph.core.build import (
+    add_outliers,
     assign_degrees,
     build_communities,
     build_community_sizes,
@@ -53,15 +52,21 @@ class ABCDGraph:
     def __init__(
         self,
         params: Optional[ABCDParams] = None,
-        n: int = 1000,
-        num_outliers: int = 0,
         logger: bool = False,
         callbacks: Optional[list[ABCDCallback]] = None,
     ) -> None:
 
-        self.params = params or ABCDParams()
-        self.n = n
-        self.num_outliers = num_outliers
+        self.params: ABCDParams = params or ABCDParams()
+
+        self.vcount = self.params.vcount
+
+        assert self.params is not None
+        self.num_outliers = self.params.num_outliers
+
+        self._has_outliers: bool = self.num_outliers > 0
+
+        self._num_regular_vertices = self.vcount - self.num_outliers
+
         self.logger = construct_logger(logger)
 
         self._graph: Optional[GraphImpl] = None
@@ -126,7 +131,7 @@ class ABCDGraph:
             model_used=model,
             start_time=datetime.now(),
             params=self.params,
-            number_of_nodes=self.n,
+            number_of_nodes=self.vcount,
         )
 
         for callback in self._callbacks:
@@ -144,7 +149,7 @@ class ABCDGraph:
         context.raw_build_time = build_end - build_start
 
         assert self._graph is not None
-        self._exporter = GraphExporter(self._graph, self.n)
+        self._exporter = GraphExporter(self._graph, self.vcount)
 
         for callback in self._callbacks:
             callback.after_build(self._graph, context, self._exporter)
@@ -153,19 +158,19 @@ class ABCDGraph:
 
     def _build_impl(self, model: Model) -> float:
         degrees = build_degrees(
-            self.n,
+            self._num_regular_vertices,
             self.params.gamma,
-            self.params.delta,
-            self.params.zeta,
+            self.params.min_degree,
+            self.params.max_degree,
         )
 
         self.logger.info("Building community sizes")
 
         community_sizes = build_community_sizes(
-            self.n,
+            self._num_regular_vertices,
             self.params.beta,
-            self.params.s,
-            self.params.tau,
+            self.params.min_community_size,
+            self.params.max_community_size,
         )
 
         self.logger.info("Building communities")
@@ -180,16 +185,17 @@ class ABCDGraph:
 
         deg_c, deg_b = split_degrees(deg, communities, self.params.xi)
 
-        if self.num_outliers > 0:
+        if self._has_outliers:
             self.logger.info("Adding outliers")
-            communities, deg_c, deg_b = add_outliers(
-                self.num_outliers,
-                self.params.gamma, 
-                self.params.delta, 
-                self.params.zeta,
-                communities,
-                deg_c,
-                deg_b,
+            communities, deg_b, deg_c = add_outliers(
+                vcount=self.vcount,
+                num_outliers=self.num_outliers,
+                gamma=self.params.gamma,
+                min_degree=self.params.min_degree,
+                max_degree=self.params.max_degree,
+                communities=communities,
+                deg_b=deg_b,
+                deg_c=deg_c,
             )
 
         self._graph = GraphImpl(deg_b, deg_c, params=self.params)

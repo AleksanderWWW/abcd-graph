@@ -1,0 +1,1 @@
+OUTLIER_COMMUNITY_ID: int = -1
