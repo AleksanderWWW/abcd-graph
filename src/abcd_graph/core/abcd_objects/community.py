@@ -5,7 +5,6 @@ from abcd_graph.core.abcd_objects.utils import (
     choose_other_edge,
     rewire_edge,
 )
-from abcd_graph.core.typing import DegreeSequence
 
 
 class Community(AbstractCommunity):
@@ -13,8 +12,8 @@ class Community(AbstractCommunity):
         self,
         edges: list[Edge],
         vertices: list[int],
-        deg_b: DegreeSequence,
-        deg_c: DegreeSequence,
+        deg_b: dict[int, int],
+        deg_c: dict[int, int],
         community_id: int,
     ) -> None:
         super().__init__(edges, community_id)
@@ -32,14 +31,14 @@ class Community(AbstractCommunity):
         return sum(self.degree_sequence.values()) / len(self.vertices)
 
     @property
-    def degree_sequence(self) -> DegreeSequence:
+    def degree_sequence(self) -> dict[int, int]:
         res = {}
         for vert in self.vertices:
             res[vert] = self._deg_c[vert] + self._deg_b[vert]
         return res
 
     @property
-    def local_deg_c(self) -> DegreeSequence:
+    def local_deg_c(self) -> dict[int, int]:
         return {k: v for k, v in self._deg_c.items() if k in self.vertices}
 
     @property
@@ -48,7 +47,7 @@ class Community(AbstractCommunity):
             sum(self._deg_b[i] for i in self.vertices) + sum(self.local_deg_c.values())
         )
 
-    def push_to_background(self, edges: list[Edge], deg_b: DegreeSequence) -> None:
+    def push_to_background(self, edges: list[Edge], deg_b: dict[int, int]) -> None:
         for edge in edges:
             if edge.is_loop:
                 for i in range(self.adj_dict[edge]):
@@ -63,7 +62,7 @@ class Community(AbstractCommunity):
 
                     self._update_degree_sequences(edge, deg_b)
 
-    def _update_degree_sequences(self, edge: Edge, deg_b: DegreeSequence) -> None:
+    def _update_degree_sequences(self, edge: Edge, deg_b: dict[int, int]) -> None:
         deg_b[edge.v1] += 1
         deg_b[edge.v2] += 1
         self._deg_c[edge.v1] -= 1
