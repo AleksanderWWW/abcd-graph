@@ -18,60 +18,44 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-
 __all__ = ["ABCDParams"]
 
-from pydantic import (
-    BaseModel,
-    Field,
-    field_validator,
-)
+from dataclasses import dataclass
 
 
-class ABCDParams(BaseModel):
-    gamma: float = Field(description="Power-law parameter for degrees, between 2 and 3", kw_only=True, default=2.5)
-    delta: int = Field(description="Min degree", kw_only=True, default=5)
-    zeta: float = Field(description="Parameter for max degree, between 0 and 1", kw_only=True, default=0.5)
-    beta: float = Field(
-        description="Power-law parameter for community sizes, between 1 and 2",
-        kw_only=True,
-        default=1.5,
-    )
-    s: int = Field(description="Min community size", kw_only=True, default=20)
-    tau: float = Field(description="Parameter for max community size, between zeta and 1", kw_only=True, default=0.8)
-    xi: float = Field(description="Noise parameter, between 0 and 1", kw_only=True, default=0.25)
+@dataclass
+class ABCDParams:
+    vcount: int = 1000
+    gamma: float = 2.5
+    beta: float = 1.5
+    xi: float = 0.25
+    min_degree: int = 5
+    max_degree: int = 30
+    min_community_size: int = 20
+    max_community_size: int = 250
+    num_outliers: int = 0
 
-    @field_validator("gamma")
-    @classmethod
-    def check_gamma(cls, v: float) -> float:
-        if v < 2 or v > 3:
+    def __post_init__(self) -> None:
+        if self.gamma < 2 or self.gamma > 3:
             raise ValueError("gamma must be between 2 and 3")
-        return v
 
-    @field_validator("zeta")
-    @classmethod
-    def check_zeta(cls, v: float) -> float:
-        if v < 0 or v > 1:
-            raise ValueError("zeta must be between 0 and 1")
-        return v
-
-    @field_validator("beta")
-    @classmethod
-    def check_beta(cls, v: float) -> float:
-        if v < 1 or v > 2:
+        if self.beta < 1 or self.beta > 2:
             raise ValueError("beta must be between 1 and 2")
-        return v
 
-    @field_validator("tau")
-    @classmethod
-    def check_tau(cls, v: float) -> float:
-        if v < 0 or v > 1:
-            raise ValueError("tau must be between 0 and 1")
-        return v
-
-    @field_validator("xi")
-    @classmethod
-    def check_xi(cls, v: float) -> float:
-        if v < 0 or v > 1:
+        if self.xi < 0 or self.xi > 1:
             raise ValueError("xi must be between 0 and 1")
-        return v
+
+        if self.min_degree < 1 or self.min_degree > self.max_degree:
+            raise ValueError("min_degree must be between 1 and max_degree")
+
+        if self.max_degree >= self.max_community_size:
+            raise ValueError("max_degree must be less than max_community_size")
+
+        if self.min_community_size < self.min_degree or self.min_community_size > self.max_community_size:
+            raise ValueError("min_community_size must be between min_degree and max_community_size")
+
+        if self.max_community_size > self.vcount - self.num_outliers:
+            raise ValueError("max_community_size must be less than n")
+
+        if self.num_outliers < 0:
+            raise ValueError("num_outliers must be non-negative")

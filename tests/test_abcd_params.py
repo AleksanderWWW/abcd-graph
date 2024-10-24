@@ -25,31 +25,41 @@ from abcd_graph import ABCDParams
 
 def test_abcd_params_invalid_gamma():
     with pytest.raises(ValueError):
-        ABCDParams(gamma=1.5, delta=1, zeta=0.5, beta=1.5, tau=0.5, xi=0.5, s=1)
+        ABCDParams(
+            gamma=1.5, min_degree=1, max_degree=30, beta=1.5, max_community_size=100, xi=0.5, min_community_size=2
+        )
 
 
 def test_abcd_params_invalid_zeta():
     with pytest.raises(ValueError):
-        ABCDParams(gamma=2.5, delta=1, zeta=1.5, beta=1.5, tau=0.5, xi=0.5, s=1)
+        ABCDParams(
+            gamma=2.5, min_degree=1, max_degree=5000, beta=1.5, max_community_size=100, xi=0.5, min_community_size=2
+        )
 
 
 def test_abcd_params_invalid_beta():
     with pytest.raises(ValueError):
-        ABCDParams(gamma=2.5, delta=1, zeta=0.5, beta=0.5, tau=0.5, xi=0.5, s=1)
+        ABCDParams(
+            gamma=2.5, min_degree=1, max_degree=30, beta=0.5, max_community_size=100, xi=0.5, min_community_size=2
+        )
 
 
 def test_abcd_params_invalid_tau():
     with pytest.raises(ValueError):
-        ABCDParams(gamma=2.5, delta=1, zeta=0.5, beta=1.5, tau=1.5, xi=0.5, s=1)
+        ABCDParams(
+            gamma=2.5, min_degree=1, max_degree=30, beta=1.5, max_community_size=5000, xi=0.5, min_community_size=2
+        )
 
 
 def test_abcd_params_invalid_xi():
     with pytest.raises(ValueError):
-        ABCDParams(gamma=2.5, delta=1, zeta=0.5, beta=1.5, tau=0.5, xi=1.5, s=1)
+        ABCDParams(
+            gamma=2.5, min_degree=1, max_degree=30, beta=1.5, max_community_size=100, xi=1.5, min_community_size=2
+        )
 
 
 def test_abcd_params_proper_init():
-    ABCDParams(gamma=2.5, delta=1, zeta=0.5, beta=1.5, tau=0.5, xi=0.5, s=1)
+    ABCDParams(gamma=2.5, min_degree=1, max_degree=30, beta=1.5, max_community_size=100, xi=0.5, min_community_size=2)
     assert True
 
 

@@ -1,13 +1,10 @@
-from abcd_graph.core.typing import DegreeSequence
-
-
 class ABCDCommunity:
     def __init__(
         self,
         community_id: int,
         vertices: list[int],
         average_degree: float,
-        degree_sequence: DegreeSequence,
+        degree_sequence: dict[int, int],
         empirical_xi: float,
     ) -> None:
         self._community_id = community_id
