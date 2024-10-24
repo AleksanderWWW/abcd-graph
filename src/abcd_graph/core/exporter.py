@@ -65,7 +65,11 @@ class GraphExporter:
         import igraph
 
         assert self._graph is not None
-        return igraph.Graph(self._graph.edges)
+        graph = igraph.Graph(self._graph.edges)
+
+        graph.vs["ground_truth_community"] = self._graph.membership_list
+
+        return graph
 
     @require("networkx")
     def to_networkx(self) -> "NetworkXGraph":  # type: ignore[no-any-unimported]
@@ -77,4 +81,10 @@ class GraphExporter:
 
         graph.add_nodes_from(range(self._n))
         graph.add_edges_from(self._graph.edges)
+
+        m_list = self._graph.membership_list
+
+        for node in graph.nodes:
+            graph.nodes[node]["ground_truth_community"] = m_list[node]
+
         return graph

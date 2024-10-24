@@ -16,7 +16,7 @@ from abcd_graph.core.abcd_objects.utils import (
     choose_other_edge,
     rewire_edge,
 )
-from abcd_graph.core.typing import Communities
+from abcd_graph.core.constants import OUTLIER_COMMUNITY_ID
 
 
 class GraphImpl(AbstractGraph):
@@ -37,59 +37,63 @@ class GraphImpl(AbstractGraph):
 
     @property
     def expected_average_degree(self) -> float:
-        d_max = int(np.floor(len(self.deg_b) ** self._params.zeta))
-        bottom: float = sum(k ** (-self._params.gamma) for k in range(self._params.delta, d_max + 1))
-        top: float = sum(k ** (1 - self._params.gamma) for k in range(self._params.delta, d_max + 1))
+        bottom: float = sum(
+            k ** (-self._params.gamma) for k in range(self._params.min_degree, self._params.max_degree + 1)
+        )
+        top: float = sum(
+            k ** (1 - self._params.gamma) for k in range(self._params.min_degree, self._params.max_degree + 1)
+        )
 
         return top / bottom
 
     @property
     def actual_degree_cdf(self) -> dict[int, float]:
-        n = len(self.deg_b)
         deg = {v: self.deg_b[v] + self.deg_c[v] for v in self.deg_b}
         sorted_deg = sorted(list(deg.values()))
         val = sorted_deg[0]
-        cdf = {val: 1 / n}
+        cdf = {val: 1 / self._params.vcount}
         for d in sorted_deg[1:]:
             new_val = d
             if new_val == val:
-                cdf[new_val] += 1 / n
+                cdf[new_val] += 1 / self._params.vcount
             else:
-                cdf[new_val] = cdf[val] + 1 / n
+                cdf[new_val] = cdf[val] + 1 / self._params.vcount
             val = new_val
         return cdf
 
     @property
     def expected_degree_cdf(self) -> dict[int, float]:
         cdf = {}
-        n = len(self.deg_b)
-        gamma = self._params.gamma
-        d_min = self._params.delta
-        d_max = int(np.floor(n**self._params.zeta))
-        bottom = sum(k ** (-gamma) for k in range(d_min, d_max + 1))
-        for d in range(d_min, d_max + 1):
-            cdf[d] = sum(k ** (-gamma) for k in range(d_min, d + 1)) / bottom
+        bottom = sum(k ** (-self._params.gamma) for k in range(self._params.min_degree, self._params.max_degree + 1))
+
+        for d in range(self._params.min_degree, self._params.max_degree + 1):
+            cdf[d] = sum(k ** (-self._params.gamma) for k in range(self._params.min_degree, d + 1)) / bottom
         return cdf
 
     @property
     def actual_average_community_size(self) -> float:
-        volume = sum(len(c.vertices) for c in self.communities)
-        return volume / len(self.communities)
+        volume = sum(
+            len(c.vertices) for c in self.communities if c.community_id != OUTLIER_COMMUNITY_ID
+        )  # Excluding outliers
+        num_communities = len([c for c in self.communities if c.community_id != OUTLIER_COMMUNITY_ID])
+        return volume / num_communities
 
     @property
     def expected_average_community_size(self) -> float:
-        n = len(self.deg_b)
-        beta = self._params.beta
-        c_min = self._params.s
-        c_max = int(np.floor(n**self._params.tau))
-        bottom: float = sum(k ** (-beta) for k in range(c_min, c_max + 1))
-        top: float = sum(k ** (1 - beta) for k in range(c_min, c_max + 1))
+        bottom: float = sum(
+            k ** (-self._params.beta)
+            for k in range(self._params.min_community_size, self._params.max_community_size + 1)
+        )
+        top: float = sum(
+            k ** (1 - self._params.beta)
+            for k in range(self._params.min_community_size, self._params.max_community_size + 1)
+        )
         return top / bottom
 
     @property
     def actual_community_cdf(self) -> dict[int, float]:
-        L = len(self.communities)
-        sizes = {c: len(c.vertices) for c in self.communities}
+        L = len([c for c in self.communities if c.community_id != OUTLIER_COMMUNITY_ID])  # Excluding outliers
+        sizes = {c: len(c.vertices) for c in self.communities if c.community_id != OUTLIER_COMMUNITY_ID}
         sorted_sizes = sorted(list(sizes.values()))
         val = sorted_sizes[0]
         cdf = {val: 1 / L}
@@ -105,13 +109,12 @@ class GraphImpl(AbstractGraph):
     @property
     def expected_community_cdf(self) -> dict[int, float]:
         cdf = {}
-        n = len(self.deg_b)
-        beta = self._params.beta
-        c_min = self._params.s
-        c_max = int(np.floor(n**self._params.tau))
-        bottom = sum(k ** (-beta) for k in range(c_min, c_max + 1))
-        for s in range(c_min, c_max + 1):
-            cdf[s] = sum(k ** (-beta) for k in range(c_min, s + 1)) / bottom
+        bottom = sum(
+            k ** (-self._params.beta)
+            for k in range(self._params.min_community_size, self._params.max_community_size + 1)
+        )
+        for s in range(self._params.min_community_size, self._params.max_community_size + 1):
+            cdf[s] = sum(k**self._params.beta for k in range(self._params.min_community_size, s + 1)) / bottom
         return cdf
 
     @property
@@ -169,9 +172,18 @@ class GraphImpl(AbstractGraph):
 
     @property
     def num_communities(self) -> int:
-        return len(self.communities)
+        return len(self.communities) if self._params.num_outliers == 0 else len(self.communities) - 1
 
-    def build_communities(self, communities: Communities, model: Model) -> "GraphImpl":
+    @property
+    def membership_list(self) -> list[int]:
+        result = []
+
+        for community in self.communities:
+            result += [community.community_id] * len(community.vertices)
+
+        return result
+
+    def build_communities(self, communities: dict[int, list[int]], model: Model) -> "GraphImpl":
         for community_id, community_vertices in communities.items():
             community_edges = model({v: self.deg_c[v] for v in community_vertices})
             community_obj = Community(
