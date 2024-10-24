@@ -13,7 +13,7 @@ from abcd_graph.core.exporter import GraphExporter
 @patch("abcd_graph.core.abcd_objects.graph_impl.GraphImpl", return_value=Mock(spec=GraphImpl))
 def test_graph_exporter_adj_matrix(mock_graph):
     # given
-    exporter = GraphExporter(mock_graph, 1000)
+    exporter = GraphExporter(mock_graph)
 
     mock_graph.is_proper_abcd = True
 
@@ -30,7 +30,7 @@ def test_graph_exporter_adj_matrix(mock_graph):
 @patch("abcd_graph.core.abcd_objects.graph_impl.GraphImpl", return_value=Mock(spec=GraphImpl))
 def test_graph_exporter_improper_graph(mock_graph):
     # given
-    exporter = GraphExporter(mock_graph, 1000)
+    exporter = GraphExporter(mock_graph)
 
     mock_graph.is_proper_abcd = False
 
