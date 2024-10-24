@@ -36,6 +36,9 @@ class ABCDParams:
     num_outliers: int = 0
 
     def __post_init__(self) -> None:
+        if self.vcount < 1 and not isinstance(self.vcount, int):
+            raise ValueError("vcount must be a positive integer")
+
         if self.gamma < 2 or self.gamma > 3:
             raise ValueError("gamma must be between 2 and 3")
 

@@ -97,38 +97,73 @@ def assign_degrees(
     phi = 1 - np.sum(community_sizes**2) / (len(degrees) ** 2)
     deg = {}
     avail = 0
-    already_chosen = set()
+    already_chosen: set[int] = set()
 
     lock = 0
     d_previous = degrees[0] + 1
 
     for i, d in enumerate(degrees):
-        if (d < d_previous) and (lock < len(community_sizes)):
-            threshold = d * (1 - xi * phi) + 1
-            while community_sizes[lock] >= threshold:
-                avail = communities[lock][-1]
-                lock += 1
-                if lock == len(community_sizes):
-                    break
+        if lock_needs_update(d, d_previous, lock, len(community_sizes)):
+            threshold = calculate_threshold(d, xi, phi)
+            lock, avail = update_lock(threshold, lock, avail, community_sizes, communities)
 
-        v = np.random.choice(avail)
-        while v in already_chosen:
-            v = np.random.choice(avail)
+        d_previous = d
+
+        v = choose_new_vertex(avail, already_chosen)
 
         already_chosen.add(v)
         deg[v] = d
 
         if avail == len(degrees) - 1:
-            still_not_chosen_set = set(range(len(degrees))) - already_chosen
-            still_not_chosen: NDArray[np.int64] = np.array([v for v in still_not_chosen_set])
-            degrees_remaining: NDArray[np.int64] = degrees[i + 1 :]  # noqa: E203
+            return assign_remaining_degrees(i, degrees, already_chosen, deg)
 
-            np.random.shuffle(still_not_chosen)
+    return deg
 
-            deg.update({label: degree for label, degree in zip(still_not_chosen, degrees_remaining)})
-            return deg
 
-        d_previous = d
+def lock_needs_update(degree: int, previous_degree: int, lock: int, num_communities: int) -> bool:
+    return (degree < previous_degree) and (lock < num_communities)
+
+
+def calculate_threshold(d: int, xi: float, phi: float) -> float:
+    return d * (1 - xi * phi) + 1
+
+
+def update_lock(
+    threshold: float,
+    lock: int,
+    avail: int,
+    community_sizes: NDArray[np.int64],
+    communities: dict[int, list[int]],
+) -> tuple[int, int]:
+    while community_sizes[lock] >= threshold:
+        avail = communities[lock][-1]
+        lock += 1
+        if lock == len(community_sizes):
+            break
+    return lock, avail
+
+
+def choose_new_vertex(avail: int, already_chosen: set[int]) -> int:
+    v = np.random.choice(avail)
+    while v in already_chosen:
+        v = np.random.choice(avail)
+
+    return v
+
+
+def assign_remaining_degrees(
+    degree_index: int,
+    degrees: NDArray[np.int64],
+    already_chosen: set[int],
+    deg: dict[int, Any],
+) -> dict[int, Any]:
+    still_not_chosen_set = set(range(len(degrees))) - already_chosen
+    still_not_chosen: NDArray[np.int64] = np.array([v for v in still_not_chosen_set])
+    degrees_remaining: NDArray[np.int64] = degrees[degree_index + 1 :]  # noqa: E203
+
+    np.random.shuffle(still_not_chosen)
+
+    deg.update({label: degree for label, degree in zip(still_not_chosen, degrees_remaining)})
     return deg
 
 

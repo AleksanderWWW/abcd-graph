@@ -4,6 +4,7 @@
 #  Note that the script checks if the tag is consistent with the version specified in  pyproject.toml.
 #  If they don't match, the script will exit without publishing the package.
 #  This is a safety measure to prevent accidental releases.
+set -euo pipefail
 
 
 CURRENT_VERSION=$(poetry version | awk '{print $2}')
