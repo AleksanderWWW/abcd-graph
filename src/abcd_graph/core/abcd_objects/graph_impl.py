@@ -264,8 +264,14 @@ class XiMatrixBuilder:
         bottom = sum(self.deg_b.values()) - 1
         for i, c_i in enumerate(self.communities):
             for j, c_j in enumerate(self.communities):
-                vol_i = sum(c_i.degree_sequence.values()) * c_i.empirical_xi
-                vol_j = sum(c_j.degree_sequence.values()) * c_j.empirical_xi
+                if i == OUTLIER_COMMUNITY_ID:
+                    vol_i = sum(c_i.degree_sequence.values())
+                else:
+                    vol_i = sum(c_i.degree_sequence.values()) * c_i.empirical_xi 
+                if j == OUTLIER_COMMUNITY_ID:
+                    vol_j = sum(c_j.degree_sequence.values())
+                else:     
+                    vol_j = sum(c_j.degree_sequence.values()) * c_j.empirical_xi
                 top = vol_i * vol_j
                 self.expected_betweenness_matrix[i][j] = top / bottom
                 self.expected_betweenness_matrix[j][i] = top / bottom
@@ -273,7 +279,7 @@ class XiMatrixBuilder:
     def _build_normalized_matrix(self) -> None:
         for i, c_i in enumerate(self.communities):
             for j, c_j in enumerate(self.communities):
-                if i == j:
+                if i == j and i != OUTLIER_COMMUNITY_ID:
                     self.normalized_betweeness_matrix[i][j] = (1 - c_i.empirical_xi) / (1 - self.xi)
                 else:
                     self.normalized_betweeness_matrix[i][j] = (
