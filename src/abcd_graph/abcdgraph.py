@@ -149,7 +149,7 @@ class ABCDGraph:
         context.raw_build_time = build_end - build_start
 
         assert self._graph is not None
-        self._exporter = GraphExporter(self._graph, self.vcount)
+        self._exporter = GraphExporter(self._graph)
 
         for callback in self._callbacks:
             callback.after_build(self._graph, context, self._exporter)
