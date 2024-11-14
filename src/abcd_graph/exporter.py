@@ -23,8 +23,8 @@ from typing import TYPE_CHECKING
 import numpy as np
 from numpy.typing import NDArray
 
-from abcd_graph.core.abcd_objects.graph_impl import GraphImpl
-from abcd_graph.core.exceptions import MalformedGraphException
+from abcd_graph.graph.core.abcd_objects import GraphImpl
+from abcd_graph.graph.core.exceptions import MalformedGraphException
 from abcd_graph.utils import require
 
 if TYPE_CHECKING:
@@ -34,9 +34,8 @@ if TYPE_CHECKING:
 
 
 class GraphExporter:
-    def __init__(self, graph: GraphImpl, n: int) -> None:
+    def __init__(self, graph: GraphImpl) -> None:
         self._graph = graph
-        self._n = n
 
     @property
     def is_proper_abcd(self) -> bool:
@@ -79,7 +78,7 @@ class GraphExporter:
 
         graph = nx.Graph()
 
-        graph.add_nodes_from(range(self._n))
+        graph.add_nodes_from(range(self._graph._params.vcount))
         graph.add_edges_from(self._graph.edges)
 
         m_list = self._graph.membership_list

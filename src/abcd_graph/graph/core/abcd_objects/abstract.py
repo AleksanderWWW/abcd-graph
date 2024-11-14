@@ -1,6 +1,6 @@
 import abc
 
-from abcd_graph.core.abcd_objects.edge import Edge
+from abcd_graph.graph.core.abcd_objects.edge import Edge
 
 
 class AbstractGraph(abc.ABC):
