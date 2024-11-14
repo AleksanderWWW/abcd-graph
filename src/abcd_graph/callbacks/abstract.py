@@ -23,10 +23,10 @@ from abc import ABC
 from dataclasses import dataclass
 from typing import Optional
 
-from abcd_graph.api.abcd_models import Model
-from abcd_graph.api.abcd_params import ABCDParams
-from abcd_graph.core.abcd_objects.graph_impl import GraphImpl
-from abcd_graph.core.exporter import GraphExporter
+from abcd_graph.exporter import GraphExporter
+from abcd_graph.graph.core.abcd_objects.graph_impl import GraphImpl
+from abcd_graph.graph.models import Model
+from abcd_graph.params import ABCDParams
 
 
 @dataclass

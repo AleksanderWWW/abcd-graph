@@ -1,6 +1,6 @@
-from abcd_graph.core.abcd_objects.abstract import AbstractCommunity
-from abcd_graph.core.abcd_objects.edge import Edge
-from abcd_graph.core.abcd_objects.utils import (
+from abcd_graph.graph.core.abcd_objects.abstract import AbstractCommunity
+from abcd_graph.graph.core.abcd_objects.edge import Edge
+from abcd_graph.graph.core.abcd_objects.utils import (
     build_recycle_list,
     choose_other_edge,
     rewire_edge,

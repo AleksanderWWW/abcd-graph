@@ -3,20 +3,20 @@ from typing import Optional
 import numpy as np
 from numpy.typing import NDArray
 
-from abcd_graph.api.abcd_models import Model
-from abcd_graph.api.abcd_params import ABCDParams
-from abcd_graph.core.abcd_objects.abstract import AbstractGraph
-from abcd_graph.core.abcd_objects.community import (
+from abcd_graph.graph.core.abcd_objects.abstract import AbstractGraph
+from abcd_graph.graph.core.abcd_objects.community import (
     BackgroundGraph,
     Community,
 )
-from abcd_graph.core.abcd_objects.edge import Edge
-from abcd_graph.core.abcd_objects.utils import (
+from abcd_graph.graph.core.abcd_objects.edge import Edge
+from abcd_graph.graph.core.abcd_objects.utils import (
     build_recycle_list,
     choose_other_edge,
     rewire_edge,
 )
-from abcd_graph.core.constants import OUTLIER_COMMUNITY_ID
+from abcd_graph.graph.core.constants import OUTLIER_COMMUNITY_ID
+from abcd_graph.graph.models import Model
+from abcd_graph.params import ABCDParams
 
 
 class GraphImpl(AbstractGraph):
