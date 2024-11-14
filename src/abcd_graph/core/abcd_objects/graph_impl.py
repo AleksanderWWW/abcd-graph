@@ -251,9 +251,9 @@ class XiMatrixBuilder:
         self.normalized_betweeness_matrix = np.zeros((self._community_len, self._community_len))
 
     def _build_location(self) -> None:
-        for i, c in enumerate(self.communities):
+        for c in self.communities:
             for v in c.vertices:
-                self.location[v] = i
+                self.location[v] = c.community_id
 
     def _build_actual_matrix(self) -> None:
         for edge in self.adj_matrix:
@@ -262,28 +262,32 @@ class XiMatrixBuilder:
 
     def _build_expectation_matrix(self) -> None:
         bottom = sum(self.deg_b.values()) - 1
-        for i, c_i in enumerate(self.communities):
-            for j, c_j in enumerate(self.communities):
-                if i == OUTLIER_COMMUNITY_ID:
-                    vol_i = sum(c_i.degree_sequence.values())
+        for c_i in self.communities:
+            for c_j in self.communities:
+                if c_i.community_id == OUTLIER_COMMUNITY_ID:
+                    vol_i = float(sum(c_i.degree_sequence.values()))
                 else:
-                    vol_i = sum(c_i.degree_sequence.values()) * c_i.empirical_xi 
-                if j == OUTLIER_COMMUNITY_ID:
-                    vol_j = sum(c_j.degree_sequence.values())
-                else:     
+                    vol_i = sum(c_i.degree_sequence.values()) * c_i.empirical_xi
+                if c_j.community_id == OUTLIER_COMMUNITY_ID:
+                    vol_j = float(sum(c_j.degree_sequence.values()))
+                else:
                     vol_j = sum(c_j.degree_sequence.values()) * c_j.empirical_xi
                 top = vol_i * vol_j
-                self.expected_betweenness_matrix[i][j] = top / bottom
-                self.expected_betweenness_matrix[j][i] = top / bottom
+
+                self.expected_betweenness_matrix[c_i.community_id][c_j.community_id] = top / bottom
+                self.expected_betweenness_matrix[c_j.community_id][c_i.community_id] = top / bottom
 
     def _build_normalized_matrix(self) -> None:
-        for i, c_i in enumerate(self.communities):
-            for j, c_j in enumerate(self.communities):
-                if i == j and i != OUTLIER_COMMUNITY_ID:
-                    self.normalized_betweeness_matrix[i][j] = (1 - c_i.empirical_xi) / (1 - self.xi)
+        for c_i in self.communities:
+            for c_j in self.communities:
+                if c_i == c_j and c_i.community_id != OUTLIER_COMMUNITY_ID:
+                    self.normalized_betweeness_matrix[c_i.community_id][c_j.community_id] = (1 - c_i.empirical_xi) / (
+                        1 - self.xi
+                    )
                 else:
-                    self.normalized_betweeness_matrix[i][j] = (
-                        self.actual_betweenness_matrix[i][j] / self.expected_betweenness_matrix[i][j]
+                    self.normalized_betweeness_matrix[c_i.community_id][c_j.community_id] = (
+                        self.actual_betweenness_matrix[c_i.community_id][c_j.community_id]
+                        / self.expected_betweenness_matrix[c_i.community_id][c_j.community_id]
                     )
 
     def build(self) -> NDArray[np.float64]:

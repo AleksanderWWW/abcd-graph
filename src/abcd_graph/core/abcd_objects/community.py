@@ -22,6 +22,14 @@ class Community(AbstractCommunity):
         self._deg_b = deg_b
         self._deg_c = deg_c
 
+    def __eq__(self, other: object) -> bool:
+        if not isinstance(other, AbstractCommunity):
+            return False
+        return self.community_id == other.community_id
+
+    def __hash__(self) -> int:
+        return hash(self.community_id)
+
     @property
     def vertices(self) -> list[int]:
         return self._vertices
