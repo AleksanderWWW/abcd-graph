@@ -31,7 +31,7 @@ from abcd_graph.callbacks.abstract import (
 )
 from abcd_graph.exporter import GraphExporter
 from abcd_graph.graph.community import ABCDCommunity
-from abcd_graph.graph.core.abcd_objects.graph_impl import GraphImpl
+from abcd_graph.graph.core.abcd_objects import GraphImpl
 from abcd_graph.graph.core.build import (
     add_outliers,
     assign_degrees,

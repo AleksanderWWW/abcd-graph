@@ -1,14 +1,16 @@
+__all__ = ["GraphImpl"]
+
 from typing import Optional
 
 import numpy as np
 from numpy.typing import NDArray
 
-from abcd_graph.graph.core.abcd_objects.abstract import AbstractGraph
-from abcd_graph.graph.core.abcd_objects.community import (
+from abcd_graph.graph.core.abcd_objects import (
     BackgroundGraph,
     Community,
+    Edge,
 )
-from abcd_graph.graph.core.abcd_objects.edge import Edge
+from abcd_graph.graph.core.abcd_objects.abstract import AbstractGraph
 from abcd_graph.graph.core.abcd_objects.utils import (
     build_recycle_list,
     choose_other_edge,

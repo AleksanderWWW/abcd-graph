@@ -1,3 +1,5 @@
+__all__ = ["Community", "BackgroundGraph"]
+
 from abcd_graph.graph.core.abcd_objects.abstract import AbstractCommunity
 from abcd_graph.graph.core.abcd_objects.edge import Edge
 from abcd_graph.graph.core.abcd_objects.utils import (

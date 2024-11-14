@@ -28,8 +28,10 @@ from abcd_graph.callbacks.abstract import (
     BuildContext,
 )
 from abcd_graph.exporter import GraphExporter
-from abcd_graph.graph.core.abcd_objects.community import Community
-from abcd_graph.graph.core.abcd_objects.graph_impl import GraphImpl
+from abcd_graph.graph.core.abcd_objects import (
+    Community,
+    GraphImpl,
+)
 
 
 class PropertyCollector(ABCDCallback):
