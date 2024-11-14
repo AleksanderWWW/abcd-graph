@@ -1,6 +1,8 @@
-from abcd_graph.core.abcd_objects.abstract import AbstractCommunity
-from abcd_graph.core.abcd_objects.edge import Edge
-from abcd_graph.core.abcd_objects.utils import (
+__all__ = ["Community", "BackgroundGraph"]
+
+from abcd_graph.graph.core.abcd_objects.abstract import AbstractCommunity
+from abcd_graph.graph.core.abcd_objects.edge import Edge
+from abcd_graph.graph.core.abcd_objects.utils import (
     build_recycle_list,
     choose_other_edge,
     rewire_edge,
@@ -21,6 +23,14 @@ class Community(AbstractCommunity):
         self._vertices = vertices
         self._deg_b = deg_b
         self._deg_c = deg_c
+
+    def __eq__(self, other: object) -> bool:
+        if not isinstance(other, AbstractCommunity):
+            return False
+        return self.community_id == other.community_id
+
+    def __hash__(self) -> int:
+        return hash(self.community_id)
 
     @property
     def vertices(self) -> list[int]:

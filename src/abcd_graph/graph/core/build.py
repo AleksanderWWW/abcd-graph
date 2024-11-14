@@ -32,8 +32,8 @@ from typing import Any
 import numpy as np
 from numpy.typing import NDArray
 
-from abcd_graph.core.constants import OUTLIER_COMMUNITY_ID
-from abcd_graph.core.utils import (
+from abcd_graph.graph.core.constants import OUTLIER_COMMUNITY_ID
+from abcd_graph.graph.core.utils import (
     powerlaw_distribution,
     rand_round,
 )

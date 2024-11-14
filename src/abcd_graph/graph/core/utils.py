@@ -28,7 +28,7 @@ import numpy as np
 from numpy.typing import NDArray
 
 if TYPE_CHECKING:
-    from abcd_graph.core.abcd_objects.community import Community
+    from abcd_graph.graph.core.abcd_objects import Community
 
 
 def rand_round(x: float) -> int:

@@ -23,8 +23,8 @@ from typing import TYPE_CHECKING
 import numpy as np
 from numpy.typing import NDArray
 
-from abcd_graph.core.abcd_objects.graph_impl import GraphImpl
-from abcd_graph.core.exceptions import MalformedGraphException
+from abcd_graph.graph.core.abcd_objects import GraphImpl
+from abcd_graph.graph.core.exceptions import MalformedGraphException
 from abcd_graph.utils import require
 
 if TYPE_CHECKING:

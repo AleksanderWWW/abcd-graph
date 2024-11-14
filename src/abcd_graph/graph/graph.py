@@ -25,18 +25,14 @@ import warnings
 from datetime import datetime
 from typing import Optional
 
-from abcd_graph.api.abcd_community import ABCDCommunity
-from abcd_graph.api.abcd_models import (
-    Model,
-    configuration_model,
-)
-from abcd_graph.api.abcd_params import ABCDParams
 from abcd_graph.callbacks.abstract import (
     ABCDCallback,
     BuildContext,
 )
-from abcd_graph.core.abcd_objects.graph_impl import GraphImpl
-from abcd_graph.core.build import (
+from abcd_graph.exporter import GraphExporter
+from abcd_graph.graph.community import ABCDCommunity
+from abcd_graph.graph.core.abcd_objects import GraphImpl
+from abcd_graph.graph.core.build import (
     add_outliers,
     assign_degrees,
     build_communities,
@@ -44,8 +40,12 @@ from abcd_graph.core.build import (
     build_degrees,
     split_degrees,
 )
-from abcd_graph.core.exporter import GraphExporter
+from abcd_graph.graph.models import (
+    Model,
+    configuration_model,
+)
 from abcd_graph.logger import construct_logger
+from abcd_graph.params import ABCDParams
 
 
 class ABCDGraph:
@@ -58,14 +58,13 @@ class ABCDGraph:
 
         self.params: ABCDParams = params or ABCDParams()
 
-        self.vcount = self.params.vcount
+        self._vcount = self.params.vcount
 
-        assert self.params is not None
         self.num_outliers = self.params.num_outliers
 
         self._has_outliers: bool = self.num_outliers > 0
 
-        self._num_regular_vertices = self.vcount - self.num_outliers
+        self._num_regular_vertices = self._vcount - self.num_outliers
 
         self.logger = construct_logger(logger)
 
@@ -94,31 +93,33 @@ class ABCDGraph:
         return self._exporter
 
     @property
-    def edges(self) -> list[tuple[int, int]]:
-        assert self._graph is not None
+    def vcount(self) -> int:
+        return self._vcount if self.is_built else 0
 
-        return self._graph.edges
+    @property
+    def edges(self) -> list[tuple[int, int]]:
+        return self._graph.edges if self._graph else []
 
     @property
     def membership_list(self) -> list[int]:
-        assert self._graph is not None
-
-        return self._graph.membership_list
+        return self._graph.membership_list if self._graph else []
 
     @property
     def communities(self) -> list[ABCDCommunity]:
-        assert self._graph is not None
-
-        return [
-            ABCDCommunity(
-                community_id=community.community_id,
-                vertices=community.vertices,
-                average_degree=community.average_degree,
-                degree_sequence=community.degree_sequence,
-                empirical_xi=community.empirical_xi,
-            )
-            for community in self._graph.communities
-        ]
+        return (
+            [
+                ABCDCommunity(
+                    community_id=community.community_id,
+                    vertices=community.vertices,
+                    average_degree=community.average_degree,
+                    degree_sequence=community.degree_sequence,
+                    empirical_xi=community.empirical_xi,
+                )
+                for community in self._graph.communities
+            ]
+            if self._graph
+            else []
+        )
 
     def build(self, model: Optional[Model] = None) -> "ABCDGraph":
         if self.is_built:
@@ -131,7 +132,7 @@ class ABCDGraph:
             model_used=model,
             start_time=datetime.now(),
             params=self.params,
-            number_of_nodes=self.vcount,
+            number_of_nodes=self._vcount,
         )
 
         for callback in self._callbacks:
@@ -188,7 +189,7 @@ class ABCDGraph:
         if self._has_outliers:
             self.logger.info("Adding outliers")
             communities, deg_b, deg_c = add_outliers(
-                vcount=self.vcount,
+                vcount=self._vcount,
                 num_outliers=self.num_outliers,
                 gamma=self.params.gamma,
                 min_degree=self.params.min_degree,
