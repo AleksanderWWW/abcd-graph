@@ -35,11 +35,10 @@ if TYPE_CHECKING:
 
 class GraphExporter:
     def __init__(self, graph: GraphImpl) -> None:
-        self._graph = graph
+        self._graph: GraphImpl = graph
 
     @property
     def is_proper_abcd(self) -> bool:
-        assert self._graph is not None
         return self._graph.is_proper_abcd
 
     def to_adjacency_matrix(self) -> NDArray[np.bool_]:
@@ -63,7 +62,6 @@ class GraphExporter:
     def to_igraph(self) -> "IGraph":  # type: ignore[no-any-unimported]
         import igraph
 
-        assert self._graph is not None
         graph = igraph.Graph(self._graph.edges)
 
         graph.vs["ground_truth_community"] = self._graph.membership_list
@@ -73,8 +71,6 @@ class GraphExporter:
     @require("networkx")
     def to_networkx(self) -> "NetworkXGraph":  # type: ignore[no-any-unimported]
         import networkx as nx
-
-        assert self._graph is not None
 
         graph = nx.Graph()
 
