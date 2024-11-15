@@ -61,8 +61,5 @@ def assert_graph_not_built(graph: ABCDGraph):
     assert graph.vcount == 0
 
 
-def test_xi_matrix(): ...
-
-
 # TODO: Tests for different param values
 # TODO: Tests for outliers

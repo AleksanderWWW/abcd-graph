@@ -17,7 +17,7 @@ from abcd_graph.graph.core.abcd_objects.utils import (
     rewire_edge,
 )
 from abcd_graph.graph.core.constants import OUTLIER_COMMUNITY_ID
-from abcd_graph.graph.models import Model
+from abcd_graph.models import Model
 from abcd_graph.params import ABCDParams
 
 

@@ -40,11 +40,11 @@ from abcd_graph.graph.core.build import (
     build_degrees,
     split_degrees,
 )
-from abcd_graph.graph.models import (
+from abcd_graph.logger import construct_logger
+from abcd_graph.models import (
     Model,
     configuration_model,
 )
-from abcd_graph.logger import construct_logger
 from abcd_graph.params import ABCDParams
 
 

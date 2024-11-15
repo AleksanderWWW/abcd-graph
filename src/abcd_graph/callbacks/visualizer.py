@@ -30,7 +30,7 @@ from abcd_graph.graph.core.abcd_objects import (
     GraphImpl,
 )
 from abcd_graph.graph.core.utils import get_community_color_map
-from abcd_graph.graph.models import Model
+from abcd_graph.models import Model
 from abcd_graph.utils import require
 
 
