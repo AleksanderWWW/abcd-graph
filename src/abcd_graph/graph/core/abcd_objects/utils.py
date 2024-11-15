@@ -1,6 +1,6 @@
 import random
 
-from abcd_graph.core.abcd_objects.edge import Edge
+from abcd_graph.graph.core.abcd_objects.edge import Edge
 
 
 def build_recycle_list(adj_matrix: dict["Edge", int]) -> list["Edge"]:

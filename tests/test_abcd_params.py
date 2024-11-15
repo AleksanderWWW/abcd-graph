@@ -66,3 +66,11 @@ def test_abcd_params_proper_init():
 def test_abcd_params_default_init():
     ABCDParams()
     assert True
+
+
+def test_invalid_num_outliers():
+    with pytest.raises(ValueError):
+        ABCDParams(num_outliers=-1)
+
+    with pytest.raises(ValueError):
+        ABCDParams(num_outliers=1001)

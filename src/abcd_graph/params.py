@@ -62,3 +62,6 @@ class ABCDParams:
 
         if self.num_outliers < 0:
             raise ValueError("num_outliers must be non-negative")
+
+        if self.num_outliers > self.vcount:
+            raise ValueError("num_outliers must be less than vcount")

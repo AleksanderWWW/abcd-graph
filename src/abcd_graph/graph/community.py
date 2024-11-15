@@ -13,5 +13,9 @@ class ABCDCommunity:
         self.degree_sequence = degree_sequence
         self.empirical_xi = empirical_xi
 
+    @property
+    def community_id(self) -> int:
+        return self._community_id
+
     def __repr__(self) -> str:
         return f"ABCDCommunityObj(id={self._community_id}, vertices={self.vertices[0]}-{self.vertices[-1]})"
