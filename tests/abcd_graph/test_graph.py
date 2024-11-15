@@ -1,6 +1,7 @@
 import pytest
 
 from abcd_graph import ABCDGraph
+from abcd_graph.graph.core.constants import OUTLIER_COMMUNITY_ID
 
 
 def test_abcd_graph_not_built(params):
@@ -62,4 +63,24 @@ def assert_graph_not_built(graph: ABCDGraph):
 
 
 # TODO: Tests for different param values
-# TODO: Tests for outliers
+
+
+def test_outliers(params_with_outliers):
+    g = ABCDGraph(params_with_outliers, logger=False).build()
+
+    assert g.num_outliers == 100
+
+    assert OUTLIER_COMMUNITY_ID in [c.community_id for c in g.communities]
+
+    outlier_community = next(c for c in g.communities if c.community_id == OUTLIER_COMMUNITY_ID)
+    assert len(outlier_community.vertices) == 100
+
+
+def test_outliers_deg_c_is_zero_for_every_outlier(params_with_outliers):
+    g = ABCDGraph(params_with_outliers, logger=False).build()
+
+    outlier_community = next(c for c in g.communities if c.community_id == OUTLIER_COMMUNITY_ID)
+
+    deg_c = g._graph.deg_c
+
+    assert all(deg_c[v] == 0 for v in outlier_community.vertices)

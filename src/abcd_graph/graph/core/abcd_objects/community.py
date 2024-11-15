@@ -7,6 +7,7 @@ from abcd_graph.graph.core.abcd_objects.utils import (
     choose_other_edge,
     rewire_edge,
 )
+from abcd_graph.graph.core.constants import BACKGROUND_GRAPH_ID
 
 
 class Community(AbstractCommunity):
@@ -94,4 +95,4 @@ class Community(AbstractCommunity):
 
 class BackgroundGraph(AbstractCommunity):
     def __init__(self, edges: list[Edge]) -> None:
-        super().__init__(edges, community_id=-1)
+        super().__init__(edges, community_id=-BACKGROUND_GRAPH_ID)
