@@ -1,4 +1,4 @@
-## [UNRELEASED] abc-graph 0.3.0
+## abcd-graph 0.3.0
 
 ### Misc
 - Added an example of using the library in a Jupyter notebook ([#29](https://github.com/AleksanderWWW/abcd-graph/pull/29))
