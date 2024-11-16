@@ -36,7 +36,7 @@ class ABCDParams:
     num_outliers: int = 0
 
     def __post_init__(self) -> None:
-        if self.vcount < 1 and not isinstance(self.vcount, int):
+        if self.vcount < 1 or not isinstance(self.vcount, int):
             raise ValueError("vcount must be a positive integer")
 
         if self.gamma < 2 or self.gamma > 3:
@@ -57,11 +57,11 @@ class ABCDParams:
         if self.min_community_size < self.min_degree or self.min_community_size > self.max_community_size:
             raise ValueError("min_community_size must be between min_degree and max_community_size")
 
-        if self.max_community_size > self.vcount - self.num_outliers:
-            raise ValueError("max_community_size must be less than n")
-
         if self.num_outliers < 0:
             raise ValueError("num_outliers must be non-negative")
 
         if self.num_outliers > self.vcount:
             raise ValueError("num_outliers must be less than vcount")
+
+        if self.max_community_size > self.vcount - self.num_outliers:
+            raise ValueError("max_community_size must be less than n")
