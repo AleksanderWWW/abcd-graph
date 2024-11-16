@@ -1,6 +1,9 @@
 # abcd-graph
 A python library for generating ABCD graphs.
 
+![tests](https://github.com/AleksanderWWW/abcd-graph/actions/workflows/ci.yml/badge.svg)
+![pre-commit](https://github.com/AleksanderWWW/abcd-graph/actions/workflows/pre-commit.yml/badge.svg)
+
 ## Installation
 
 ### Using `pip`
