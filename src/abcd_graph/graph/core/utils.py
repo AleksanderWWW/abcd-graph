@@ -27,7 +27,7 @@ from typing import TYPE_CHECKING
 import numpy as np
 from numpy.typing import NDArray
 
-if TYPE_CHECKING:
+if TYPE_CHECKING:  # pragma: no cover
     from abcd_graph.graph.core.abcd_objects import Community
 
 

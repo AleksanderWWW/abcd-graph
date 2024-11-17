@@ -17,5 +17,5 @@ class ABCDCommunity:
     def community_id(self) -> int:
         return self._community_id
 
-    def __repr__(self) -> str:
+    def __repr__(self) -> str:  # pragma: no cover
         return f"ABCDCommunityObj(id={self._community_id}, vertices={self.vertices[0]}-{self.vertices[-1]})"

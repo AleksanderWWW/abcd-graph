@@ -27,7 +27,7 @@ from abcd_graph.graph.core.abcd_objects import GraphImpl
 from abcd_graph.graph.core.exceptions import MalformedGraphException
 from abcd_graph.utils import require
 
-if TYPE_CHECKING:
+if TYPE_CHECKING:  # pragma: no cover
     from igraph import Graph as IGraph  # type: ignore[import]
     from networkx import Graph as NetworkXGraph  # type: ignore[import]
     from scipy.sparse import csr_matrix  # type: ignore[import]

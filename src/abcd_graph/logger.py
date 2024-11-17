@@ -33,7 +33,7 @@ from typing import Union
 from typing_extensions import TypeAlias
 
 
-class ABCDLogger(ABC):
+class ABCDLogger(ABC):  # pragma: no cover
     @abstractmethod
     def info(self, message: str) -> None:
         pass
