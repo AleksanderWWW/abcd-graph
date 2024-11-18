@@ -23,6 +23,11 @@ import pytest
 from abcd_graph import ABCDParams
 
 
+def test_abcd_params_negative_vcount():
+    with pytest.raises(ValueError):
+        ABCDParams(vcount=-1)
+
+
 def test_abcd_params_invalid_gamma():
     with pytest.raises(ValueError):
         ABCDParams(
@@ -58,6 +63,19 @@ def test_abcd_params_invalid_xi():
         )
 
 
+def test_abcd_params_invalid_min_degree():
+    with pytest.raises(ValueError):
+        ABCDParams(min_degree=0, max_degree=30)
+
+    with pytest.raises(ValueError):
+        ABCDParams(min_degree=30, max_degree=20)
+
+
+def test_abcd_params_invalid_min_community_size():
+    with pytest.raises(ValueError):
+        ABCDParams(min_community_size=110, max_community_size=100)
+
+
 def test_abcd_params_proper_init():
     ABCDParams(gamma=2.5, min_degree=1, max_degree=30, beta=1.5, max_community_size=100, xi=0.5, min_community_size=2)
     assert True
@@ -68,9 +86,11 @@ def test_abcd_params_default_init():
     assert True
 
 
-def test_invalid_num_outliers():
+def test_num_outliers_cannot_be_negative():
     with pytest.raises(ValueError):
         ABCDParams(num_outliers=-1)
 
+
+def test_num_outliers_cannot_be_greater_than_vcount():
     with pytest.raises(ValueError):
-        ABCDParams(num_outliers=1001)
+        ABCDParams(vcount=1000, num_outliers=1001)

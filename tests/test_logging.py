@@ -70,3 +70,21 @@ def test_env_var_for_logging_level(caplog):
     assert "warning" not in captured_stdout
     assert "error" not in captured_stdout
     assert "critical" in captured_stdout
+
+
+def test_noop_logger(caplog):
+    logger = NoOpLogger()
+
+    logger.debug("debug")
+    logger.info("info")
+    logger.warning("warning")
+    logger.error("error")
+    logger.critical("critical")
+
+    captured_stdout = caplog.text
+
+    assert "debug" not in captured_stdout
+    assert "info" not in captured_stdout
+    assert "warning" not in captured_stdout
+    assert "error" not in captured_stdout
+    assert "critical" not in captured_stdout

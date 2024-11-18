@@ -1,7 +1,14 @@
+from unittest.mock import patch
+
 import pytest
 
 from abcd_graph import ABCDGraph
 from abcd_graph.graph.core.constants import OUTLIER_COMMUNITY_ID
+from abcd_graph.models import configuration_model
+from tests.utils import (
+    assert_graph_built,
+    assert_graph_not_built,
+)
 
 
 def test_abcd_graph_not_built(params):
@@ -40,26 +47,25 @@ def test_abcd_reset_after_build(params):
     assert_graph_not_built(g)
 
 
-def assert_graph_built(graph: ABCDGraph):
-    assert graph.is_built
-
-    assert graph.exporter is not None
-    assert graph.communities != []
-    assert graph.edges != []
-    assert graph.membership_list != []
-    assert graph.vcount == graph.params.vcount
-
-
-def assert_graph_not_built(graph: ABCDGraph):
-    assert not graph.is_built
+def test_graph_exporter_raises_exception_if_exporter_is_none(params):
+    graph = ABCDGraph(params=params, logger=False).build()
+    graph._exporter = None
 
     with pytest.raises(RuntimeError):
         _ = graph.exporter
 
-    assert graph.communities == []
-    assert graph.edges == []
-    assert graph.membership_list == []
-    assert graph.vcount == 0
+
+@patch("abcd_graph.graph.ABCDGraph._build_impl", side_effect=Exception)
+@patch("abcd_graph.graph.ABCDGraph.reset")
+def test_graph_build_error_triggers_reset(mock_reset, mock_build_impl):
+    graph = ABCDGraph(logger=False)
+
+    with pytest.raises(Exception):
+        graph.build()
+
+    mock_build_impl.assert_called_once_with(configuration_model)
+
+    mock_reset.assert_called_once()
 
 
 # TODO: Tests for different param values

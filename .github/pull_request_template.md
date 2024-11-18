@@ -2,4 +2,3 @@
 
 - [ ] Did you **update the CHANGELOG**? (not for test updates, internal changes/refactors or CI/CD setup)
 - [ ] Did you add tests to cover your changes? (if applicable)
-- [ ] Did you bump the version in `pyproject.toml`? (if applicable)
