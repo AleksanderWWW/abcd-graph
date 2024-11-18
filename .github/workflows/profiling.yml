@@ -21,4 +21,4 @@ jobs:
         uses: ./.github/actions/build
 
       - name: Profile
-        run: python tests/profiling_report.py
+        run: python profiling_report.py
