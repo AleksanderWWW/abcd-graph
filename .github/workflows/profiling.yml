@@ -1,4 +1,4 @@
-name: Profiling report
+name: profiling reports
 on:
   push:
 #    branches:
@@ -17,8 +17,11 @@ jobs:
         with:
           python-version: ${{ matrix.python-version }}
 
-      - name: Build
-        uses: ./.github/actions/build
+      - name: Install dependencies
+        uses: pip install . tabulate
 
-      - name: Profile
-        run: python profiling_report.py
+      - name: Computing efficiency profiling report
+        run: python profiling/profiling_report.py
+
+      - name: Algorithmic complexity profiling report
+        run: python profiling/scaling_report.py
