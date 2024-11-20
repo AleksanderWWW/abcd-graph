@@ -1,3 +1,8 @@
+## [UNRELEASED] abcd-graph 0.3.1
+
+### Changes
+- Made property computation lazy ([#45](https://github.com/AleksanderWWW/abcd-graph/pull/45))
+
 ## abcd-graph 0.3.0
 
 ### Misc
