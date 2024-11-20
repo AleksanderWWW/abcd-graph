@@ -1,8 +1,5 @@
 name: profiling reports
-on:
-  push:
-#    branches:
-#      - main
+on: [push]
 jobs:
   test:
     runs-on: ${{ matrix.os }}
