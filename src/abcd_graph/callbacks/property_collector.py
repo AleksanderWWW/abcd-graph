@@ -57,8 +57,8 @@ class PropertyCollector(ABCDCallback):
 
     @property
     def degree_sequence(self) -> dict[int, int]:
-        if self._degree_sequence is None:
-            self._degree_sequence = self._graph.degree_sequence
+        if not self._degree_sequence:
+            self._degree_sequence = self._graph.degree_sequence  # type: ignore[union-attr]
 
         return self._degree_sequence
 
@@ -70,28 +70,28 @@ class PropertyCollector(ABCDCallback):
 
     @property
     def expected_degree_cdf(self) -> dict[int, float]:
-        if self._expected_degree_cdf is None:
-            self._expected_degree_cdf = self._graph.expected_degree_cdf
+        if not self._expected_degree_cdf:
+            self._expected_degree_cdf = self._graph.expected_degree_cdf  # type: ignore[union-attr]
 
         return self._expected_degree_cdf
 
     @property
     def actual_degree_cdf(self) -> dict[int, float]:
-        if self._actual_degree_cdf is None:
-            self._actual_degree_cdf = self._graph.actual_degree_cdf
+        if not self._actual_degree_cdf:
+            self._actual_degree_cdf = self._graph.actual_degree_cdf  # type: ignore[union-attr]
 
         return self._actual_degree_cdf
 
     @property
     def expected_community_cdf(self) -> dict[int, float]:
-        if self._expected_community_cdf is None:
-            self._expected_community_cdf = self._graph.expected_community_cdf
+        if not self._expected_community_cdf:
+            self._expected_community_cdf = self._graph.expected_community_cdf  # type: ignore[union-attr]
 
         return self._expected_community_cdf
 
     @property
     def actual_community_cdf(self) -> dict[int, float]:
-        if self._actual_community_cdf is None:
-            self._actual_community_cdf = self._graph.actual_community_cdf
+        if not self._actual_community_cdf:
+            self._actual_community_cdf = self._graph.actual_community_cdf  # type: ignore[union-attr]
 
         return self._actual_community_cdf
