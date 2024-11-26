@@ -3,6 +3,12 @@ A python library for generating ABCD graphs.
 
 ![tests](https://github.com/AleksanderWWW/abcd-graph/actions/workflows/ci.yml/badge.svg)
 ![pre-commit](https://github.com/AleksanderWWW/abcd-graph/actions/workflows/pre-commit.yml/badge.svg)
+![GitHub commits since release](https://img.shields.io/github/commits-since/AleksanderWWW/abcd-graph/latest)
+![GitHub License](https://img.shields.io/github/license/AleksanderWWW/abcd-graph)
+![GitHub Issues or Pull Requests](https://img.shields.io/github/issues/AleksanderWWW/abcd-graph)
+![PyPI - Python Version](https://img.shields.io/pypi/pyversions/abcd-graph)
+![GitHub repo size](https://img.shields.io/github/repo-size/AleksanderWWW/abcd-graph)
+
 
 ## Installation
 
