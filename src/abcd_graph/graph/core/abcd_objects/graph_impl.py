@@ -263,17 +263,20 @@ class XiMatrixBuilder:
             self.actual_betweenness_matrix[self.location[edge.v2]][self.location[edge.v1]] += 1
 
     def _build_expectation_matrix(self) -> None:
+        # Pre-compute community volumes and empirical xi's before looping
+        vol = {c.community_id: sum(c.degree_sequence.values()) for c in self.communities}
+        empirical_xi = {c.community_id: c.empirical_xi for c in self.communities}
         bottom = sum(self.deg_b.values()) - 1
         for c_i in self.communities:
             for c_j in self.communities:
                 if c_i.community_id == OUTLIER_COMMUNITY_ID:
-                    vol_i = float(sum(c_i.degree_sequence.values()))
+                    vol_i = float(vol[OUTLIER_COMMUNITY_ID])
                 else:
-                    vol_i = sum(c_i.degree_sequence.values()) * c_i.empirical_xi
+                    vol_i = vol[c_i.community_id] * empirical_xi[c_i.community_id]
                 if c_j.community_id == OUTLIER_COMMUNITY_ID:
-                    vol_j = float(sum(c_j.degree_sequence.values()))
+                    vol_j = float(vol[OUTLIER_COMMUNITY_ID])
                 else:
-                    vol_j = sum(c_j.degree_sequence.values()) * c_j.empirical_xi
+                    vol_j = vol[c_j.community_id] * empirical_xi[c_j.community_id]
                 top = vol_i * vol_j
 
                 self.expected_betweenness_matrix[c_i.community_id][c_j.community_id] = top / bottom
