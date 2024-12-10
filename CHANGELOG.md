@@ -1,3 +1,12 @@
+## [UNRELEASED] abcd-graph 0.3.1
+
+### Changes
+- Made property computation lazy ([#45](https://github.com/AleksanderWWW/abcd-graph/pull/45))
+
+### Enhancements
+- Sped up building `Xi matrix` by pre-computing community volumes and empirical xi's ([#47](https://github.com/AleksanderWWW/abcd-graph/pull/47))
+
+
 ## abcd-graph 0.3.0
 
 ### Misc

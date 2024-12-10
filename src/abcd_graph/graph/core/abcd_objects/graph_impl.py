@@ -50,6 +50,9 @@ class GraphImpl(AbstractGraph):
 
     @property
     def actual_degree_cdf(self) -> dict[int, float]:
+        return self._calc_actual_degree_cdf()
+
+    def _calc_actual_degree_cdf(self) -> dict[int, float]:
         deg = {v: self.deg_b[v] + self.deg_c[v] for v in self.deg_b}
         sorted_deg = sorted(list(deg.values()))
         val = sorted_deg[0]
@@ -65,6 +68,9 @@ class GraphImpl(AbstractGraph):
 
     @property
     def expected_degree_cdf(self) -> dict[int, float]:
+        return self._calc_expected_degree_cdf()
+
+    def _calc_expected_degree_cdf(self) -> dict[int, float]:
         cdf = {}
         bottom = sum(k ** (-self._params.gamma) for k in range(self._params.min_degree, self._params.max_degree + 1))
 
@@ -74,6 +80,9 @@ class GraphImpl(AbstractGraph):
 
     @property
     def actual_average_community_size(self) -> float:
+        return self._calc_actual_average_community_size()
+
+    def _calc_actual_average_community_size(self) -> float:
         volume = sum(
             len(c.vertices) for c in self.communities if c.community_id != OUTLIER_COMMUNITY_ID
         )  # Excluding outliers
@@ -82,6 +91,9 @@ class GraphImpl(AbstractGraph):
 
     @property
     def expected_average_community_size(self) -> float:
+        return self._calc_expected_average_community_size()
+
+    def _calc_expected_average_community_size(self) -> float:
         bottom: float = sum(
             k ** (-self._params.beta)
             for k in range(self._params.min_community_size, self._params.max_community_size + 1)
@@ -94,6 +106,9 @@ class GraphImpl(AbstractGraph):
 
     @property
     def actual_community_cdf(self) -> dict[int, float]:
+        return self._calc_actual_community_cdf()
+
+    def _calc_actual_community_cdf(self) -> dict[int, float]:
         L = len([c for c in self.communities if c.community_id != OUTLIER_COMMUNITY_ID])  # Excluding outliers
         sizes = {c: len(c.vertices) for c in self.communities if c.community_id != OUTLIER_COMMUNITY_ID}
         sorted_sizes = sorted(list(sizes.values()))
@@ -110,6 +125,9 @@ class GraphImpl(AbstractGraph):
 
     @property
     def expected_community_cdf(self) -> dict[int, float]:
+        return self._calc_expected_community_cdf()
+
+    def _calc_expected_community_cdf(self) -> dict[int, float]:
         cdf = {}
         bottom = sum(
             k ** (-self._params.beta)
@@ -263,17 +281,20 @@ class XiMatrixBuilder:
             self.actual_betweenness_matrix[self.location[edge.v2]][self.location[edge.v1]] += 1
 
     def _build_expectation_matrix(self) -> None:
+        # Pre-compute community volumes and empirical xi's before looping
+        vol = {c.community_id: sum(c.degree_sequence.values()) for c in self.communities}
+        empirical_xi = {c.community_id: c.empirical_xi for c in self.communities}
         bottom = sum(self.deg_b.values()) - 1
         for c_i in self.communities:
             for c_j in self.communities:
                 if c_i.community_id == OUTLIER_COMMUNITY_ID:
-                    vol_i = float(sum(c_i.degree_sequence.values()))
+                    vol_i = float(vol[OUTLIER_COMMUNITY_ID])
                 else:
-                    vol_i = sum(c_i.degree_sequence.values()) * c_i.empirical_xi
+                    vol_i = vol[c_i.community_id] * empirical_xi[c_i.community_id]
                 if c_j.community_id == OUTLIER_COMMUNITY_ID:
-                    vol_j = float(sum(c_j.degree_sequence.values()))
+                    vol_j = float(vol[OUTLIER_COMMUNITY_ID])
                 else:
-                    vol_j = sum(c_j.degree_sequence.values()) * c_j.empirical_xi
+                    vol_j = vol[c_j.community_id] * empirical_xi[c_j.community_id]
                 top = vol_i * vol_j
 
                 self.expected_betweenness_matrix[c_i.community_id][c_j.community_id] = top / bottom

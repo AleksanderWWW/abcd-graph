@@ -36,6 +36,8 @@ from abcd_graph.graph.core.abcd_objects import (
 
 class PropertyCollector(ABCDCallback):
     def __init__(self) -> None:
+        self._graph: Optional[GraphImpl] = None
+
         self._communities: list[Community] = []
 
         self._degree_sequence: dict[int, int] = {}
@@ -51,42 +53,45 @@ class PropertyCollector(ABCDCallback):
         self._actual_community_cdf: dict[int, float] = {}
 
     def after_build(self, graph: GraphImpl, context: BuildContext, exporter: GraphExporter) -> None:
-        self._communities = graph.communities
-
-        self._degree_sequence = graph.degree_sequence
-
-        self._xi_matrix = graph.xi_matrix
-
-        self._expected_degree_cdf = graph.expected_degree_cdf
-
-        self._actual_degree_cdf = graph.actual_degree_cdf
-
-        self._expected_community_cdf = graph.expected_community_cdf
-
-        self._actual_community_cdf = graph.actual_community_cdf
+        self._graph = graph
 
     @property
     def degree_sequence(self) -> dict[int, int]:
+        if not self._degree_sequence:
+            self._degree_sequence = self._graph.degree_sequence  # type: ignore[union-attr]
+
         return self._degree_sequence
 
     @property
     def xi_matrix(self) -> NDArray[np.float64]:
-        assert self._xi_matrix is not None
-
+        if self._xi_matrix is None:
+            self._xi_matrix = self._graph.xi_matrix  # type: ignore[union-attr]
         return self._xi_matrix
 
     @property
     def expected_degree_cdf(self) -> dict[int, float]:
+        if not self._expected_degree_cdf:
+            self._expected_degree_cdf = self._graph.expected_degree_cdf  # type: ignore[union-attr]
+
         return self._expected_degree_cdf
 
     @property
     def actual_degree_cdf(self) -> dict[int, float]:
+        if not self._actual_degree_cdf:
+            self._actual_degree_cdf = self._graph.actual_degree_cdf  # type: ignore[union-attr]
+
         return self._actual_degree_cdf
 
     @property
     def expected_community_cdf(self) -> dict[int, float]:
+        if not self._expected_community_cdf:
+            self._expected_community_cdf = self._graph.expected_community_cdf  # type: ignore[union-attr]
+
         return self._expected_community_cdf
 
     @property
     def actual_community_cdf(self) -> dict[int, float]:
+        if not self._actual_community_cdf:
+            self._actual_community_cdf = self._graph.actual_community_cdf  # type: ignore[union-attr]
+
         return self._actual_community_cdf

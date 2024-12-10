@@ -49,13 +49,9 @@ class Community(AbstractCommunity):
         return res
 
     @property
-    def local_deg_c(self) -> dict[int, int]:
-        return {k: v for k, v in self._deg_c.items() if k in self.vertices}
-
-    @property
     def empirical_xi(self) -> float:
         return sum(self._deg_b[i] for i in self.vertices) / (
-            sum(self._deg_b[i] for i in self.vertices) + sum(self.local_deg_c.values())
+            sum(self._deg_b[i] + self._deg_c[i] for i in self.vertices)
         )
 
     def push_to_background(self, edges: list[Edge], deg_b: dict[int, int]) -> None:
