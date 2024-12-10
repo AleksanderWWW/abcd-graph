@@ -14,6 +14,16 @@ def test_property_collector(params):
 
     assert props.xi_matrix.shape == (len(graph.communities), len(graph.communities))
 
+    assert min(props.actual_community_cdf.values()) >= 0 and round(max(props.actual_community_cdf.values()), 10) <= 1
+
+    assert (
+        min(props.expected_community_cdf.values()) >= 0 and round(max(props.expected_community_cdf.values()), 10) <= 1
+    )
+
+    assert min(props.actual_degree_cdf.values()) >= 0 and round(max(props.actual_degree_cdf.values()), 10) <= 1
+
+    assert min(props.expected_degree_cdf.values()) >= 0 and round(max(props.expected_degree_cdf.values()), 10) <= 1
+
 
 @patch("abcd_graph.graph.core.abcd_objects.graph_impl.XiMatrixBuilder.build")
 def test_property_collector_lazy_eval_xi_matrix(mock_xi_build):
