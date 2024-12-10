@@ -40,7 +40,7 @@ from abcd_graph.graph.core.utils import (
 
 
 def build_degrees(n: int, gamma: float, min_degree: int, max_degree: int) -> NDArray[np.int64]:
-    avail = np.arange(min_degree, max_degree + 1)
+    avail = np.arange(min_degree, max_degree + 1, dtype=float)
 
     probabilities = powerlaw_distribution(avail, gamma)
 
@@ -54,7 +54,7 @@ def build_degrees(n: int, gamma: float, min_degree: int, max_degree: int) -> NDA
 
 def build_community_sizes(n: int, beta: float, min_community_size: int, max_community_size: int) -> NDArray[np.int64]:
     max_community_number = int(np.ceil(n / min_community_size))
-    avail = np.arange(min_community_size, max_community_size + 1)
+    avail = np.arange(min_community_size, max_community_size + 1, dtype=float)
 
     probabilities = powerlaw_distribution(avail, beta)
 
