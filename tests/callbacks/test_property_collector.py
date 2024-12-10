@@ -1,3 +1,5 @@
+from unittest.mock import patch
+
 from abcd_graph import ABCDGraph
 from abcd_graph.callbacks import PropertyCollector
 
@@ -11,3 +13,77 @@ def test_property_collector(params):
     assert len(props.degree_sequence) == params.vcount
 
     assert props.xi_matrix.shape == (len(graph.communities), len(graph.communities))
+
+
+@patch("abcd_graph.graph.core.abcd_objects.graph_impl.XiMatrixBuilder.build")
+def test_property_collector_lazy_eval_xi_matrix(mock_xi_build):
+    props = PropertyCollector()
+    graph = ABCDGraph(callbacks=[props])
+
+    graph.build()
+
+    mock_xi_build.assert_not_called()  # xi matrix not built until called for
+
+    _ = props.xi_matrix
+
+    mock_xi_build.assert_called_once()
+
+    _ = props.xi_matrix
+
+    mock_xi_build.assert_called_once()  # xi matrix not rebuilt upon every call
+
+
+@patch("abcd_graph.graph.core.abcd_objects.graph_impl.GraphImpl._calc_actual_degree_cdf")
+def test_property_collector_lazy_eval_actual_degree_cdf(mock_actual_cdf):
+    props = PropertyCollector()
+    graph = ABCDGraph(callbacks=[props])
+
+    graph.build()
+
+    mock_actual_cdf.assert_not_called()
+
+    _ = props.actual_degree_cdf
+
+    mock_actual_cdf.assert_called_once()
+
+
+@patch("abcd_graph.graph.core.abcd_objects.graph_impl.GraphImpl._calc_expected_degree_cdf")
+def test_property_collector_lazy_eval_expected_degree_cdf(mock_expected_cdf):
+    props = PropertyCollector()
+    graph = ABCDGraph(callbacks=[props])
+
+    graph.build()
+
+    mock_expected_cdf.assert_not_called()
+
+    _ = props.expected_degree_cdf
+
+    mock_expected_cdf.assert_called_once()
+
+
+@patch("abcd_graph.graph.core.abcd_objects.graph_impl.GraphImpl._calc_actual_community_cdf")
+def test_property_collector_lazy_eval_actual_community_cdf(mock_actual_cdf):
+    props = PropertyCollector()
+    graph = ABCDGraph(callbacks=[props])
+
+    graph.build()
+
+    mock_actual_cdf.assert_not_called()
+
+    _ = props.actual_community_cdf
+
+    mock_actual_cdf.assert_called_once()
+
+
+@patch("abcd_graph.graph.core.abcd_objects.graph_impl.GraphImpl._calc_expected_community_cdf")
+def test_property_collector_lazy_eval_expected_community_cdf(mock_expected_cdf):
+    props = PropertyCollector()
+    graph = ABCDGraph(callbacks=[props])
+
+    graph.build()
+
+    mock_expected_cdf.assert_not_called()
+
+    _ = props.expected_community_cdf
+
+    mock_expected_cdf.assert_called_once()
