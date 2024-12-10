@@ -96,7 +96,7 @@ def assign_degrees(
 ) -> dict[int, Any]:
     phi = 1 - np.sum(community_sizes**2) / (len(degrees) ** 2)
     deg = {}
-    avail = 0
+    avail = communities[0][-1]
     already_chosen: set[int] = set()
 
     lock = 0
@@ -144,7 +144,7 @@ def update_lock(
 
 
 def choose_new_vertex(avail: int, already_chosen: set[int]) -> int:
-    v = np.random.choice(avail)
+    v = np.random.choice(avail)  # ValueError: a must be greater than 0 unless no samples are taken
     while v in already_chosen:
         v = np.random.choice(avail)
 

@@ -20,7 +20,6 @@ def test_visualizer_raises_exception_if_more_than_100_nodes():
         visualizer.draw_communities()
 
 
-@pytest.mark.skip(reason="Bug in the Chung-Lu model")
 def test_visualizer_not_supporting_models_other_than_configuration_model():
     visualizer = Visualizer()
     graph = ABCDGraph(params=ABCDParams(vcount=60, max_community_size=50), callbacks=[visualizer])
