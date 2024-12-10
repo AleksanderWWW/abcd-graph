@@ -1,5 +1,8 @@
 ## [UNRELEASED] abcd-graph 0.3.1
 
+### Fixes
+- Fixed calculating expected community cdf ([#48](https://github.com/AleksanderWWW/abcd-graph/pull/48))
+
 ### Changes
 - Made property computation lazy ([#45](https://github.com/AleksanderWWW/abcd-graph/pull/45))
 
