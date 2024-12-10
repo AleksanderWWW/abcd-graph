@@ -36,7 +36,7 @@ def rand_round(x: float) -> int:
     return int(math.floor(x) + 1) if random.uniform(0, 1) <= p else int(math.floor(x))
 
 
-def powerlaw_distribution(choices: NDArray[np.int64], intensity: float) -> NDArray[np.float64]:
+def powerlaw_distribution(choices: NDArray[np.float64], intensity: float) -> NDArray[np.float64]:
     dist: NDArray[np.float64] = (choices ** (-intensity)) / np.sum(choices ** (-intensity))
     return dist
 

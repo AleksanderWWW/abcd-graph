@@ -134,7 +134,7 @@ class GraphImpl(AbstractGraph):
             for k in range(self._params.min_community_size, self._params.max_community_size + 1)
         )
         for s in range(self._params.min_community_size, self._params.max_community_size + 1):
-            cdf[s] = sum(k**self._params.beta for k in range(self._params.min_community_size, s + 1)) / bottom
+            cdf[s] = sum(k ** (-self._params.beta) for k in range(self._params.min_community_size, s + 1)) / bottom
         return cdf
 
     @property
