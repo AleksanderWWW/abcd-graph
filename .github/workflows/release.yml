@@ -29,5 +29,10 @@ jobs:
           python-version: "3.12"
       - name: Install poetry
         run: pip install poetry
+      - name: Set up dynamic versioning
+        run: poetry self add poetry-dynamic-versioning
       - name: Publish
-        run: ./publish.sh ${{ secrets.PYPI_TOKEN }} ${{ secrets.GHCR_TOKEN }}
+        run: ./publish.sh
+        env:
+          GHCR_TOKEN: ${{ secrets.GHCR_TOKEN }}
+          PYPI_TOKEN: ${{ secrets.PYPI_TOKEN }}

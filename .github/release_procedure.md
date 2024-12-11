@@ -5,6 +5,7 @@ Following the steps below for a release `X.Y.Z` should result in creating:
 - a new tag on GitHub with the version `X.Y.Z`
 - a new release on GitHub named `X.Y.Z`
 - a new version on PyPI with the version `X.Y.Z`.
+- new docker image tags with the version `X.Y.Z`.
 
 ## Steps
 
@@ -27,14 +28,6 @@ git fetch --all
 git checkout -b release/abcd-X.Y.Z
 ```
 
-- Update the version number in the `pyproject.toml` file.
-
-```toml
-[tool.poetry]
-name = "abcd-graph"
-version = "X.Y.Z"
-```
-
 - [Not applicable for release candidates!!!] Update the changelog - remove the [UNRELEASED] part of the top-most part of the file.
 
 before:
@@ -50,7 +43,7 @@ after:
 - Commit the changes.
 
 ```bash
-git add pyproject.toml CHANGELOG.md
+git add CHANGELOG.md
 git commit -m "Release abcd-graph X.Y.Z"
 git push -u origin release/abcd-X.Y.Z
 ```
@@ -65,4 +58,4 @@ Once this PR is merged, the release can be made.
   - Fill in the release description with the changes since the last release (copy from changelog).
   - Publish the release (set as pre-release in case of release candidates).
 - Wait for the CI to finish and the release to be built.
-- Once the release is built, check that the package is available on PyPI.
+- Once the release is built, check that the package is available on PyPI and new image tags are present on GHCR.

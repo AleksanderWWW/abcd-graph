@@ -1,5 +1,5 @@
 name: profiling reports
-on: [push]
+on: [workflow_dispatch]
 jobs:
   test:
     runs-on: ${{ matrix.os }}
