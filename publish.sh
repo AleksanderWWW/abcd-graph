@@ -1,6 +1,7 @@
 #!/bin/bash
 
 #  This script will build the package, and publish it to PyPI.
+# It will also build and push docker images to GitHub Container Registry.
 #  Note that the script checks if the tag is consistent with the version specified in  pyproject.toml.
 #  If they don't match, the script will exit without publishing the package.
 #  This is a safety measure to prevent accidental releases.
@@ -24,3 +25,21 @@ poetry build
 poetry publish  --username __token__ --password "$1"
 
 echo "Published $CURRENT_VERSION to PyPI."
+
+echo "Running docker build-and-push"
+
+echo "Logging in to GitHub Container Registry"
+docker login --username AleksanderWWW --password "$2" ghcr.io
+
+echo "Building basic docker image"
+docker build -t ghcr.io/aleksanderwww/abcd-graph:"$TAG" .
+
+echo "Pushing basic docker image"
+docker push ghcr.io/aleksanderwww/abcd-graph:"$TAG"
+
+
+echo "Building full docker image"
+docker build -t ghcr.io/aleksanderwww/abcd-graph-all:"$TAG" --build-arg INSTALL_TYPE=all .
+
+echo "Pushing full docker image"
+docker push ghcr.io/aleksanderwww/abcd-graph-all:"$TAG"
