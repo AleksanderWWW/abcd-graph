@@ -29,27 +29,5 @@ jobs:
           python-version: "3.12"
       - name: Install poetry
         run: pip install poetry
-      - name: Set up dynamic versioning
-        run: poetry self add poetry-dynamic-versioning
       - name: Publish
-        run: ./publish.sh
-        env:
-          PYPI_TOKEN: ${{ secrets.PYPI_TOKEN }}
-
-  build-and-push:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
-        with:
-          python-version: "3.12"
-      - name: Docker login
-        run: docker login --username AleksanderWWW --password ${{ secrets.GHCR_TOKEN }} ghcr.io
-      - name: Build and push basic image
-        run: |
-          docker build -t ghcr.io/aleksanderwww/abcd-graph:"${GITHUB_REF#refs/tags/}" .
-          docker push ghcr.io/aleksanderwww/abcd-graph:"${GITHUB_REF#refs/tags/}"
-      - name: Build and push full image
-        run: |
-          build -t ghcr.io/aleksanderwww/abcd-graph-all:"${GITHUB_REF#refs/tags/}" --build-arg INSTALL_TYPE=all .
-          docker push ghcr.io/aleksanderwww/abcd-graph-all:"${GITHUB_REF#refs/tags/}"
+        run: ./publish.sh ${{ secrets.PYPI_TOKEN }} ${{ secrets.GHCR_TOKEN }}

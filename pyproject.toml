@@ -1,22 +1,12 @@
 [tool.poetry]
 name = "abcd-graph"
-version = "0.1.0"
+version = "0.3.1rc0"
 description = "A python library for generating ABCD graphs."
 authors = ["Aleksander Wojnarowicz", "Jordan Barrett"]
 license = "MIT"
 readme = "README.md"
 packages = [{include = "abcd_graph", from = "src"}]
 repository = "https://github.com/AleksanderWWW/abcd-graph"
-
-[build-system]
-requires = ["poetry-core>=1.0.0", "poetry-dynamic-versioning>=1.0.0,<2.0.0"]
-build-backend = "poetry_dynamic_versioning.backend"
-
-[tool.poetry-dynamic-versioning]
-enable = true
-vcs = "git"
-style = "semver"
-pattern = "default-unprefixed"
 
 [tool.poetry.dependencies]
 python = "^3.10"
@@ -60,6 +50,11 @@ extended = [
     "scipy",
     "matplotlib",
 ]
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
 
 
 [tool.black]
