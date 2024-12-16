@@ -178,8 +178,7 @@ Possible values for `INSTALL_TYPE` are `dev`, `matplotlib`,  `networkx`, `igraph
 | `networkx`   | `networkx`                                                                        |
 | `igraph`     | `igraph`                                                                          |
 | `scipy`      | `scipy`                                                                           |
-| `all`        | `networkx`, `igraph`, `scipy`, `pytest`, `pre-commit`, `pytest-cov`, `matplotlib` |
-| `extended`   | `scipy`, `matplotlib`                                                             |
+| `all`        | `networkx`, `igraph`, `scipy`, `matplotlib`                                       |
 
 > [!NOTE]
 > Combinations of the above values are also possible, e.g. `igraph,networkx`.
