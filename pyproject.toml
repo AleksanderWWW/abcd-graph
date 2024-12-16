@@ -1,60 +1,49 @@
-[tool.poetry]
+[project]
 name = "abcd-graph"
-version = "0.3.1rc0"
-description = "A python library for generating ABCD graphs."
-authors = ["Aleksander Wojnarowicz", "Jordan Barrett"]
-license = "MIT"
+version = "0.3.1rc4"
 readme = "README.md"
+description = "A python library for generating ABCD graphs."
+authors = [
+    { name = "Aleksander Wojnarowicz", email = "alwojnarowicz@gmail.com" },
+    { name = "Jordan Barrett" }
+]
+license = "MIT"
+requires-python = ">=3.9"
 packages = [{include = "abcd_graph", from = "src"}]
 repository = "https://github.com/AleksanderWWW/abcd-graph"
-
-[tool.poetry.dependencies]
-python = "^3.10"
-numpy = "^1.26.4"
-typing-extensions = "^4.10.0"
-
-# dev
-pre-commit = { version = "^3.7.0", optional = true }
-pytest = { version = "^8.1.1", optional = true }
-pytest-cov = { version = "^5.0.0", optional = true }
-
-# integrations
-networkx = { version = "^3.3", optional = true }
-igraph = { version = "*", optional = true }
-matplotlib = { version = "^3.9.0", optional = true }
-scipy = { version = "^1.0.0", optional = true}
-
-
-[tool.poetry.extras]
-dev = [
-    "pre-commit",
-    "pytest",
-    "pytest-cov",
+dependencies = [
+    "numpy>=1.26.4",
+    "typing-extensions>=4.10.0"
 ]
-networkx = ["networkx"]
-igraph = ["igraph"]
-matplotlib = ["matplotlib"]
-scipy = ["scipy"]
 
+[project.optional-dependencies]
+networkx = [
+    "networkx>=3.2.1",
+]
+igraph = [
+    "igraph>=0.11.8",
+]
+matplotlib = [
+    "matplotlib>=3.9.4",
+]
+scipy = [
+    "scipy>=1.13.1",
+]
 all = [
-    "pre-commit",
-    "pytest",
-    "pytest-cov",
-    "networkx",
-    "igraph",
-    "matplotlib",
-    "scipy",
+    "igraph>=0.11.8",
+    "matplotlib>=3.9.4",
+    "networkx>=3.2.1",
+    "scipy>=1.13.1",
 ]
-
-extended = [
-    "scipy",
-    "matplotlib",
+dev = [
+    "pre-commit>=4.0.1",
+    "pytest>=8.3.4",
+    "pytest-cov>=6.0.0",
 ]
-
 
 [build-system]
-requires = ["poetry-core"]
-build-backend = "poetry.core.masonry.api"
+requires = ["hatchling"]
+build-backend = "hatchling.build"
 
 
 [tool.black]
