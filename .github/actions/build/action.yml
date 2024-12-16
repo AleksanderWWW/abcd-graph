@@ -22,6 +22,5 @@ runs:
       - name: Install dependencies
         working-directory: ${{ inputs.working_directory }}
         run: |
-          uv pip install --system -r pyproject.toml --extra all --extra dev
-          pip install .
+          uv pip install --system -r pyproject.toml --extra all --extra dev .
         shell: bash
