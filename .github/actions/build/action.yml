@@ -17,6 +17,7 @@ runs:
 
       - name: Install uv
         run : curl -LsSf https://astral.sh/uv/install.sh | sh
+        shell: bash
 
       - name: Install dependencies
         working-directory: ${{ inputs.working_directory }}
