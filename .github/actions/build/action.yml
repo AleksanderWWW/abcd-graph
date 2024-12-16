@@ -24,5 +24,4 @@ runs:
         run: |
           uv pip install --system -r pyproject.toml --extra all --extra dev
           pip install .
-          |
         shell: bash
