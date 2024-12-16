@@ -8,7 +8,7 @@
 set -euo pipefail
 
 
-CURRENT_VERSION=$(uv version | awk '{print $2}')
+CURRENT_VERSION=$(pip list | grep abcd-graph | awk '{print $2}')
 TAG="${GITHUB_REF#refs/tags/}"
 
 # Make sure that we're releasing the version specified in pyproject.toml to PyPI
