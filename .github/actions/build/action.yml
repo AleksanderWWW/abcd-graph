@@ -15,7 +15,10 @@ runs:
           repository: AleksanderWWW/abcd-graph
           path: ${{ inputs.working_directory }}
 
+      - name: Install uv
+        run : curl -LsSf https://astral.sh/uv/install.sh | sh
+
       - name: Install dependencies
         working-directory: ${{ inputs.working_directory }}
-        run: pip install -e .[dev,all]
+        run: uv pip install -r pyproject.toml --extra all --extra dev
         shell: bash
