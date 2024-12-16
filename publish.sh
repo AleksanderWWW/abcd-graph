@@ -8,7 +8,7 @@
 set -euo pipefail
 
 
-CURRENT_VERSION=$(poetry version | awk '{print $2}')
+CURRENT_VERSION=$(pip list | grep abcd-graph | awk '{print $2}')
 TAG="${GITHUB_REF#refs/tags/}"
 
 # Make sure that we're releasing the version specified in pyproject.toml to PyPI
@@ -19,10 +19,10 @@ fi
 
 echo "Tag is consistent with the current version. Proceeding with the release."
 
-poetry build
+uv build
 
 # Publish to PyPI
-poetry publish  --username __token__ --password "$1"
+uv publish --token "$1"
 
 echo "Published $CURRENT_VERSION to PyPI."
 

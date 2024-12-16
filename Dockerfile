@@ -7,7 +7,7 @@ WORKDIR /home/abcd-graph
 
 RUN python -m pip install --upgrade pip
 
-COPY pyproject.toml poetry.lock README.md ./
+COPY pyproject.toml README.md ./
 
 COPY src src/
 
