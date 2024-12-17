@@ -26,6 +26,35 @@ cd abcd-graph
 pip install .
 ```
 
+If you're using `uv` then run the following for lightning-fast installation:
+```bash
+uv pip install -r pyproject.toml .
+````
+
+### Optional dependencies
+The project comes with a set of optional dependencies that can be installed using the following commands:
+
+```bash
+pip install abcd-graph[dependency-name]
+```
+
+or
+
+```bash
+uv add abcd-graph --extra dependency-name
+```
+
+where `dependency-name` is one of the following:
+
+| Value        | Packages installed                                                                |
+|--------------|-----------------------------------------------------------------------------------|
+| `dev`        | `pytest`, `pre-commit`, `pytest-cov`                                              |
+| `matplotlib` | `matplotlib`                                                                      |
+| `networkx`   | `networkx`                                                                        |
+| `igraph`     | `igraph`                                                                          |
+| `scipy`      | `scipy`                                                                           |
+| `all`        | `networkx`, `igraph`, `scipy`, `matplotlib`                                       |
+
 
 ## Usage
 
@@ -169,7 +198,7 @@ Available are also installation commands for the additional packages:
 docker build -t abcd-test --build-arg INSTALL_TYPE=igraph .
 ```
 
-Possible values for `INSTALL_TYPE` are `dev`, `matplotlib`,  `networkx`, `igraph`, `scipy`, `all` and `extended`.
+Possible values for `INSTALL_TYPE` are `dev`, `matplotlib`,  `networkx`, `igraph`, `scipy` and `all`.
 
 | Value        | Packages installed                                                                |
 |--------------|-----------------------------------------------------------------------------------|
@@ -181,7 +210,7 @@ Possible values for `INSTALL_TYPE` are `dev`, `matplotlib`,  `networkx`, `igraph
 | `all`        | `networkx`, `igraph`, `scipy`, `matplotlib`                                       |
 
 > [!WARNING]
-> If you choose and option outside the available ones, the build process will fail
+> If you choose and option outside the available ones, the build process will fail.
 
 
 ## Examples
