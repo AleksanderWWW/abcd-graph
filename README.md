@@ -128,12 +128,12 @@ Exporting the graph to different formats is done via the `exporter` property of 
 
 Possible formats are:
 
-| Method                         | Description                                                                               | Required packages | Installation command         |
-|--------------------------------|-------------------------------------------------------------------------------------------|-------------------|------------------------------|
-| `to_networkx()`                | Export the graph to a `networkx.Graph` object.                                            | `networkx`        | `pip install abcd[networkx]` |
-| `to_igraph()`                  | Export the graph to an `igraph.Graph` object.                                             | `igraph`          | `pip install abcd[igraph]`   |
-| `adj_matrix`                   | Export the graph to a `numpy.ndarray` object representing the adjacency matrix.           |                   |                              |
-| `to_sparse_adjacency_matrix()` | Export the graph to a `scipy.sparse.csr_matrix` object representing the adjacency matrix. | `scipy`           | `pip install abcd[scipy]`    |
+| Method                         | Description                                                                               | Additional packages | Installation command               |
+|--------------------------------|-------------------------------------------------------------------------------------------|---------------------|------------------------------------|
+| `to_networkx()`                | Export the graph to a `networkx.Graph` object.                                            | `networkx`          | `pip install abcd-graph[networkx]` |
+| `to_igraph()`                  | Export the graph to an `igraph.Graph` object.                                             | `igraph`            | `pip install abcd-graph[igraph]`   |
+| `to_adjacency_matrix()`        | Export the graph to a `numpy.ndarray` object representing the adjacency matrix.           |                     |                                    |
+| `to_sparse_adjacency_matrix()` | Export the graph to a `scipy.sparse.csr_matrix` object representing the adjacency matrix. | `scipy`             | `pip install abcd-graph[scipy]`    |
 
 
 Example:
@@ -210,7 +210,7 @@ Possible values for `INSTALL_TYPE` are `dev`, `matplotlib`,  `networkx`, `igraph
 | `all`        | `networkx`, `igraph`, `scipy`, `matplotlib`                                       |
 
 > [!WARNING]
-> If you choose and option outside the available ones, the build process will fail.
+> If you choose an option not included in the table above, the build process will fail.
 
 
 ## Examples
