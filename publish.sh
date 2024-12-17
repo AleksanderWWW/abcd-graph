@@ -7,14 +7,13 @@
 #  This is a safety measure to prevent accidental releases.
 set -euo pipefail
 
-
-CURRENT_VERSION=$(pip list | grep abcd-graph | awk '{print $2}')
+CURRENT_VERSION=$(python -c "import importlib.metadata; print(importlib.metadata.version('abcd-graph'))")
 TAG="${GITHUB_REF#refs/tags/}"
 
 # Make sure that we're releasing the version specified in pyproject.toml to PyPI
 if [ "$TAG" != "$CURRENT_VERSION" ]; then
     echo "Tag $TAG is inconsistent with current version $CURRENT_VERSION and will not be published on PyPI."
-    exit 0
+    exit 1
 fi
 
 echo "Tag is consistent with the current version. Proceeding with the release."
@@ -36,7 +35,6 @@ docker build -t ghcr.io/aleksanderwww/abcd-graph:"$TAG" .
 
 echo "Pushing basic docker image"
 docker push ghcr.io/aleksanderwww/abcd-graph:"$TAG"
-
 
 echo "Building full docker image"
 docker build -t ghcr.io/aleksanderwww/abcd-graph-all:"$TAG" --build-arg INSTALL_TYPE=all .
