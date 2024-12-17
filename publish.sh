@@ -7,7 +7,7 @@
 #  This is a safety measure to prevent accidental releases.
 set -euo pipefail
 
-CURRENT_VERSION=$(python -c "import importlib.metadata; print(importlib.metadata.version('abcd-graph'))")
+CURRENT_VERSION=$(cat pyproject.toml | awk -F '"' '/^version =/ { print $2; exit }')
 TAG="${GITHUB_REF#refs/tags/}"
 
 # Make sure that we're releasing the version specified in pyproject.toml to PyPI
