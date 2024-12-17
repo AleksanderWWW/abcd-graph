@@ -1,6 +1,6 @@
 [project]
 name = "abcd-graph"
-version = "0.3.1rc6"
+version = "0.3.1rc7"
 readme = "README.md"
 description = "A python library for generating ABCD graphs."
 authors = [
