@@ -5,15 +5,18 @@ ARG INSTALL_TYPE=normal
 
 WORKDIR /home/abcd-graph
 
-RUN python -m pip install --upgrade pip
+RUN pip install uv
 
 COPY pyproject.toml README.md ./
 
-COPY src src/
-
-# Install the project
+# Install the project dependencies
 RUN if [ "$INSTALL_TYPE" = "normal" ]; then \
-        pip install --no-cache-dir -e . ; \
+        uv pip install --no-cache-dir --system -r pyproject.toml ; \
     else \
-        pip install --no-cache-dir -e .[$INSTALL_TYPE] ; \
+        uv pip install --no-cache-dir --system -r pyproject.toml --extra $INSTALL_TYPE ; \
     fi
+
+COPY src src
+
+# Install the project source code
+RUN uv pip install --no-cache-dir --system .
