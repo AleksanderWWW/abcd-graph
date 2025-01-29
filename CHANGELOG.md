@@ -9,6 +9,7 @@
 
 ### Enhancements
 - Sped up building `Xi matrix` by pre-computing community volumes and empirical xi's ([#47](https://github.com/AleksanderWWW/abcd-graph/pull/47))
+- Enforced implementing at least one base method in all `ABCDCallback` subclasses ([#56](https://github.com/AleksanderWWW/abcd-graph/pull/56))
 
 
 ## abcd-graph 0.3.0
