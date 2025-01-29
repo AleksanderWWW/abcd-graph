@@ -94,7 +94,7 @@ def assign_degrees(
     community_sizes: NDArray[np.int64],
     xi: float,
 ) -> dict[int, Any]:
-    phi = 1 - np.sum(community_sizes**2) / (len(degrees) ** 2)
+    phi = float(1 - np.sum(community_sizes**2) / (len(degrees) ** 2))
     deg = {}
     avail = communities[0][-1]
     already_chosen: set[int] = set()
