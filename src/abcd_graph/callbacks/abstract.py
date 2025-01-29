@@ -19,9 +19,8 @@
 # SOFTWARE.
 
 import datetime
-from abc import ABC
 from dataclasses import dataclass
-from typing import Optional
+from typing import Optional, Type
 
 from abcd_graph.exporter import GraphExporter
 from abcd_graph.graph.core.abcd_objects import GraphImpl
@@ -39,7 +38,20 @@ class BuildContext:
     raw_build_time: Optional[float] = None
 
 
-class ABCDCallback(ABC):
+class CallbackMeta(type):
+    def __new__(cls: Type["CallbackMeta"], name: str, bases: tuple, classdict: dict) -> "CallbackMeta":
+        methods = ["before_build", "after_build"]
+        error_msg = f"Class {name} must implement at least one of {methods}"
+        
+        present_methods = [method for method in methods if method in classdict]
+
+        if not any(present_methods):
+            raise ValueError(error_msg)
+
+        return super().__new__(cls, name, bases, classdict)
+
+
+class ABCDCallback(metaclass=CallbackMeta):
     def before_build(self, context: BuildContext) -> None: ...
 
     def after_build(self, graph: GraphImpl, context: BuildContext, exporter: GraphExporter) -> None: ...
