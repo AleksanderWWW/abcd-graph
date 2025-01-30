@@ -104,7 +104,7 @@ def assign_degrees(
 
     for i, d in enumerate(degrees):
         if lock_needs_update(d, d_previous, lock, len(community_sizes)):
-            threshold = calculate_threshold(d, xi, phi)
+            threshold = calculate_threshold(d, xi, float(phi))
             lock, avail = update_lock(threshold, lock, avail, community_sizes, communities)
 
         d_previous = d
