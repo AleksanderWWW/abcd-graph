@@ -1,9 +1,12 @@
+import pytest
+
 from abcd_graph import ABCDGraph
 from abcd_graph.callbacks import StatsCollector
 from abcd_graph.models import (
     chung_lu,
     configuration_model,
 )
+from abcd_graph.params import ABCDParams
 
 
 def test_stats_collector(params):
@@ -30,3 +33,11 @@ def test_stats_collector_chung_lu_model(params):
     graph.build(model=chung_lu)
 
     assert stats.fetch_statistic("model_used") == chung_lu.__name__
+
+
+def test_stats_collector_failing_methods_with_custom_sequences(params_with_custom_sequences: ABCDParams):
+    stats = StatsCollector()
+    graph = ABCDGraph(params=params_with_custom_sequences, callbacks=[stats])
+
+    with pytest.raises(RuntimeError):
+        graph.build()

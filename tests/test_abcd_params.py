@@ -21,6 +21,10 @@
 import pytest
 
 from abcd_graph import ABCDParams
+from abcd_graph.params import (
+    DEFAULT_BETA_VALUE,
+    DEFAULT_GAMMA_VALUE,
+)
 
 
 def test_abcd_params_negative_vcount():
@@ -87,3 +91,31 @@ def test_num_outliers_cannot_be_negative():
 def test_num_outliers_cannot_be_greater_than_vcount():
     with pytest.raises(ValueError):
         ABCDParams(vcount=1000, num_outliers=1001)
+
+
+def test_custom_sequences_defaults():
+    ABCDParams(
+        degree_sequence=[9] + [1] * 9,
+        community_size_sequence=(5, 5),
+        vcount=10,
+    )
+
+
+def test_custom_sequences_fail_with_params_provided():
+    with pytest.raises(ValueError):
+        ABCDParams(
+            degree_sequence=[9] + [1] * 9,
+            community_size_sequence=(5, 5),
+            vcount=10,
+            gamma=DEFAULT_GAMMA_VALUE,
+            beta=DEFAULT_BETA_VALUE,
+        )
+
+
+def test_custom_sequences_fail_wrong_vcount():
+    with pytest.raises(ValueError):
+        ABCDParams(
+            degree_sequence=[9] + [1] * 9,
+            community_size_sequence=(5, 5),
+            vcount=100,
+        )

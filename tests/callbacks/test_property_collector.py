@@ -1,7 +1,10 @@
 from unittest.mock import patch
 
+import pytest
+
 from abcd_graph import ABCDGraph
 from abcd_graph.callbacks import PropertyCollector
+from abcd_graph.params import ABCDParams
 
 
 def test_property_collector(params):
@@ -97,3 +100,15 @@ def test_property_collector_lazy_eval_expected_community_cdf(mock_expected_cdf):
     _ = props.expected_community_cdf
 
     mock_expected_cdf.assert_called_once()
+
+
+def test_property_collector_failing_methods_with_custom_sequences(params_with_custom_sequences: ABCDParams):
+    props = PropertyCollector()
+    graph = ABCDGraph(params=params_with_custom_sequences, callbacks=[props])
+    graph.build()
+
+    with pytest.raises(RuntimeError):
+        props.expected_degree_cdf()
+
+    with pytest.raises(RuntimeError):
+        props.expected_community_cdf()
