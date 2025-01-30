@@ -17,5 +17,14 @@ def params_with_outliers() -> ABCDParams:
 
 
 @pytest.fixture(scope="session")
+def params_with_custom_sequences() -> ABCDParams:
+    return ABCDParams(
+        degree_sequence=[9] + [1] * 9,
+        community_size_sequence=(5, 5),
+        vcount=10,
+    )
+
+
+@pytest.fixture(scope="session")
 def graph() -> ABCDGraph:
-    yield ABCDGraph()
+    return ABCDGraph()

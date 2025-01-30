@@ -1,6 +1,9 @@
 __all__ = ["GraphImpl"]
 
-from typing import Optional
+from typing import (
+    Optional,
+    cast,
+)
 
 import numpy as np
 from numpy.typing import NDArray
@@ -19,6 +22,11 @@ from abcd_graph.graph.core.abcd_objects.utils import (
 from abcd_graph.graph.core.constants import OUTLIER_COMMUNITY_ID
 from abcd_graph.models import Model
 from abcd_graph.params import ABCDParams
+
+UNSUPPORTED_OPERATION_CUSTOM_SEQUENCE_MSG = """Cannot compute {operation_name} because relevant parameters are `None`.
+                If you passed custom degree sequence to `ABCDParams()` you cannot use this property.
+                Otherwise this might be a bug on our side - please contact the maintainers or submit a GitHub issue.
+            """
 
 
 class GraphImpl(AbstractGraph):
@@ -39,6 +47,15 @@ class GraphImpl(AbstractGraph):
 
     @property
     def expected_average_degree(self) -> float:
+        if not all([self._params.gamma, self._params.min_degree, self._params.max_degree]):
+            raise RuntimeError(
+                UNSUPPORTED_OPERATION_CUSTOM_SEQUENCE_MSG.format(operation_name="expected average degree")
+            )
+
+        self._params.gamma = cast(float, self._params.gamma)
+        self._params.min_degree = cast(int, self._params.min_degree)
+        self._params.max_degree = cast(int, self._params.max_degree)
+
         bottom: float = sum(
             k ** (-self._params.gamma) for k in range(self._params.min_degree, self._params.max_degree + 1)
         )
@@ -68,9 +85,16 @@ class GraphImpl(AbstractGraph):
 
     @property
     def expected_degree_cdf(self) -> dict[int, float]:
+        if not all([self._params.gamma, self._params.min_degree, self._params.max_degree]):
+            raise RuntimeError(UNSUPPORTED_OPERATION_CUSTOM_SEQUENCE_MSG.format(operation_name="expected degree cdf"))
+
         return self._calc_expected_degree_cdf()
 
     def _calc_expected_degree_cdf(self) -> dict[int, float]:
+        self._params.gamma = cast(float, self._params.gamma)
+        self._params.min_degree = cast(int, self._params.min_degree)
+        self._params.max_degree = cast(int, self._params.max_degree)
+
         cdf = {}
         bottom = sum(k ** (-self._params.gamma) for k in range(self._params.min_degree, self._params.max_degree + 1))
 
@@ -91,9 +115,18 @@ class GraphImpl(AbstractGraph):
 
     @property
     def expected_average_community_size(self) -> float:
+        if not all([self._params.beta, self._params.min_community_size, self._params.max_community_size]):
+            raise RuntimeError(
+                UNSUPPORTED_OPERATION_CUSTOM_SEQUENCE_MSG.format(operation_name="expected average community size")
+            )
+
         return self._calc_expected_average_community_size()
 
     def _calc_expected_average_community_size(self) -> float:
+        self._params.beta = cast(float, self._params.beta)
+        self._params.min_community_size = cast(int, self._params.min_community_size)
+        self._params.max_community_size = cast(int, self._params.max_community_size)
+
         bottom: float = sum(
             k ** (-self._params.beta)
             for k in range(self._params.min_community_size, self._params.max_community_size + 1)
@@ -125,9 +158,18 @@ class GraphImpl(AbstractGraph):
 
     @property
     def expected_community_cdf(self) -> dict[int, float]:
+        if not all([self._params.beta, self._params.min_community_size, self._params.max_community_size]):
+            raise RuntimeError(
+                UNSUPPORTED_OPERATION_CUSTOM_SEQUENCE_MSG.format(operation_name="expected community cdf")
+            )
+
         return self._calc_expected_community_cdf()
 
     def _calc_expected_community_cdf(self) -> dict[int, float]:
+        self._params.beta = cast(float, self._params.beta)
+        self._params.min_community_size = cast(int, self._params.min_community_size)
+        self._params.max_community_size = cast(int, self._params.max_community_size)
+
         cdf = {}
         bottom = sum(
             k ** (-self._params.beta)

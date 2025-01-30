@@ -1,4 +1,4 @@
-## [UNRELEASED] abcd-graph 0.3.1
+## [UNRELEASED] abcd-graph 0.4.0
 
 ### Fixes
 - Fixed calculating expected community cdf ([#48](https://github.com/AleksanderWWW/abcd-graph/pull/48))
@@ -9,6 +9,9 @@
 
 ### Enhancements
 - Sped up building `Xi matrix` by pre-computing community volumes and empirical xi's ([#47](https://github.com/AleksanderWWW/abcd-graph/pull/47))
+
+### Features
+- Allowed to pass custom degree and community size sequences ([#57](https://github.com/AleksanderWWW/abcd-graph/pull/57))
 
 
 ## abcd-graph 0.3.0

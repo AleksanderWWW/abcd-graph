@@ -120,6 +120,15 @@ def assign_degrees(
     return deg
 
 
+def choose_new_vertex(avail: int, already_chosen: set[int]) -> int:
+    avail_set = set(range(avail)) - already_chosen
+
+    if not avail_set:
+        return max(already_chosen) + 1
+
+    return int(np.random.choice(list(avail_set))) if avail_set else avail
+
+
 def lock_needs_update(degree: int, previous_degree: int, lock: int, num_communities: int) -> bool:
     return (degree < previous_degree) and (lock < num_communities)
 
@@ -141,14 +150,6 @@ def update_lock(
         if lock == len(community_sizes):
             break
     return lock, avail
-
-
-def choose_new_vertex(avail: int, already_chosen: set[int]) -> int:
-    v = np.random.choice(avail)  # ValueError: a must be greater than 0 unless no samples are taken
-    while v in already_chosen:
-        v = np.random.choice(avail)
-
-    return v
 
 
 def assign_remaining_degrees(
