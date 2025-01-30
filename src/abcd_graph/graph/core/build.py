@@ -104,7 +104,7 @@ def assign_degrees(
 
     for i, d in enumerate(degrees):
         if lock_needs_update(d, d_previous, lock, len(community_sizes)):
-            threshold = calculate_threshold(d, xi, phi)
+            threshold = calculate_threshold(d, xi, float(phi))
             lock, avail = update_lock(threshold, lock, avail, community_sizes, communities)
 
         d_previous = d
@@ -126,7 +126,7 @@ def choose_new_vertex(avail: int, already_chosen: set[int]) -> int:
     if not avail_set:
         return max(already_chosen) + 1
 
-    return np.random.choice(list(avail_set)) if avail_set else avail
+    return int(np.random.choice(list(avail_set))) if avail_set else avail
 
 
 def lock_needs_update(degree: int, previous_degree: int, lock: int, num_communities: int) -> bool:

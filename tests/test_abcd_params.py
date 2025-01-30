@@ -35,13 +35,6 @@ def test_abcd_params_invalid_gamma():
         )
 
 
-def test_abcd_params_invalid_zeta():
-    with pytest.raises(ValueError):
-        ABCDParams(
-            gamma=2.5, min_degree=1, max_degree=5000, beta=1.5, max_community_size=100, xi=0.5, min_community_size=2
-        )
-
-
 def test_abcd_params_invalid_beta():
     with pytest.raises(ValueError):
         ABCDParams(

@@ -24,6 +24,7 @@ from dataclasses import dataclass
 from typing import Sequence
 
 import numpy as np
+from numpy.typing import NDArray
 
 DEFAULT_GAMMA_VALUE: float = 2.5
 DEFAULT_MIN_DEGREE: int = 5
@@ -44,8 +45,8 @@ class ABCDParams:
     max_degree: int | None = None  # 30
     min_community_size: int | None = None  # 20
     max_community_size: int | None = None  # 250
-    degree_sequence: Sequence[int] | None = None
-    community_size_sequence: Sequence[int] | None = None
+    degree_sequence: Sequence[int] | NDArray[np.int64] | None = None
+    community_size_sequence: Sequence[int] | NDArray[np.int64] | None = None
     num_outliers: int = 0
 
     def __post_init__(self) -> None:
@@ -70,13 +71,11 @@ class ABCDParams:
             if self.min_degree < 1 or self.min_degree > self.max_degree:
                 raise ValueError("min_degree must be between 1 and max_degree")
 
-            if self.max_degree >= self.max_community_size:
-                raise ValueError("max_degree must be less than max_community_size")
-
         if self.community_size_sequence is not None:
             if any([self.beta is not None, self.min_community_size is not None, self.max_community_size is not None]):
                 raise ValueError(
-                    "cannot pass both `community_size_sequence` and any of (`beta`, `min_community_size`, `max_community_size`"
+                    "cannot pass both `community_size_sequence` and any of \
+                                 (`beta`, `min_community_size`, `max_community_size`)"
                 )
             self.community_size_sequence = np.sort(np.array(self.community_size_sequence))[::-1]
 
@@ -94,7 +93,7 @@ class ABCDParams:
             if self.beta < 1 or self.beta > 2:
                 raise ValueError("beta must be between 1 and 2")
 
-            if self.min_community_size < self.min_degree or self.min_community_size > self.max_community_size:
+            if self.min_community_size > self.max_community_size:
                 raise ValueError("min_community_size must be between min_degree and max_community_size")
 
             if self.max_community_size > self.vcount - self.num_outliers:
