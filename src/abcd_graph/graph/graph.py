@@ -158,20 +158,28 @@ class ABCDGraph:
         return self
 
     def _build_impl(self, model: Model) -> float:
-        degrees = build_degrees(
-            self._num_regular_vertices,
-            self.params.gamma,
-            self.params.min_degree,
-            self.params.max_degree,
+        degrees = (
+            build_degrees(
+                self._num_regular_vertices,
+                self.params.gamma,
+                self.params.min_degree,
+                self.params.max_degree,
+            )
+            if self.params.degree_sequence is None
+            else self.params.degree_sequence
         )
 
         self.logger.info("Building community sizes")
 
-        community_sizes = build_community_sizes(
-            self._num_regular_vertices,
-            self.params.beta,
-            self.params.min_community_size,
-            self.params.max_community_size,
+        community_sizes = (
+            build_community_sizes(
+                self._num_regular_vertices,
+                self.params.beta,
+                self.params.min_community_size,
+                self.params.max_community_size,
+            )
+            if self.params.community_size_sequence is None
+            else self.params.community_size_sequence
         )
 
         self.logger.info("Building communities")
