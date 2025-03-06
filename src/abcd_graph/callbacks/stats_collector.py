@@ -50,6 +50,8 @@ class StatsCollector(ABCDCallback):
         self.log_statistic("number_of_nodes", context.number_of_nodes)
 
     def after_build(self, graph: "GraphImpl", context: BuildContext, exporter: GraphExporter) -> None:
+        _ = exporter
+
         self.log_statistic("start_time", context.start_time)
         self.log_statistic("end_time", context.end_time)
         self.log_statistic("time_to_build", context.raw_build_time)

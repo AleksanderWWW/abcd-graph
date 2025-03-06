@@ -23,7 +23,12 @@ __all__ = ["ABCDGraph"]
 import time
 import warnings
 from datetime import datetime
-from typing import Optional
+from typing import (
+    Optional,
+    cast,
+)
+
+import numpy as np
 
 from abcd_graph.callbacks.abstract import (
     ABCDCallback,
@@ -158,20 +163,28 @@ class ABCDGraph:
         return self
 
     def _build_impl(self, model: Model) -> float:
-        degrees = build_degrees(
-            self._num_regular_vertices,
-            self.params.gamma,
-            self.params.min_degree,
-            self.params.max_degree,
+        degrees = (
+            build_degrees(
+                self._num_regular_vertices,
+                cast(float, self.params.gamma),
+                cast(int, self.params.min_degree),
+                cast(int, self.params.max_degree),
+            )
+            if self.params.degree_sequence is None
+            else np.array(self.params.degree_sequence)
         )
 
         self.logger.info("Building community sizes")
 
-        community_sizes = build_community_sizes(
-            self._num_regular_vertices,
-            self.params.beta,
-            self.params.min_community_size,
-            self.params.max_community_size,
+        community_sizes = (
+            build_community_sizes(
+                self._num_regular_vertices,
+                cast(float, self.params.beta),
+                cast(int, self.params.min_community_size),
+                cast(int, self.params.max_community_size),
+            )
+            if self.params.community_size_sequence is None
+            else np.array(self.params.community_size_sequence)
         )
 
         self.logger.info("Building communities")
@@ -191,9 +204,9 @@ class ABCDGraph:
             communities, deg_b, deg_c = add_outliers(
                 vcount=self._vcount,
                 num_outliers=self.num_outliers,
-                gamma=self.params.gamma,
-                min_degree=self.params.min_degree,
-                max_degree=self.params.max_degree,
+                gamma=cast(float, self.params.gamma),
+                min_degree=cast(int, self.params.min_degree),
+                max_degree=cast(int, self.params.max_degree),
                 communities=communities,
                 deg_b=deg_b,
                 deg_c=deg_c,
