@@ -1,4 +1,4 @@
-## [UNRELEASED] abcd-graph 0.4.0
+## abcd-graph 0.4.0
 
 ### Fixes
 - Fixed calculating expected community cdf ([#48](https://github.com/AleksanderWWW/abcd-graph/pull/48))
