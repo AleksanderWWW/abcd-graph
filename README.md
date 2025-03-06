@@ -81,19 +81,26 @@ The `ABCDParams` class is used to set the parameters for the graph generation.
 
 Arguments:
 
-| Name                 | Type    | Description                                                  | Default |
-|----------------------|---------|--------------------------------------------------------------|---------|
-| `vcount`             | `int`   | Number of vertices in the graph                              | 1000    |
-| `gamma`              | `float` | Power-law parameter for degrees, between 2 and 3             | 2.5     |
-| `min_degree`         | `int`   | Min degree                                                   | 5       |
-| `max_degree`         | `float` | Parameter for max degree, between 0 and 1                    | 0.5     |
-| `beta`               | `float` | Power-law parameter for community sizes, between 1 and 2     | 1.5     |
-| `min_community_size` | `int`   | Min community size                                           | 20      |
-| `max_community_size` | `float` | Parameter for max community size, between `max_degree` and 1 | 0.8     |
-| `xi`                 | `float` | Noise parameter, between 0 and 1                             | 0.25    |
-| `num_outliers`       | `int`   | Number of outlier vertices in the resulting graph            | 0       |
+| Name                      | Type            | Description                                                  | Default |
+|---------------------------|-----------------|--------------------------------------------------------------|---------|
+| `vcount`                  | `int`           | Number of vertices in the graph                              | 1000    |
+| `gamma`                   | `float`         | Power-law parameter for degrees, between 2 and 3             | 2.5     |
+| `min_degree`              | `int`           | Min degree                                                   | 5       |
+| `max_degree`              | `float`         | Parameter for max degree, between 0 and 1                    | 0.5     |
+| `beta`                    | `float`         | Power-law parameter for community sizes, between 1 and 2     | 1.5     |
+| `min_community_size`      | `int`           | Min community size                                           | 20      |
+| `max_community_size`      | `float`         | Parameter for max community size, between `max_degree` and 1 | 0.8     |
+| `xi`                      | `float`         | Noise parameter, between 0 and 1                             | 0.25    |
+| `num_outliers`            | `int`           | Number of outlier vertices in the resulting graph            | 0       |
+| `degree_sequence`         | `Sequence[int]` | Custom degree sequence to use during graph building          | None    | 
+| `community_size_sequence` | `Sequence[int]` | Custom community size sequence to use during graph building  | None    |
 
 Parameters are validated when the object is created. If any of the parameters are invalid, a `ValueError` will be raised.
+
+**Notes**
+- You cannot pass both `degree_sequence` and any of `gamma`, `min_degree` or `max_degree`.
+- You cannot pass both `community_size_sequence` and any of `beta`, `min_community_size` or `max_community_size`.
+
 
 ### Communities and edges
 
