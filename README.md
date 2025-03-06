@@ -92,7 +92,7 @@ Arguments:
 | `max_community_size`      | `float`         | Parameter for max community size, between `max_degree` and 1 | 0.8     |
 | `xi`                      | `float`         | Noise parameter, between 0 and 1                             | 0.25    |
 | `num_outliers`            | `int`           | Number of outlier vertices in the resulting graph            | 0       |
-| `degree_sequence`         | `Sequence[int]` | Custom degree sequence to use during graph building          | None    | 
+| `degree_sequence`         | `Sequence[int]` | Custom degree sequence to use during graph building          | None    |
 | `community_size_sequence` | `Sequence[int]` | Custom community size sequence to use during graph building  | None    |
 
 Parameters are validated when the object is created. If any of the parameters are invalid, a `ValueError` will be raised.
