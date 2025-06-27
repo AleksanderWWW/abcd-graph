@@ -1,3 +1,9 @@
+## abcd-graph 0.4.1
+
+### Changes
+- Reduced docker image size with multi-stage build ([#62](https://github.com/AleksanderWWW/abcd-graph/pull/62))
+
+
 ## abcd-graph 0.4.0
 
 ### Fixes

@@ -1,0 +1,30 @@
+name: docker build test
+
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+
+jobs:
+  docker-build-test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Build docker basic image
+        run: |
+          docker build -t abcd-graph .
+
+      - name: Run basic docker image
+        run: |
+          docker run --rm abcd-graph python -c "from abcd_graph import ABCDGraph, ABCDParams"
+
+      - name: Build docker full image
+        run: |
+          docker build -t abcd-graph-full --build-arg INSTALL_TYPE=all .
+
+      - name: Run full docker image
+        run: |
+          docker run --rm abcd-graph-full python -c "import abcd_graph, igraph, networkx, scipy"
