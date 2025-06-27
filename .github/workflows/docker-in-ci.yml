@@ -19,7 +19,7 @@ jobs:
 
       - name: Run basic docker image
         run: |
-          docker run -it --rm abcd-graph python -c "from abcd_graph import ABCDGraph, ABCDParams"
+          docker run --rm abcd-graph python -c "from abcd_graph import ABCDGraph, ABCDParams"
 
       - name: Build docker full image
         run: |
@@ -27,4 +27,4 @@ jobs:
 
       - name: Run full docker image
         run: |
-          docker run -it --rm abcd-graph-full python -c "import abcd_graph, igraph, networkx, scipy"
+          docker run --rm abcd-graph-full python -c "import abcd_graph, igraph, networkx, scipy"
