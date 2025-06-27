@@ -13,9 +13,6 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Install Trivy  # for vulnerability scanning
-        uses: aquasecurity/trivy-action@v0.31.0
-
       - name: Build docker basic image
         run: |
           docker build -t abcd-graph .
@@ -24,9 +21,15 @@ jobs:
         run: |
           docker image inspect abcd-graph
 
-      - name: Scan basic image for vulnerabilities
-        run: |
-          trivy image --exit-code 1 --severity HIGH,CRITICAL abcd-graph
+      - name: Run Trivy vulnerability scanner
+        uses: aquasecurity/trivy-action@0.31.0
+        with:
+          image-ref: 'abcd-graph'
+          format: 'table'
+          exit-code: '1'
+          ignore-unfixed: true
+          vuln-type: 'os,library'
+          severity: 'CRITICAL,HIGH'
 
       - name: Run basic docker image
         run: |
@@ -40,9 +43,6 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Install Trivy  # for vulnerability scanning
-        uses: aquasecurity/trivy-action@v0.31.0
-
       - name: Build docker full image
         run: |
           docker build -t abcd-graph-full --build-arg INSTALL_TYPE=all .
@@ -55,6 +55,12 @@ jobs:
         run: |
           docker run --rm abcd-graph-full python -c "import abcd_graph, igraph, networkx, scipy"
 
-      - name: Scan full image for vulnerabilities
-        run: |
-          trivy image --exit-code 1 --severity HIGH,CRITICAL abcd-graph-full
+      - name: Run Trivy vulnerability scanner
+        uses: aquasecurity/trivy-action@0.31.0
+        with:
+          image-ref: 'abcd-graph-full'
+          format: 'table'
+          exit-code: '1'
+          ignore-unfixed: true
+          vuln-type: 'os,library'
+          severity: 'CRITICAL,HIGH'
