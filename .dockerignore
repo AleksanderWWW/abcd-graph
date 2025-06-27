@@ -1,0 +1,16 @@
+tests/
+examples/
+.github/
+htmlcov/
+profiling/
+venv/
+.coverage
+CHANGELOG.md
+LICENSE
+publish.sh
+scratch.py
+.pre-commit-config.yaml
+
+*.csv
+*.json
+*.txt
