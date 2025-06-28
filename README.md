@@ -5,7 +5,6 @@ A python library for generating ABCD graphs.
 ![pre-commit](https://github.com/AleksanderWWW/abcd-graph/actions/workflows/pre-commit.yml/badge.svg)
 [![Release](https://img.shields.io/github/v/release/AleksanderWWW/abcd-graph)](https://github.com/AleksanderWWW/abcd-graph/releases)
 ![GitHub License](https://img.shields.io/github/license/AleksanderWWW/abcd-graph)
-![PyPI - Python Version](https://img.shields.io/pypi/pyversions/abcd-graph)
 ![GitHub repo size](https://img.shields.io/github/repo-size/AleksanderWWW/abcd-graph)
 
 
