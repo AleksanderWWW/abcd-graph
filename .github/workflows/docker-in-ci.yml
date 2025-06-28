@@ -1,4 +1,4 @@
-name: docker build test
+name: docker
 
 on:
   pull_request:
@@ -7,7 +7,7 @@ on:
       - main
 
 jobs:
-  docker-build-test:
+  docker-basic:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
@@ -17,14 +17,50 @@ jobs:
         run: |
           docker build -t abcd-graph .
 
+      - name: Inspect basic docker image
+        run: |
+          docker image inspect abcd-graph
+
+      - name: Run Trivy vulnerability scanner
+        uses: aquasecurity/trivy-action@0.31.0
+        with:
+          image-ref: 'abcd-graph'
+          format: 'table'
+          exit-code: '1'
+          ignore-unfixed: true
+          vuln-type: 'os,library'
+          severity: 'CRITICAL,HIGH'
+
       - name: Run basic docker image
         run: |
-          docker run --rm abcd-graph python -c "from abcd_graph import ABCDGraph, ABCDParams"
+          docker run --rm abcd-graph -c "from abcd_graph import ABCDGraph, ABCDParams"
+
+  docker-full:
+    needs:
+      - docker-basic
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
 
       - name: Build docker full image
         run: |
           docker build -t abcd-graph-full --build-arg INSTALL_TYPE=all .
 
+      - name: Inspect full docker image
+        run: |
+          docker image inspect abcd-graph-full
+
+      - name: Run Trivy vulnerability scanner
+        uses: aquasecurity/trivy-action@0.31.0
+        with:
+          image-ref: 'abcd-graph-full'
+          format: 'table'
+          exit-code: '1'
+          ignore-unfixed: true
+          vuln-type: 'os,library'
+          severity: 'CRITICAL,HIGH'
+
       - name: Run full docker image
         run: |
-          docker run --rm abcd-graph-full python -c "import abcd_graph, igraph, networkx, scipy"
+          docker run --rm abcd-graph-full -c "import abcd_graph, igraph, networkx, scipy"
