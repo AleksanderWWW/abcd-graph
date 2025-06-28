@@ -1,5 +1,18 @@
 FROM python:3.11.9-slim AS build
 
+# Security updates
+RUN apt-get update && \
+    apt-get upgrade -y && \
+    apt-get install --only-upgrade -y \
+        libexpat1 \
+        liblzma5 \
+        libsqlite3-0 \
+        perl-base && \
+    apt-get clean && \
+    rm -rf /var/lib/apt/lists/*
+
+RUN pip install --upgrade setuptools
+
 # Choose the type of installation (default - just the base package)
 ARG INSTALL_TYPE=normal
 
