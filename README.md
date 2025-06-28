@@ -194,9 +194,9 @@ docker build -t abcd-graph .
 To run the image, use:
 
 ```bash
-docker run -it abcd-graph /bin/bash
+docker run -it abcd-graph
 ```
-This will give you a terminal inside a container with the library installed.
+This will give you a python REPL inside a container with the library installed.
 
 Available are also installation commands for the additional packages:
 
