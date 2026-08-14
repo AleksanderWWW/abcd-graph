@@ -1,3 +1,8 @@
+## Unreleased
+
+### Features
+- Added top level ABCD object, an alternative interface that effectively adds a .sample() method to the ABCDParams. ([#67](https://github.com/AleksanderWWW/abcd-graph/pull/67))
+
 ## abcd-graph 0.4.1
 
 ### Changes

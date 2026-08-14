@@ -64,6 +64,14 @@ params = ABCDParams(vcount=1000)
 graph = ABCDGraph(params, logger=True).build()
 ```
 
+Or for an alternative interface
+```python
+from abcd_graph import ABCD
+
+abcd_sampler = ABCD(1000) # vcount is required, other ABCDParams are keyword args
+graph = abcd_sampler.sample() # return a built ABCDGraph object
+```
+
 ### Parameters
 
 - `params`: An instance of `ABCDParams` class.
