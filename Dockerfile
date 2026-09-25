@@ -1,7 +1,10 @@
 FROM python:3.12-alpine AS build
 
+# Upgrade apk package repo
+RUN apk update && apk upgrade --no-cache
+
 # Install build tools + curl
-RUN apk add --no-cache \
+RUN apk add --no-cache --upgrade \
     bash \
     curl \
     libffi-dev \

@@ -42,7 +42,7 @@ def powerlaw_distribution(choices: NDArray[np.float64], intensity: float) -> NDA
 
 
 def get_community_color_map(communities: list["Community"]) -> list[str]:
-    import matplotlib.colors as colors  # type: ignore[import]
+    import matplotlib.colors as colors  # type: ignore[import-not-found]
 
     colors_list = list(colors.BASE_COLORS.values())[: len(communities)]
 

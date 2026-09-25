@@ -28,9 +28,9 @@ from abcd_graph.graph.core.exceptions import MalformedGraphException
 from abcd_graph.utils import require
 
 if TYPE_CHECKING:  # pragma: no cover
-    from igraph import Graph as IGraph  # type: ignore[import]
-    from networkx import Graph as NetworkXGraph  # type: ignore[import]
-    from scipy.sparse import csr_matrix  # type: ignore[import]
+    from igraph import Graph as IGraph  # type: ignore[import-not-found]
+    from networkx import Graph as NetworkXGraph
+    from scipy.sparse import csr_matrix
 
 
 class GraphExporter:
@@ -49,7 +49,7 @@ class GraphExporter:
         return self._graph.to_adj_matrix()
 
     @require("scipy")
-    def to_sparse_adjacency_matrix(self) -> "csr_matrix":  # type: ignore[no-any-unimported]
+    def to_sparse_adjacency_matrix(self) -> "csr_matrix":
         from scipy.sparse import csr_matrix
 
         if not self.is_proper_abcd:
@@ -69,9 +69,10 @@ class GraphExporter:
         return graph
 
     @require("networkx")
-    def to_networkx(self) -> "NetworkXGraph":  # type: ignore[no-any-unimported]
+    def to_networkx(self) -> "NetworkXGraph":
         import networkx as nx
 
+        graph: nx.Graph = nx.Graph()
         graph = nx.Graph()
 
         graph.add_nodes_from(range(self._graph._params.vcount))

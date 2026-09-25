@@ -50,7 +50,7 @@ class Visualizer(ABCDCallback):
 
     @require("matplotlib")
     def draw_community_cdf(self) -> None:
-        import matplotlib.pyplot as plt  # type: ignore[import]
+        import matplotlib.pyplot as plt  # type: ignore[import-not-found]
 
         assert self._graph is not None
 
@@ -104,7 +104,7 @@ class Visualizer(ABCDCallback):
         if self._model_used is not None and self._model_used.__name__ != "configuration_model":
             raise NotImplementedError("Drawing communities is only supported for the configuration model")
 
-        import networkx as nx  # type: ignore[import]
+        import networkx as nx
         from matplotlib import pyplot as plt
 
         assert self._exporter is not None
