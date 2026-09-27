@@ -1,21 +1,32 @@
 name: unit tests
-on: [push]
+on:
+  push:
+    branches:
+      - 'main'
+      - 'release/**'
+  pull_request:
+    branches:
+      - 'main'
+      - 'release/**'
 jobs:
   test:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
         os: [ubuntu-latest, macos-latest, windows-latest]
-        python-version: ["3.10", "3.12"]
+        python-version: ["3.12", "3.13", "3.14"]
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout Repository
+        uses: actions/checkout@v7
 
-      - uses: actions/setup-python@v5
+      - name: Install uv
+        uses: astral-sh/setup-uv@20cfd1bf945f4377ade1205e4dbc17946fc9a30d # v10.0.1
         with:
           python-version: ${{ matrix.python-version }}
+          enable-cache: true
 
-      - name: Build
-        uses: ./.github/actions/build
+      - name: Install package
+        run: uv sync --frozen --extra all
 
-      - name: Test
-        uses: ./.github/actions/test
+      - name: Run Tests
+        run: uv run pytest tests

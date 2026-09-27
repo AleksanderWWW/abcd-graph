@@ -1,86 +1,146 @@
-[project]
-name = "abcd-graph"
-version = "0.4.1"
-readme = "README.md"
-description = "A python library for generating ABCD graphs."
-authors = [
-    { name = "Aleksander Wojnarowicz", email = "alwojnarowicz@gmail.com" },
-    { name = "Jordan Barrett" }
-]
-license = "MIT"
-requires-python = ">=3.9"
-packages = [{include = "abcd_graph", from = "src"}]
-repository = "https://github.com/AleksanderWWW/abcd-graph"
-dependencies = [
-    "numpy>=1.26.4",
-    "typing-extensions>=4.10.0"
-]
-
-[project.optional-dependencies]
-networkx = [
-    "networkx>=3.2.1",
-]
-igraph = [
-    "igraph>=0.11.8",
-]
-matplotlib = [
-    "matplotlib>=3.9.4",
-]
-scipy = [
-    "scipy>=1.13.1",
-]
-all = [
-    "igraph>=0.11.8",
-    "matplotlib>=3.9.4",
-    "networkx>=3.2.1",
-    "scipy>=1.13.1",
-]
-dev = [
-    "pre-commit>=4.0.1",
-    "pytest>=8.3.4",
-    "pytest-cov>=6.0.0",
-]
-
 [build-system]
 requires = ["hatchling"]
 build-backend = "hatchling.build"
 
+[project]
+name = "abcd-graph"
+version = "0.5.0-beta"
+description = "A python library for generating ABCD graphs."
+authors = [
+    { name = "Aleksander Wojnarowicz", email = "alwojnarowicz@gmail.com" },
+    { name = "Jordan Barrett" },
+    { name = "Ryan DeWolfe", email = "ryan.dewolfe@uwaterloo.ca" },
+]
+keywords = ["community detection", "graph clustering", "benchmark", "evaluation", "random graphs"]
+readme = "README.md"
+license = "MIT"
+license-files = ["LICENSE"]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Programming Language :: Python :: 3.14",
+    "Operating System :: OS Independent",
+    "Intended Audience :: Science/Research",
+    "License :: OSI Approved :: MIT License",
+]
+
+requires-python = ">=3.12"
+dependencies = [
+    "numba>=0.66.0",
+    "numpy>=2.1.0",
+    "scipy>=1.18.0",
+    "typing-extensions>=4.10.0",
+    "tqdm>=4.0.0",
+]
+
+[project.optional-dependencies]
+all = [
+    "igraph>=1.0.0",
+    "networkx>=3.6.1",
+]
+
+[dependency-groups]
+dev = [
+    "prek",
+    "pytest>=8.3.4",
+    "pytest-cov>=6.0.0",
+    "pytest-benchmark>=5.3.0",
+    "ty>=0.0.80",
+]
+docs = [
+    "matplotlib",
+    "jupyterlab_pygments>=0.1.1",
+    "ipykernel",
+    "nbsphinx",
+    "numpydoc",
+    "pandocfilters",
+    "sphinx-rtd-theme",
+    "networkx>=3.6.1",
+    "partition-networkx",
+    "igraph>=1.0.0",
+    "partition-igraph",
+    "scikit-network>=0.33.5",
+    "partition-sknetwork>=0.0.4",
+    "egosplit-sknetwork>=0.0.4",
+    "fstar",
+]
+
+[project.urls]
+Homepage = "https://github.com/AleksanderWWW/abcd-graph"
+Repository = "https://github.com/AleksanderWWW/abcd-graph"
+
+[tool.hatch.build.targets.wheel]
+packages = ["abcd_graph"]
+
+[tool.uv]
+exclude-newer = "14 days"
+
+[tool.uv.sources]
+fstar = { git = "https://github.com/ryandewolfe33/fstar" }
+
 [tool.pytest.ini_options]
+pythonpath = [
+  "."
+]
 addopts = ["--strict-markers"]
 markers = [
     "integration: marks tests using external dependencies"
 ]
 
-
 [tool.black]
-line-length = 120
-target-version = ['py310', 'py311', 'py312']
+line-length = 88
+target-version = ["py312"]
 include = '\.pyi?$'
 exclude = '''
 /(
     \.git
-  | \.mypy_cache
-  | \.tox
   | \.venv
   | build
   | dist
+  | \.eggs
 )/
 '''
 
-[tool.isort]
-profile = "black"
-line_length = 120
-force_grid_wrap = 2
+[tool.ruff]
+line-length = 88
+target-version = "py312"
 
-[tool.mypy]
-files = "src/abcd_graph"
-mypy_path = "stubs"
-install_types = "True"
-non_interactive = "True"
-disallow_untyped_defs = "True"
-disallow_any_unimported = "True"
-no_implicit_optional = "True"
-check_untyped_defs = "True"
-warn_return_any = "True"
-show_error_codes = "True"
-warn_unused_ignores = "True"
+[tool.ruff.lint]
+select = [
+    "E",   # pycodestyle errors
+    "W",   # pycodestyle warnings
+    "F",   # pyflakes
+    "I",   # isort
+    "B",   # flake8-bugbear
+    "C4",  # flake8-comprehensions
+    "UP",  # pyupgrade
+]
+ignore = [
+    "E501",  # line too long (handled by black)
+    "B008", # Do not perform function call in defaults
+    "B905", # Do not require strict in zip, not compatible with numba
+]
+
+[tool.ruff.lint.per-file-ignores]
+"__init__.py" = ["F401"]
+
+[tool.ty.src]
+include = [
+    "abcd_graph",
+    "tests",
+    "benchmarks",
+]
+
+[tool.coverage.run]
+source = ["abcd_graph"]
+
+[tool.coverage.report]
+exclude_lines = [
+    "pragma: no cover",
+    "def __repr__",
+    "raise AssertionError",
+    "raise NotImplementedError",
+    "if __name__ == .__main__.:",
+    "if TYPE_CHECKING:",
+]
