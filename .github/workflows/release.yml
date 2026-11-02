@@ -9,11 +9,14 @@ jobs:
   publish:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
+      - name: Checkout Repository
+        uses: actions/checkout@v7
+
+      - name: Setup uv
+        uses: astral-sh/setup-uv@20cfd1bf945f4377ade1205e4dbc17946fc9a30d # v10.0.1
         with:
           python-version: "3.12"
-      - name: Install uv
-        run: curl -LsSf https://astral.sh/uv/install.sh | sh
+          enable-cache: true
+
       - name: Publish
         run: ./publish.sh ${{ secrets.PYPI_TOKEN }} ${{ secrets.GHCR_TOKEN }}

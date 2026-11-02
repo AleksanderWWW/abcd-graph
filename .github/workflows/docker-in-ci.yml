@@ -1,17 +1,21 @@
 name: docker
 
 on:
-  pull_request:
   push:
     branches:
-      - main
+      - 'main'
+      - 'release/**'
+  pull_request:
+    branches:
+      - 'main'
+      - 'release/**'
 
 jobs:
   docker-basic:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
 
       - name: Build docker basic image
         run: |
@@ -22,7 +26,7 @@ jobs:
           docker image inspect abcd-graph
 
       - name: Run Trivy vulnerability scanner
-        uses: aquasecurity/trivy-action@0.31.0
+        uses: aquasecurity/trivy-action@v0.36.0
         with:
           image-ref: 'abcd-graph'
           format: 'table'
@@ -30,10 +34,11 @@ jobs:
           ignore-unfixed: true
           vuln-type: 'os,library'
           severity: 'CRITICAL,HIGH'
+          version: 'v0.74.0'
 
       - name: Run basic docker image
         run: |
-          docker run --rm abcd-graph -c "from abcd_graph import ABCDGraph, ABCDParams"
+          docker run --rm abcd-graph -c "from abcd_graph import ABCD, ABCDSample"
 
   docker-full:
     needs:
@@ -41,7 +46,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
 
       - name: Build docker full image
         run: |
@@ -52,7 +57,7 @@ jobs:
           docker image inspect abcd-graph-full
 
       - name: Run Trivy vulnerability scanner
-        uses: aquasecurity/trivy-action@0.31.0
+        uses: aquasecurity/trivy-action@v0.36.0
         with:
           image-ref: 'abcd-graph-full'
           format: 'table'
@@ -60,7 +65,8 @@ jobs:
           ignore-unfixed: true
           vuln-type: 'os,library'
           severity: 'CRITICAL,HIGH'
+          version: 'v0.74.0'
 
       - name: Run full docker image
         run: |
-          docker run --rm abcd-graph-full -c "import abcd_graph, igraph, networkx, scipy"
+          docker run --rm abcd-graph-full -c "from abcd_graph import ABCD, ABCDSample; import igraph; import networkx"

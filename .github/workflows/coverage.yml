@@ -1,23 +1,30 @@
 name: coverage
 on: [push]
 jobs:
-    test:
-      runs-on: ubuntu-latest
-      steps:
-        - uses: actions/checkout@v4
+  if: github.repository == 'AleksanderWWW/abcd-graph'
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v7
 
-        - uses: actions/setup-python@v5
-          with:
-            python-version: "3.10"
+      - name: Setup uv
+        uses: astral-sh/setup-uv@20cfd1bf945f4377ade1205e4dbc17946fc9a30d # v10.0.1
+        with:
+          python-version: "3.12"
+          enable-cache: true
 
-        - name: Build
-          uses: ./.github/actions/build
+      - name: Install package
+        run: uv sync --frozen --extra all
 
-        - name: Test
-          uses: ./.github/actions/test
+      - name: Run tests
+        run: NUMBA_DISABLE_JIT=1 uv run pytest --junitxml=pytest.xml
+                           --cov-report=term-missing:skip-covered
+                           --cov=abcd_graph
+                           tests | tee pytest-coverage.txt
 
-        - name: Pytest coverage comment
-          uses: MishaKav/pytest-coverage-comment@main
-          with:
-            pytest-coverage-path: ./pytest-coverage.txt
-            junitxml-path: ./pytest.xml
+      - name: Pytest coverage comment
+        uses: MishaKav/pytest-coverage-comment@main
+        with:
+          pytest-coverage-path: ./pytest-coverage.txt
+          junitxml-path: ./pytest.xml

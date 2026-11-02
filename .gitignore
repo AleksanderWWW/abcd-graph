@@ -4,3 +4,9 @@ __pycache__/
 .coverage
 dist/
 .python-version
+.DS_store
+docs/_build
+.venv
+.ruff_cache
+.pytest_cache
+.benchmarks
