@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "abcd-graph"
-version = "0.5.0-beta"
+version = "0.5.0b1"
 description = "A python library for generating ABCD graphs."
 authors = [
     { name = "Aleksander Wojnarowicz", email = "alwojnarowicz@gmail.com" },
@@ -31,7 +31,7 @@ dependencies = [
     "numpy>=2.1.0",
     "scipy>=1.18.0",
     "typing-extensions>=4.10.0",
-    "tqdm>=4.0.0",
+    "tqdm>=4.70.0",
 ]
 
 [project.optional-dependencies]
@@ -42,28 +42,28 @@ all = [
 
 [dependency-groups]
 dev = [
-    "prek",
+    "prek>=0.5.0",
     "pytest>=8.3.4",
     "pytest-cov>=6.0.0",
     "pytest-benchmark>=5.3.0",
     "ty>=0.0.80",
 ]
 docs = [
-    "matplotlib",
+    "matplotlib>=3.8",
     "jupyterlab_pygments>=0.1.1",
-    "ipykernel",
-    "nbsphinx",
-    "numpydoc",
-    "pandocfilters",
-    "sphinx-rtd-theme",
+    "ipykernel>=7.4.0",
+    "nbsphinx>=0.8.0",
+    "numpydoc>=1.10.0",
+    "pandocfilters>=1.5.1",
+    "sphinx-rtd-theme>=3.1.0",
     "networkx>=3.6.1",
-    "partition-networkx",
+    "partition-networkx>=0.0.2",
     "igraph>=1.0.0",
-    "partition-igraph",
+    "partition-igraph>=0.0.8",
     "scikit-network>=0.33.5",
     "partition-sknetwork>=0.0.4",
     "egosplit-sknetwork>=0.0.4",
-    "fstar",
+    "fstar>=0.0.2",
 ]
 
 [project.urls]
