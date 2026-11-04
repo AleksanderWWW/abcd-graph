@@ -1,4 +1,4 @@
-## abcd-graph 0.5.0-beta (unreleased)
+## abcd-graph 0.5.0b1
 - Complete rewrite and file restructure to simplify and increase speed.
 
 ### Breaking Changes

@@ -13,7 +13,7 @@ project = "abcd-graph"
 copyright = "2024 Jordan Barrett & Aleksander Wojnarowicz"
 author = "Aleksander Wojnarowicz, Jordan Barrett, and Ryan DeWolfe"
 version = "0.5"
-release = "0.5.0-beta"
+release = "0.5.0b1"
 language = "en"
 
 # -- General configuration ---------------------------------------------------
