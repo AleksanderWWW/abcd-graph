@@ -330,7 +330,7 @@ class ABCDSample:
         networkx.Graph
         """
         try:
-            import networkx as nx  # type: ignore
+            import networkx as nx
 
             g = nx.from_edgelist(self.edges)
             return g
@@ -348,7 +348,7 @@ class ABCDSample:
         igraph.Graph
         """
         try:
-            import igraph as ig  # type: ignore
+            import igraph as ig
 
             g = ig.Graph(n=self.n, edges=self.edges, directed=False)
             return g

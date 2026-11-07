@@ -29,6 +29,7 @@
 - Replaced mypy with ty for faster static type checking ([fork/#20](https://github.com/ryandewolfe33/abcd-graph/pull/20))
 - Default max_degree and max_community_size grows with n
 - Docker uses uv:python3.12-trixie-slim as base image for easier install ([fork/#19](https://github.com/ryandewolfe33/abcd-graph/pull/19))
+- Add contributing guide
 
 
 ## abcd-graph 0.4.1

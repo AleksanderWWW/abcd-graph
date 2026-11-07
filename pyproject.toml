@@ -47,6 +47,8 @@ dev = [
     "pytest-cov>=6.0.0",
     "pytest-benchmark>=5.3.0",
     "ty>=0.0.80",
+    "networkx>=3.6.1",
+    "igraph>=1.0.0",
 ]
 docs = [
     "matplotlib",
@@ -56,6 +58,7 @@ docs = [
     "numpydoc",
     "pandocfilters",
     "sphinx-rtd-theme",
+    "sphinx-math-dollar>=1.3",
     "networkx>=3.6.1",
     "partition-networkx",
     "igraph>=1.0.0",
@@ -64,6 +67,7 @@ docs = [
     "partition-sknetwork>=0.0.4",
     "egosplit-sknetwork>=0.0.4",
     "fstar",
+    "pandoc>=2.4",
 ]
 
 [project.urls]
