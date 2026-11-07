@@ -21,7 +21,6 @@ def test_abcd(n, xi):
     assert np.abs(sample.xi - xi) < 0.15  # xi is noisy
 
 
-@pytest.mark.benchmark
 @pytest.mark.parametrize("n", [1000, 2000])
 @pytest.mark.parametrize("xi", [0.2, 0.5, 0.7])
 @pytest.mark.parametrize("eta", [1.5, 2.0])

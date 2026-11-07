@@ -10,3 +10,4 @@ docs/_build
 .ruff_cache
 .pytest_cache
 .benchmarks
+.baseline.json
