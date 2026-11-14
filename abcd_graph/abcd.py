@@ -272,8 +272,11 @@ class ABCD:
                 "outliers must be a positive integer or a float between 0 and 1"
             )
 
-        if not isinstance(self.eta, (float, np.floating)) or self.eta < 1:
-            raise ValueError("eta must be at least 1")
+        if isinstance(self.eta, (float, np.floating)):
+            if self.eta < 1:
+                raise ValueError("eta must be at least 1")
+        else:
+            raise ValueError("eta must be a float")
 
         if not isinstance(self.dimension, (int, np.integer)) or self.dimension < 1:
             raise ValueError("dimensions must be a positive integer")
@@ -456,7 +459,7 @@ class ABCD:
                 self.community_size_sequence, dtype=self.dtype_
             )
         else:
-            self.logger_.info("Generating Community Size Sequence")
+            self.logger_.info("Generating Community Sequence")
             start = perf_counter()
             community_size_sequence = sample_community_sizes(
                 self.n - n_outliers,
