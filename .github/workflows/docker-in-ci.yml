@@ -19,7 +19,7 @@ jobs:
 
       - name: Build docker basic image
         run: |
-          docker build -t abcd-graph .
+          docker build --pull --no-cache -t abcd-graph .
 
       - name: Inspect basic docker image
         run: |
@@ -50,7 +50,7 @@ jobs:
 
       - name: Build docker full image
         run: |
-          docker build -t abcd-graph-full --build-arg INSTALL_TYPE=all .
+          docker build --pull --no-cache -t abcd-graph-full --build-arg INSTALL_TYPE=all .
 
       - name: Inspect full docker image
         run: |
