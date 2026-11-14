@@ -44,6 +44,10 @@ RUN --mount=type=cache,target=/root/.cache/uv \
 
 FROM ghcr.io/astral-sh/uv:python3.12-trixie-slim AS runtime
 
+RUN apt-get update \
+    && apt-get upgrade -y \
+    && rm -rf /var/lib/apt/lists/*
+
 # Add a non-root user (Debian syntax)
 RUN useradd -m -s /bin/bash abcd
 
