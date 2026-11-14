@@ -456,7 +456,7 @@ class ABCD:
                 self.community_size_sequence, dtype=self.dtype_
             )
         else:
-            self.logger_.info("Generating Degree Sequence")
+            self.logger_.info("Generating Community Size Sequence")
             start = perf_counter()
             community_size_sequence = sample_community_sizes(
                 self.n - n_outliers,
