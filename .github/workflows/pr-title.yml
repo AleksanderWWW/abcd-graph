@@ -1,0 +1,26 @@
+name: Enforce Conventional PR Title
+
+on:
+  pull_request:
+    types: [opened, edited, synchronize]
+
+jobs:
+  check-pr-title:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check PR title
+        run: |
+          PR_TITLE="${{ github.event.pull_request.title }}"
+          echo "Checking PR title: $PR_TITLE"
+
+          # Define the regex for Conventional Commits
+          CONVENTIONAL_REGEX="^(feat|fix|chore|docs|style|refactor|perf|test|ci|build|revert)(\([^)]+\))?!?: .+$"
+
+          if [[ ! "$PR_TITLE" =~ $CONVENTIONAL_REGEX ]]; then
+            echo "❌ PR title does not follow Conventional Commits format!"
+            echo "📝 Expected format: 'type(scope): description'"
+            echo "👉 Example: 'feat(auth): add login API'"
+            exit 1
+          fi
+
+          echo "✅ PR title is valid!"
